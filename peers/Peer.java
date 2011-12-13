@@ -45,17 +45,52 @@ public class Peer {
 	}
 	
 	public void sendHandshake(String _our_peer_id, byte[] _hash){
-		byte out_[] = new byte[100];
+		int outlength =0;
+		byte out_[] = new byte[85];
 		out_[0] = new Integer(19).byteValue();
+		outlength ++;
 		byte temp[] = new String("BitTorrent protocol").getBytes();
-		System.arraycopy(out_, 1, temp, 0, temp.length);
-		
-		
+		System.arraycopy(temp, 0, out_, outlength, temp.length);
+		outlength+=temp.length;
+		byte zeroes[] = new byte[8];
+		System.arraycopy(zeroes, 0, out_, outlength, zeroes.length);
+		outlength+=zeroes.length;
+		System.arraycopy(_hash,0,out_,outlength,_hash.length);
+		outlength+=_hash.length;
+		temp = _our_peer_id.getBytes();
+		System.arraycopy(temp, 0, out_, outlength, temp.length);
+		outlength+=temp.length;
+
 		try{
 			to_peer_.write(out_);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	public void sendKeepAlive(){
+		
+	}
+	public void sendChoke(){
+		
+	}
+	public void sendUnchoke(){
+		
+	}
+	public void sendInterested(){
+		
+	}
+	public void sendUninterested(){
+		
+	}
+	public void sendHave(){
+		
+	}
+	public void sendRequest(){
+		
+	}
+	public void sendPiece(){
+		
 	}
 	
 
