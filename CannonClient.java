@@ -29,6 +29,7 @@ public class CannonClient {
       TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
       ANNOUNCE_URL = TORRENT_INFO.announce_url.toString();
     } catch (Exception e){
+    	e.printStackTrace();
       System.out.println("Torrent could not be loaded.");
     }
     
@@ -41,12 +42,17 @@ public class CannonClient {
       for(Peer peer : peerList){
         if (peer.ip_.equals("128.6.5.130") && peer.peer_id_.indexOf("RUBT") != -1){
           System.out.println("Peer Found");
-          Peer.sendHandshake(PEER_ID, INFO_HASH);
+          peer.createSocket(peer.ip_,peer.port_);
+          peer.establishStreams();
+          peer.sendHandshake(PEER_ID, INFO_HASH);
         }
       }
     } catch (Exception e){
+    	e.printStackTrace();
      System.out.println("Tracker could not be queried."); 
     }
+    
+    
 	}
 	
 	public static ArrayList<Peer> getPeers(byte[] response){
@@ -80,15 +86,15 @@ public class CannonClient {
            if (key.compareTo("ip") == 0){
              //TODO: substitute this method for a method in ToolKit
              String ip = Helpers.bufferToString((ByteBuffer)value);
-             Peer.ip_ = ip;
+             newPeer.ip_ = ip;
            }
            if (key.compareTo("peer id") == 0){
              String peer_id = Helpers.bufferToString((ByteBuffer)value);
-             Peer.peer_id_ = peer_id;
+             newPeer.peer_id_ = peer_id;
            }
            if (key.compareTo("port") == 0){
              int port = (Integer)value;
-             Peer.port_ = port;
+             newPeer.port_ = port;
           }
         }
         
