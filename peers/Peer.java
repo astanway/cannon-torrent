@@ -1,15 +1,10 @@
 package peers;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-
-import utils.Helpers;
-import utils.ToolKit;
 
 public class Peer {
 
@@ -25,12 +20,21 @@ public class Peer {
 	public static final byte UNINTERESTED  = 0x03;
 	public static final byte HAVE          = 0x04;
 
+	/**
+	 * Constructor
+	 * @param _peer_id 	the peer id of the peer
+	 * @param _ip		the ip of the peer
+	 * @param _port		the port to be used by the peer
+	 */
 	public Peer(String _peer_id, String _ip, int _port){
 		this.peer_id_ = _peer_id;
 		this.ip_ = _ip;
 		this.port_ = _port;
 	}
 
+	/**
+	 * Helper method to print out peer class
+	 */
 	public void print(){
 		System.out.println(this.peer_id_);
 		System.out.println(this.ip_);
@@ -38,13 +42,21 @@ public class Peer {
 		System.out.println("");
 	}
 
+	/**
+	 * @return true if the peer is a valid one we want to use
+	 */
 	public boolean isValid(){
 		if (this.ip_.equals("128.6.5.130") && this.peer_id_.indexOf("RUBT") != -1){
 			return true;
 		}
 		return false;
 	}
-	//Opens sockets given IP and Port
+	
+	/** opens sockets for the peer on the given ip and port
+	 * @param _ip ip to open socket
+	 * @param _port port to open the socket
+	 * @return true if they are opened, false otherwise
+	 */
 	public boolean createSocket(String _ip, int _port){
 		try{
 			socket_ = new Socket(_ip, _port);
@@ -53,7 +65,11 @@ public class Peer {
 		}
 		return socket_!=null? true: false;
 	}
-	//Establishes Streams, useful to see what fails
+
+	
+	/** opens the streams of communication
+	 * @return true of the peers are established, false otherwise
+	 */
 	public boolean establishStreams(){
 		try{
 			to_peer_ = new DataOutputStream(socket_.getOutputStream());
@@ -67,7 +83,11 @@ public class Peer {
 			return true;
 	}
 
-	//Sends Handshake message to peer
+
+	/** send our handshake message to the peer
+	 * @param _our_peer_id our peer id to send in the handshake
+	 * @param _hash the has we got in the metainfo
+	 */
 	public void sendHandshake(byte[] _our_peer_id, byte[] _hash){
 		int outlength = 0;
 		byte out_[] = new byte[68];
@@ -91,7 +111,11 @@ public class Peer {
 		}
 	}
 
-	//Recieves incoming handshake from remote peer
+
+	/** receives the peers handshake message and verifies it
+	 * @param _hash sha-1 hash to be verified with their handshake
+	 * @return true if handshake is good
+	 */
 	public boolean receiveHandshake(byte[] _hash){
 		try{
 			byte[] responseHash = new byte[20];
@@ -110,6 +134,9 @@ public class Peer {
 		return true;
 	}
 
+	/** blocks until unchoked
+	 * @return returns true for unchoke message, blocks otherwise
+	 */
 	public boolean listenForUnchoke(){
 		try{
 			if(from_peer_.read() == 1 && from_peer_.read() == 1){
@@ -123,6 +150,9 @@ public class Peer {
 	}
 
 
+	/**
+	 * sends a keepalive message to keep connection alive
+	 */
 	public void sendKeepAlive(){
 		byte out_bytes_[] = new byte[4];
 		try{
@@ -132,6 +162,9 @@ public class Peer {
 		}
 	}
 
+	/** sends a message with the specified byte
+	 * @param _byte byte to send
+	 */
 	public void sendMessage(byte _byte){
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(5);
     
@@ -151,6 +184,11 @@ public class Peer {
 		}
 	}
 
+	/** Request piece call
+	 * @param _index piece number
+	 * @param _begin offset in byte array
+	 * @param _length length of requested byte array
+	 */
 	public void sendRequest(int _index, int _begin, int _length){
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(17);
 		out_bytes_.putInt(13);
@@ -168,6 +206,11 @@ public class Peer {
 	}
 
 
+	/** Sends Piece Message with data
+	 * @param _index piece number
+	 * @param _begin offset in piece
+	 * @param _block data to be transferred
+	 */
 	public void sendPiece(int _index, int _begin, byte[] _block){
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(13+_block.length);
 		out_bytes_.putInt(9+_block.length);
@@ -184,19 +227,34 @@ public class Peer {
 		}
 	}
 
+	/**
+	 * Not needed yet, will be implemented later
+	 */
 	public void sendBitfield(){
 
 	}
 
+	/** get method for ip
+	 * @return ip address
+	 */
 	public String getIP(){
 		return this.ip_;
 	}
+	/** set method for ip
+	 * @param _ip ip to be set
+	 */
 	public void setIP(String _ip){
 		this.ip_= _ip;
 	}
+	/** get method for port
+	 * @return port number
+	 */
 	public int getPort(){
 		return this.port_;
 	}
+	/** set method for port
+	 * @param _port port to be set as port in class
+	 */
 	public void setPort(int _port){
 		this.port_ = _port;
 	}
