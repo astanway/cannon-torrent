@@ -65,6 +65,17 @@ public class Peer {
 		}
 		return socket_!=null? true: false;
 	}
+	
+	/**
+	 * Closes the sockets for the selected peer
+	 */
+	public void closeSocket(){
+		try{
+			socket_.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 
 	
 	/** opens the streams of communication
