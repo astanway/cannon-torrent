@@ -15,11 +15,17 @@ public class CannonClient {
 	public static byte[] PEER_ID = new byte[20];
 	public static byte[] INFO_HASH = new byte[20];
 	public static TorrentInfo TORRENT_INFO;
+	public static RandomAccessFile file= null;
 
 	public static void main(String[] args) {
 
 		String torrentFile = args[0];
 		String savedFile = args[1];
+		int numPieces = 0;
+		int numLeft =0;
+		int leftoverBytes =0;
+		int blocksPerPiece = 0;
+		boolean havePiece[] = null;
 		setPeerId();
 
 		//set up the torrent info
@@ -30,6 +36,19 @@ public class CannonClient {
 			e.printStackTrace();
 			System.out.println("Torrent could not be loaded.");
 		}
+		
+		numPieces = TORRENT_INFO.file_length/TORRENT_INFO.piece_length + 1;
+		numLeft = numPieces;
+		leftoverBytes = TORRENT_INFO.file_length%TORRENT_INFO.piece_length;
+		blocksPerPiece = TORRENT_INFO.piece_length/16384;
+		havePiece = new boolean[numPieces+1];
+		try{
+		file = new RandomAccessFile(savedFile,"rws");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		
 
 		//query tracker
 		//TODO: write a loop that cycles through ports
@@ -56,6 +75,13 @@ public class CannonClient {
 							while(true){ if(peer.listenForUnchoke()){ break; }}
 
 							//start downloading!
+							for(int j = 0;j<numPieces;j++){
+								for(int k = 0;k<blocksPerPiece;k++){
+									peer.sendRequest(j,k,16384);
+									//Need to figure out how to do this efficiently
+									//file.write(peer.from_peer_.read(b), off, len)
+								}
+							}
 							peer.sendRequest(0, 0, 16384);
 							while(true){ peer.listenForPiece(); }
 						}
