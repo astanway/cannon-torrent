@@ -18,7 +18,8 @@ public class RUBTClient {
 	public static RandomAccessFile file      = null;
 	public static int BLOCK_LENGTH           = 16384;
 	public static boolean[] HAVE_PIECE       = null;
-	
+	public static ArrayList<Peer> peerList 	 = null;
+
 	public static final String STARTED   = "started";
 	public static final String COMPLETED = "completed";
 	public static final String STOPPED   = "stopped";
@@ -34,10 +35,10 @@ public class RUBTClient {
 		String torrentFile = args[0];
 		String savedFile   = args[1];
 
-    //set our peer id
+		//set our peer id
 		setPeerId();
-    
-    //set up torrent info
+
+		//set up torrent info
 		try{
 			TORRENT_INFO = new TorrentInfo(readTorrent(torrentFile));
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
@@ -60,9 +61,9 @@ public class RUBTClient {
 				continue;
 			}
 		}
-    
-    //loop through peers
-		ArrayList<Peer> peerList = getPeers(response);
+
+		//loop through peers
+		peerList = getPeers(response);
 		for(Peer peer : peerList){
 			if (peer.isValid()){
 				System.out.println("Peer Found");
@@ -70,16 +71,16 @@ public class RUBTClient {
 				peer.establishStreams();
 				peer.sendHandshake(PEER_ID, INFO_HASH);
 				if(peer.receiveHandshake(INFO_HASH)){
-				  
+
 					peer.sendMessage(Peer.INTERESTED);
-					
+
 					while(true){ if(peer.listenForUnchoke()){ break; }}
-					
+
 					response = getURL(constructQuery(i, TORRENT_INFO.file_length, 0, 0, STARTED));
-					
+
 					download(peer);
 
-		      response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, COMPLETED));
+					response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, COMPLETED));
 
 					peer.closeSocket();
 				}
@@ -174,6 +175,18 @@ public class RUBTClient {
 		System.out.print("] " + prog*100 + "%");
 	}
 
+
+	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
+	public static final ByteBuffer minIntervalKey = 
+		ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer downloadedKey =
+		ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
+	public static final ByteBuffer completeKey =
+		ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
+	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
+	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
+	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
 	/**
 	 * Gets the peer list from a response from the tracker
 	 * @param response	byte array response from 
@@ -186,41 +199,29 @@ public class RUBTClient {
 			// ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
-			Object[] responseArray = responseMap.values().toArray();
+			int interval = (Integer)responseMap.get(intervalKey);
+			//int interval = (Integer)responseArray[0];
 
-			int interval = (Integer)responseArray[0];
-			Object peers = responseArray[1];
 
-			ArrayList<Object> peerArray = (ArrayList<Object>)peers;
+			ArrayList<Object> peerArray = (ArrayList<Object>)responseMap.get(peersKey);
 
-			for (Object peer : peerArray){
+			for (int i = 0;i<peerArray.size();i++){
+				Object peer = peerArray.get(i);
 				String ip_ = "";
 				String peer_id_ = "";
 				int port_ = 0;
 
 				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
-
+				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
+				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
+				port_ = (Integer)peerMap.get(portKey);
+				System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
 				//get all the properties
-				for (Map.Entry<ByteBuffer, Object> entry : peerMap.entrySet()){          
-					String key = Helpers.bufferToString(entry.getKey());
-					Object value = entry.getValue();
-					if (key.compareTo("ip") == 0){
-						ip_ = Helpers.bufferToString((ByteBuffer)value);
-					}
-					if (key.compareTo("peer id") == 0){
-						peer_id_ = Helpers.bufferToString((ByteBuffer)value);
-					}
-					if (key.compareTo("port") == 0){
-						//TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
-						port_ = (Integer)value;
-					}
-				}
-
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 				peerList.add(newPeer);
 			}
 		} catch (Exception e){
-			System.out.print(e);
+			e.printStackTrace();
 		}
 
 		return peerList;
@@ -232,7 +233,7 @@ public class RUBTClient {
 	 * @param uploaded		amount uploaded
 	 * @param downloaded	amount downloaded
 	 * @param left			  amount left
- 	 * @param event		    event type
+	 * @param event		    event type
 	 * @return				    String to be sent as query
 	 */
 	public static String constructQuery(int port, int uploaded, int downloaded, int left, String event){
@@ -248,7 +249,7 @@ public class RUBTClient {
 			+ "&downloaded=" + downloaded
 			+ "&left=" + left
 			+ "&ip=" +  ip
-      + "&event=" + event;
+			+ "&event=" + event;
 
 		} catch (Exception e){
 			System.out.println(e);
@@ -310,5 +311,11 @@ public class RUBTClient {
 
 		return baos.toByteArray();
 	}
+
+	@SuppressWarnings("rawtypes")
+	public static ArrayList getPeerList(){
+		return peerList;
+	}
 }
+
 

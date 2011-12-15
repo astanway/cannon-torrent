@@ -72,7 +72,9 @@ public class Peer {
 	 */
 	public void closeSocket(){
 		try{
-			socket_.close();
+			if(socket_!=null){
+				socket_.close();
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
