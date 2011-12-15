@@ -25,25 +25,25 @@ public final class Helpers
 			System.exit(1);
 		}
 	}
-	
+
 	/**
-   * Changes the torrentfile into a bytearray
-   * @param torrentFile   the file to be read
-   * @return byte array from the file
-   */
-  public static byte[] readTorrent(String torrentFile) {
-    try {
-      RandomAccessFile rFile = new RandomAccessFile(torrentFile,"rw");
-      byte[] fileBytes = new byte[(int)rFile.length()];
-      rFile.read(fileBytes);
-      return fileBytes;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-  }
-  
-  public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
+	 * Changes the torrentfile into a bytearray
+	 * @param torrentFile   the file to be read
+	 * @return byte array from the file
+	 */
+	public static byte[] readTorrent(String torrentFile) {
+		try {
+			RandomAccessFile rFile = new RandomAccessFile(torrentFile,"rw");
+			byte[] fileBytes = new byte[(int)rFile.length()];
+			rFile.read(fileBytes);
+			return fileBytes;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
 	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
 	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
 	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
@@ -61,8 +61,8 @@ public final class Helpers
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
 		try{
 			Object decodedResponse = Bencoder2.decode(response);
-      // ToolKit.print(decodedResponse, 1);
-      
+			// ToolKit.print(decodedResponse, 1);
+
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			int interval = (Integer)responseMap.get(intervalKey);
 
@@ -78,11 +78,11 @@ public final class Helpers
 				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
 				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
 				port_ = (Integer)peerMap.get(portKey);
-        // System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
+				// System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
-				
+
 				if(newPeer.isValid()){
-				  peerList.add(newPeer);
+					peerList.add(newPeer);
 				}
 			}
 		} catch (Exception e){
@@ -177,8 +177,8 @@ public final class Helpers
 		}
 		return sb.toString();
 	}
-	
-	
+
+
 	/**
 	 * Used for the progress bar
 	 * @param completed	completed value
