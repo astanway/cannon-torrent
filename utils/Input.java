@@ -12,7 +12,6 @@ public class Input implements Runnable{
 		while(!input.equalsIgnoreCase("exit")){
 			try {
 				input = in.readLine();
-				System.out.println(input);
 			} catch (IOException e) {
 				System.out.println("Wtf IO exception");
 				e.printStackTrace();
@@ -20,7 +19,24 @@ public class Input implements Runnable{
 				return;
 			}
 		}
-    // Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+		
+		System.out.println("Closing sockets...");
+		for(int i = 0; i <Manager.activePeerList.size(); i++){
+			Manager.activePeerList.get(i).closeSocket();
+		}
+		Manager.activePeerList.clear();
+		
+		System.out.println("Notifying tracker...");
+		byte[] response = null;
+    response = Helpers.getURL(Manager.constructQuery(Manager.port, Manager.uploaded, Manager.downloaded,
+				Manager.torrent_info.file_length, Manager.STOPPED));
+				
+		while(response == null){
+		  continue;
+		}
+		
+		System.out.println("Shutting down...");
+				
 		Runtime.getRuntime().exit(1);
 	}
 }
