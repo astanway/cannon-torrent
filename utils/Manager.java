@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.locks.ReentrantLock;
 
 import peers.*;
 
@@ -22,6 +23,7 @@ public class Manager {
 	public static int numLeft                    = 0;
 	public static int blocksPerPiece		    	         = 0;
 	public static boolean ready                  = false;
+	public static ReentrantLock fileLock 		= null;
 
 	public static final int block_length = 16384;
 	public static final String STARTED   = "started";
@@ -268,6 +270,10 @@ public class Manager {
 		
 		//ready to start! THIS IS TERRIBLE CODE
 		ready = true;
+	}
+	
+	public static byte[] getBitfield(){
+		return BitToBoolean.convert(BitToBoolean.convert(have_piece));
 	}
 }
 

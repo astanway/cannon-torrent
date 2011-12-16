@@ -36,6 +36,11 @@ public class Peer {
 		this.ip_ = _ip;
 		this.port_ = _port;
 	}
+	
+	public Peer(DataInputStream in, DataOutputStream out){
+		this.to_peer_ = out;
+		this.from_peer_= in;
+	}
 
 	/**
 	 * Helper method to print out peer class

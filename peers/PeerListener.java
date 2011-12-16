@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import apps.RUBTClient;
 
 
 public class PeerListener implements Runnable {
@@ -13,8 +12,10 @@ public class PeerListener implements Runnable {
 	public Socket dataSocket;
 	public DataInputStream from_peer_;
 	public DataOutputStream to_peer_;
+	public int port;
 	
 	public PeerListener(int port){
+		this.port = port;
 		try{
 			listenSocket = new ServerSocket(port);
 		}catch(Exception e){
@@ -26,7 +27,11 @@ public class PeerListener implements Runnable {
 			dataSocket = listenSocket.accept();
 			from_peer_ = new DataInputStream(dataSocket.getInputStream());
 			to_peer_ = new DataOutputStream(dataSocket.getOutputStream());
-			RUBTClient.executeTask(new PeerHandler(from_peer_,to_peer_));
+			Peer temp = new Peer(from_peer_,to_peer_);
+			Thread t = new Thread(new UploadThread(temp));
+			t.start();
+			Thread t2 = new Thread(new PeerListener(this.port));
+			t2.start();
 		}catch(Exception e){
 			e.printStackTrace();
 		}

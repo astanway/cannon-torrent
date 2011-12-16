@@ -2,7 +2,6 @@ package peers;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import apps.RUBTClient;
 
 public class PeerHandler implements Runnable{
 	
