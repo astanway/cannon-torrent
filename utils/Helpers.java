@@ -29,12 +29,11 @@ public final class Helpers
 	public static void verifyHash(byte[] piece, byte[] pieceHash){
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
-			if (Arrays.equals(digest.digest(piece), pieceHash)){
+			if (!Arrays.equals(digest.digest(piece), pieceHash)){
 				throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
 			}
 		} catch (Exception e){
 		  System.out.println(e);
-		  System.exit(1);
 		}
 	}
 

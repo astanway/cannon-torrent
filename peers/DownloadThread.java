@@ -44,7 +44,11 @@ public class DownloadThread implements Runnable {
           Block b = Manager.q.poll();
           System.out.print("Trying ");
           b.print();
+
+          //do they have what we want?
           if(bfb[b.getPiece()] == true){
+
+            //do we want what they have?
             if(Manager.have_piece.get(b.getPiece()) == 0){
               peer.sendMessage(Peer.INTERESTED);
               if(peer.choked == false){
@@ -86,10 +90,6 @@ public class DownloadThread implements Runnable {
         System.out.println("They want something from us.");
       }
       
-      System.out.println("File downloaded.");
-      
-      //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-
       peer.closeSocket();
     }
   }
@@ -123,15 +123,16 @@ public class DownloadThread implements Runnable {
       } else if (m.getId() == Message.TYPE_PIECE){
         PieceMessage pm = (PieceMessage) m;
         byte[] piece_data = pm.getData();
-
-        // verify the data
-        byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
-        Helpers.verifyHash(piece_data, pieceHash);
-			
   			String name = "blocks/" + p + " " + b.getBlock();
   			RandomAccessFile file = new RandomAccessFile(name,"rws");
   			file.write(piece_data);
   			file.close();
+  			
+  			//TODO: verify each PIECE, as opposed to each block -> Make have array, check if it's full, and check the hash. 
+  			// If hash fails, reject entire piece, and put each block back on the queue. Possibly disconnect from peer, or at least
+  			// make sure we don't download the same piece from the same peer again.
+        // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
+        // Helpers.verifyHash(piece_data, pieceHash);
   			
   			//TODO: put it all into one file.
 

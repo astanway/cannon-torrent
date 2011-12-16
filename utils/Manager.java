@@ -39,8 +39,6 @@ public class Manager {
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile,fileName);
 
-    // should be 686 fucking blocks. i'll fix this tomorrow.
-
     int leftoverBytes = torrent_info.file_length % block_length; 
 
     numPieces = leftoverBytes == 0 ?
@@ -80,8 +78,9 @@ public class Manager {
       a.start();
 		}
 
-    // response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
-    // System.out.println("\nFile finished.");
+    System.out.println("File downloaded.");
+    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, COMPLETED));
+    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
 		return false;
 	}
 
