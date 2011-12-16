@@ -9,6 +9,10 @@ import java.nio.channels.FileLock;
 import utils.*;
 import utils.Message.*;
 
+/**
+ * @author matt
+ *
+ */
 public class DownloadThread implements Runnable {
 
 	public Peer peer = null;
@@ -22,7 +26,7 @@ public class DownloadThread implements Runnable {
 	}
 
 	public void run() {
-	  peer.closeSocket();
+		peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
 		peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
@@ -31,43 +35,43 @@ public class DownloadThread implements Runnable {
 			return;
 		} else {
 			peer.sendBitField();
-			
-			//get their bitfield
-  	  Message m = null;
-			while(peer.bfb == null){
-        try{
-          m = peer.listen();
-        } catch (Exception e){
-          run();
-          return;
-        }
-        interpret(m);        
+
+			// get their bitfield
+			Message m = null;
+			while (peer.bfb == null) {
+				try {
+					m = peer.listen();
+				} catch (Exception e) {
+					run();
+					return;
+				}
+				interpret(m);
 			}
 
 			Block b = null;
 
 			while (!checkFull()) {
 				b = Manager.q.poll();
-				if(b == null){
-				  //wait for the piece checker to fill it up again
-				  try{
-  			    Thread.sleep(3000L + (long)(Math.random() * 10));
-  			  } catch (Exception e){
-  		    }
-				  continue;
+				if (b == null) {
+					// wait for the piece checker to fill it up again
+					try {
+						Thread.sleep(3000L + (long) (Math.random() * 10));
+					} catch (Exception e) {
+					}
+					continue;
 				}
 
 				String name = "";
-  			if (b.getBlock() < 10) {
-  				name = b.getPiece() + " 0" + b.getBlock();
-  			} else {
-  				name = b.getPiece() + " " + b.getBlock();
-  			}
-				
+				if (b.getBlock() < 10) {
+					name = b.getPiece() + " 0" + b.getBlock();
+				} else {
+					name = b.getPiece() + " " + b.getBlock();
+				}
+
 				File f = new File("blocks/" + name);
-  			if (f.exists()) {
-  				continue;
-  			}
+				if (f.exists()) {
+					continue;
+				}
 
 				if (peer.bfb[b.getPiece()]) {
 					try {
@@ -78,75 +82,80 @@ public class DownloadThread implements Runnable {
 						return;
 					}
 					while (peer.choked == true) {
-					  try{
-  					  m = peer.listen();
-  					} catch (Exception e){
-  					  Manager.q.add(b);
-              run();
-              return;
-    				}
+						try {
+							m = peer.listen();
+						} catch (Exception e) {
+							Manager.q.add(b);
+							run();
+							return;
+						}
 						interpret(m);
 					}
 					try {
 						peer.requestBlock(b);
-            System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from "
-                           + peer.peer_id_);
+						System.out.println("Requested (" + b.getPiece() + ", "
+								+ b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
-					  Manager.q.add(b);
+						Manager.q.add(b);
 						run();
 						return;
 					}
-					try{
-					  m = peer.listen();
-					} catch (Exception e){
-					  Manager.q.add(b);
-					  run();
-  				  return;
-  				}
+					try {
+						m = peer.listen();
+					} catch (Exception e) {
+						Manager.q.add(b);
+						run();
+						return;
+					}
 					interpret(m);
 				} else {
-				  //they don't have what we want, but we should listen to them
-				  //to see if they want anything we've got
-				  try{
-  				  m = peer.listen();
-  				} catch (Exception e){
-  				  run();
-  				  return;
-  				}
-  				interpret(m);
+					// they don't have what we want, but we should listen to
+					// them
+					// to see if they want anything we've got
+					try {
+						m = peer.listen();
+					} catch (Exception e) {
+						run();
+						return;
+					}
+					interpret(m);
 				}
 
-				//this is to avoid hammering any one peer
-				try{
-			    Thread.sleep(20L + (long)(Math.random() * 10));
-			  } catch (Exception e){
-		    }
+				// this is to avoid hammering any one peer
+				try {
+					Thread.sleep(20L + (long) (Math.random() * 10));
+				} catch (Exception e) {
+				}
 			}
 
 			while (peerInterested) {
-				try{
-				  m = peer.listen();
-				} catch (Exception e){
-				  run();
-				  return;
+				try {
+					m = peer.listen();
+				} catch (Exception e) {
+					run();
+					return;
 				}
 				interpret(m);
 			}
 		}
 	}
 
+	/**
+	 * @param m message to be interpreted
+	 * Will do what we should go based on the specific message
+	 */
 	public void interpret(Message m) {
-	  //we have no message and we need to restart the connection
-	  if (m == null){
-	    try{
-	      Thread.sleep(500L + (long)(Math.random() * 10));
-	    } catch (Exception e){
-	     e.printStackTrace(); 
-	    }
-	    run();
-	    return;
-	  }
-	  
+		// we have no message and we need to restart the connection
+		if (m == null) {
+			try {
+				Thread.sleep(500L + (long) (Math.random() * 10));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			run();
+			return;
+		}
+
 		switch (m.getId()) {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
@@ -210,18 +219,20 @@ public class DownloadThread implements Runnable {
 				rename.renameTo(new File("blocks/" + name));
 			}
 
-      System.out.print(peer.peer_id_ + " ");
-      b.print();
+			System.out.print(peer.peer_id_ + " ");
+			b.print();
 			return;
 		case Message.TYPE_REQUEST:
 			if (!peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
 				byte[] sendData = new byte[tempRequest.getBlockLength()];
-				byte[] tempbytes = Helpers.getPiece(tempRequest.getPieceIndex());
+				byte[] tempbytes = Helpers
+						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
-        System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
-        System.out.println("of piece " + tempRequest.getPieceIndex());
+				System.out.println(peer.peer_id_ + " sending block "
+						+ tempRequest.getBegin());
+				System.out.println("of piece " + tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
@@ -235,12 +246,16 @@ public class DownloadThread implements Runnable {
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
-      System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+			System.out.println("Peer " + peer.peer_id_ + " unchoked us");
 			return;
 		}
 		return;
 	}
-	
+
+	/**
+	 * @return true if we have all the pieces
+	 * false otherwise
+	 */
 	public boolean checkFull() {
 		for (int i = 0; i < Manager.have_piece.length(); i++) {
 			if (Manager.have_piece.get(i) != 1) {

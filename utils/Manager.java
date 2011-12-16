@@ -20,7 +20,7 @@ public class Manager {
 	public static File file = null;
 	public static int port = 0;
 	public static int interval = 0;
-	public static int minInterval =0;
+	public static int minInterval = 0;
 	public static int numPieces = 0;
 	public static int numLeft = 0;
 	public static int numBlocks = 0;
@@ -81,14 +81,14 @@ public class Manager {
 			}
 		}
 	}
-	
-	public static void setTimers(){
-    Timer t = new Timer();
+
+	public static void setTimers() {
+		Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();
 		TrackerContact contact = new TrackerContact(0);
 		t.schedule(checker, 0, 3000);
-		t.schedule(contact,interval*1000,interval*1000);
-    
+		t.schedule(contact, interval * 1000, interval * 1000);
+
 		return;
 	}
 
@@ -96,7 +96,7 @@ public class Manager {
 		byte[] response = null;
 		response = Helpers.getURL(constructQuery(port, 0,
 				torrent_info.file_length, 0, STARTED));
-    
+
 		for (Peer peer : peerList_) {
 			registerPeer(peer);
 			DownloadThread p = new DownloadThread(peer);
@@ -269,7 +269,6 @@ public class Manager {
 	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[] { 'p',
 			'o', 'r', 't' });
 
-	
 	/**
 	 * Gets the peer list from a response from the tracker
 	 * 
@@ -285,7 +284,7 @@ public class Manager {
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>) decodedResponse;
 			interval = (Integer) responseMap.get(intervalKey);
-			minInterval= (Integer) responseMap.get(minIntervalKey);
+			minInterval = (Integer) responseMap.get(minIntervalKey);
 
 			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap
 					.get(peersKey);
@@ -311,23 +310,30 @@ public class Manager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		peerList_ = peerList;
 		Manager.peersReady = true;
 	}
 
+	/**
+	 * @return our bitfield as a byte[] to send as a message
+	 */
 	public static byte[] getBitfield() {
 		return BitToBoolean.convert(BitToBoolean.convert(have_piece));
 	}
 
+	/**
+	 * @param p registers a peer for our active peer list
+	 */
 	public static void registerPeer(Peer p) {
 		activePeerList.add(p);
 	}
-	
-	public static void addDownloaded(int added){
+
+	public static void addDownloaded(int added) {
 		downloaded = downloaded + added;
 	}
-	public static void addUploaded(int added){
-		uploaded+=added;
+
+	public static void addUploaded(int added) {
+		uploaded += added;
 	}
 }

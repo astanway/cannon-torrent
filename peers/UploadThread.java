@@ -44,7 +44,7 @@ public class UploadThread implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
+
 		while (interest) {
 			Message temp = listen();
 			if (weChoked) {
@@ -55,7 +55,7 @@ public class UploadThread implements Runnable {
 			switch (temp.getId()) {
 			case Message.TYPE_BITFIELD:
 				BitfieldMessage bfm = (BitfieldMessage) temp;
-				peer.bfb=BitToBoolean.convert(bfm.getData());
+				peer.bfb = BitToBoolean.convert(bfm.getData());
 				break;
 			case Message.TYPE_CHOKE:
 				System.out.println("We are Choked");
@@ -64,7 +64,7 @@ public class UploadThread implements Runnable {
 			case Message.TYPE_HAVE:
 				System.out.println("Have Message");
 				HaveMessage tempHave = (HaveMessage) temp;
-				peer.bfb[tempHave.getPieceIndex()]=true;
+				peer.bfb[tempHave.getPieceIndex()] = true;
 				break;
 			case Message.TYPE_INTERESTED:
 				System.out.println("They are interested in our Junk");
@@ -89,13 +89,15 @@ public class UploadThread implements Runnable {
 				System.out.println("We got a request message");
 				RequestMessage tempRequest = (RequestMessage) temp;
 				byte[] data = new byte[tempRequest.getBlockLength()];
-				byte[] tempbytes = Helpers.getPiece(tempRequest.getPieceIndex());
+				byte[] tempbytes = Helpers
+						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), data, 0,
 						tempRequest.getBlockLength());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						data);
-				System.out.println("Sending upload block " + tempRequest.getBegin());
+				System.out.println("Sending upload block "
+						+ tempRequest.getBegin());
 				System.out.println("of piece " + tempRequest.getPieceIndex());
 				try {
 					Message.encode(peer.to_peer_, toSend);
@@ -112,6 +114,9 @@ public class UploadThread implements Runnable {
 		}
 	}
 
+	/**
+	 * @return message from the socket
+	 */
 	public Message listen() {
 		try {
 			return Message.decode(peer.from_peer_);

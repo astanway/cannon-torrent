@@ -1,18 +1,6 @@
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-
 import utils.*;
-import utils.Shutdown;
-import utils.Message.BitfieldMessage;
-
-import peers.Peer;
 import peers.PeerListener;
 
 public class RUBTClient {
@@ -35,43 +23,44 @@ public class RUBTClient {
 		String torrentFile = args[0];
 		String savedFile = args[1];
 
-		//check if a local temp directory exists
+		// check if a local temp directory exists
 		File tempFile = new File("temp/");
-		if(tempFile.exists()){
-			if(tempFile.isDirectory()){
+		if (tempFile.exists()) {
+			if (tempFile.isDirectory()) {
 				System.out.println("Temp/ exists");
 			}
-		}else{
+		} else {
 			tempFile.mkdir();
 		}
-		
-		//check if a local temp directory exists
+
+		// check if a local temp directory exists
 		tempFile = new File("blocks/");
-		if(tempFile.exists()){
-			if(tempFile.isDirectory()){
+		if (tempFile.exists()) {
+			if (tempFile.isDirectory()) {
 				System.out.println("Blocks/ exists");
 			}
-		}else{
+		} else {
 			tempFile.mkdir();
 		}
-		
+
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
 		manager.setPeerList(getPeers());
 		manager.setTimers();
-		
-		while(!(manager.piecesReady && manager.peersReady)){
-		  try{
-		    Thread.sleep(4000L);
-  		  continue;
-		  } catch(Exception e){}
+
+		while (!(manager.piecesReady && manager.peersReady)) {
+			try {
+				Thread.sleep(4000L);
+				continue;
+			} catch (Exception e) {
+			}
 		}
 
 		manager.download();
 
-    Thread t = new Thread(new PeerListener(Manager.getPort()));
-    t.start();
-    new Thread(new Input()).start();
+		Thread t = new Thread(new PeerListener(Manager.getPort()));
+		t.start();
+		new Thread(new Input()).start();
 	}
 
 	// query the tracker and get the initial list of peers
@@ -91,7 +80,7 @@ public class RUBTClient {
 			}
 		}
 		manager.queryTracker();
-		
+
 		return response;
 	}
 

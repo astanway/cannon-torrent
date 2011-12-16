@@ -247,7 +247,11 @@ public class Peer {
 		}
 	}
 
-	public Message listen() throws Exception{
+	/**
+	 * @return listens to the peer socket for a message
+	 * @throws Exception
+	 */
+	public Message listen() throws Exception {
 		try {
 			Message m = Message.decode(from_peer_);
 			// System.out.println("Got type " + m.getId() + " from peer " +
@@ -273,11 +277,10 @@ public class Peer {
 		Message m = new RequestMessage(x, y, z);
 		try {
 			Message.encode(to_peer_, m);
-		} catch(SocketException se){
+		} catch (SocketException se) {
 			this.establishStreams();
 			se.printStackTrace();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Error on sendRequest for peer " + peer_id_);
 		}

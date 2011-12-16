@@ -152,7 +152,7 @@ public class Message {
 				BitfieldMessage tmp = (BitfieldMessage) message;
 				dout.writeInt(tmp.getLength());
 				dout.writeByte(tmp.getId());
-				dout.write(tmp.getData(),0,tmp.getData().length);
+				dout.write(tmp.getData(), 0, tmp.getData().length);
 				break;
 			}
 
@@ -219,7 +219,7 @@ public class Message {
 		public byte[] getData() {
 			return data;
 		}
-		
+
 		public int getBlockLength() {
 			return data.length;
 		}
@@ -263,13 +263,13 @@ public class Message {
 			return data;
 		}
 	}
-	
+
 	public static final class InterestedMessage extends Message {
 		public InterestedMessage() {
 			super(TYPE_INTERESTED, 1);
 		}
 	}
-	
+
 	public static final class UninterestedMessage extends Message {
 		public UninterestedMessage() {
 			super(TYPE_NOT_INTERESTED, 1);

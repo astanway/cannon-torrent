@@ -150,7 +150,6 @@ public final class Helpers {
 		}
 		return sb.toString();
 	}
-	
 
 	/**
 	 * Returns the piece in a byte array if we have it, returns null otherwise
@@ -168,7 +167,8 @@ public final class Helpers {
 		// is it the last piece?
 		if (i == Manager.numPieces - 1) {
 			last = true;
-			int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
+			int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length)
+					+ Manager.leftoverBytes;
 			piece = new byte[lastPieceSize];
 		} else {
 			piece = new byte[Manager.blocksPerPiece * Manager.block_length];
@@ -228,7 +228,8 @@ public final class Helpers {
 				file.delete();
 				int b = Integer.parseInt(st.nextToken());
 
-				if (i == Manager.numPieces - 1 && b == Manager.blocksInLastPiece) {
+				if (i == Manager.numPieces - 1
+						&& b == Manager.blocksInLastPiece) {
 					data = new byte[Manager.leftoverBytes];
 				} else {
 					data = new byte[Manager.block_length];
@@ -292,10 +293,14 @@ public final class Helpers {
 		}
 		System.out.print("] " + prog * 100 + "%");
 	}
-	
-	public static String converToHex(byte[] data){
+
+	/**
+	 * @param data byte[] to be turned into a hex string
+	 * @return A hex string of the bytes as two hex characters
+	 */
+	public static String converToHex(byte[] data) {
 		StringBuffer sb = new StringBuffer();
-		for(byte b: data){
+		for (byte b : data) {
 			sb.append(Integer.toHexString(b & 0xFF));
 		}
 		return sb.toString();
