@@ -11,7 +11,7 @@ import utils.Message.*;
 
 /**
  * @author matt
- *
+ * 
  */
 public class DownloadThread implements Runnable {
 
@@ -141,8 +141,9 @@ public class DownloadThread implements Runnable {
 	}
 
 	/**
-	 * @param m message to be interpreted
-	 * Will do what we should go based on the specific message
+	 * @param m
+	 *            message to be interpreted Will do what we should go based on
+	 *            the specific message
 	 */
 	public void interpret(Message m) {
 		// we have no message and we need to restart the connection
@@ -160,11 +161,11 @@ public class DownloadThread implements Runnable {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
 			peer.bfb = BitToBoolean.convert(bfm.getData());
-			System.out.println("Got a bitfield from " + peer.peer_id_);
+			// System.out.println("Got a bitfield from " + peer.peer_id_);
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
-			System.out.println("We have been choked by " + peer.peer_id_);
+			// System.out.println("We have been choked by " + peer.peer_id_);
 			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;
@@ -230,9 +231,11 @@ public class DownloadThread implements Runnable {
 						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
-				System.out.println(peer.peer_id_ + " sending block "
-						+ tempRequest.getBegin());
-				System.out.println("of piece " + tempRequest.getPieceIndex());
+
+				// System.out.println(peer.peer_id_ + " sending block " +
+				// tempRequest.getBegin());
+				// System.out.println("of piece " +
+				// tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
@@ -253,8 +256,7 @@ public class DownloadThread implements Runnable {
 	}
 
 	/**
-	 * @return true if we have all the pieces
-	 * false otherwise
+	 * @return true if we have all the pieces false otherwise
 	 */
 	public boolean checkFull() {
 		for (int i = 0; i < Manager.have_piece.length(); i++) {

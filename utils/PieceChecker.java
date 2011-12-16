@@ -37,13 +37,13 @@ public class PieceChecker extends TimerTask {
 
 				byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
 				if (Helpers.verifyHash(piece, pieceHash)) {
-					System.out.println("Piece " + i + " verified");
+					// System.out.println("Piece " + i + " verified");
 					Manager.have_piece.set(i, 1);
 					Manager.addDownloaded(Helpers.getPiece(i).length);
 
 					// don't send the have message if this is a resumed download
-					if (Manager.peersReady && Manager.piecesReady) {
-						for (Peer peer : Manager.activePeerList) {
+					for (Peer peer : Manager.activePeerList) {
+						if (peer.ready) {
 							HaveMessage haveSend = new HaveMessage(i);
 							try {
 								Message.encode(peer.to_peer_, haveSend);
@@ -70,7 +70,8 @@ public class PieceChecker extends TimerTask {
 
 		}
 
-		finish();
+		if (!Manager.fileDone)
+			finish();
 	}
 
 	// adds missing blocks to queue if needed
@@ -95,13 +96,13 @@ public class PieceChecker extends TimerTask {
 						data = new byte[Manager.leftoverBytes];
 						Block b = new Block(j, k, data);
 						Manager.q.add(b);
-						System.out.println("Adding block " + j + " " + k);
+						// System.out.println("Adding block " + j + " " + k);
 						break;
 					} else {
 						data = new byte[Manager.block_length];
 					}
 					Block b = new Block(j, k, data);
-					System.out.println("Adding block " + j + " " + k);
+					// System.out.println("Adding block " + j + " " + k);
 					Manager.q.add(b);
 				}
 			}
@@ -111,6 +112,13 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public static void finish() {
+		File f = new File(Manager.file.getName());
+		if (f.exists()) {
+			System.out.println("File already exists.");
+			Manager.fileDone = true;
+			return;
+		}
+
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
 			System.out.println("Not finished yet.");
 			if (Manager.q.size() == 0) {
@@ -160,17 +168,16 @@ public class PieceChecker extends TimerTask {
 		}
 
 		// tell the tracker we're done
-		byte[] response = null;
-		response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0,
-				Manager.torrent_info.file_length, Manager.COMPLETED));
-		response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0,
-				Manager.torrent_info.file_length, Manager.STOPPED));
-		System.out.println("Bye!");
-		Thread t = new Thread(new TrackerContact(1));
-		t.start();
-		Manager.fileDone = true;
-		// Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
-		// System.exit(1);
+		if (!Manager.fileDone) {
+			byte[] response = null;
+			response = Helpers.getURL(Manager.constructQuery(Manager.port, 0,
+					0, Manager.torrent_info.file_length, Manager.COMPLETED));
+			response = Helpers.getURL(Manager.constructQuery(Manager.port, 0,
+					0, Manager.torrent_info.file_length, Manager.STOPPED));
+			Thread t = new Thread(new TrackerContact(1));
+			t.start();
+			Manager.fileDone = true;
+		}
 	}
 
 	public static void deleteBlocks(int i) {
