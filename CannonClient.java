@@ -3,6 +3,7 @@ import java.util.*;
 import java.net.*;
 
 import utils.TorrentInfo;
+import utils.Bencoder2;
 
 public class CannonClient {
 	
@@ -14,11 +15,10 @@ public class CannonClient {
 
     try{
       TorrentInfo decoded = new TorrentInfo(torrentArray);
-      System.out.print(decoded.announce_url);
+      byte[] response = getURL(decoded.announce_url.toString());
+      Object decoded_response = Bencoder2.decode(response);
+      //get list of peers from this decoded response
       
-      //get url from decoded torrent
-      
-      byte[] response = getURL("http://abe.is"); 
     } catch (Exception e){
       System.out.println(e);
     }
