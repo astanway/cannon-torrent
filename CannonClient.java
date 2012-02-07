@@ -1,10 +1,8 @@
-// package cannon;
-
 import java.io.*;
 import java.util.*;
 import java.net.*;
 
-import utils.Bencoder2;
+import utils.TorrentInfo;
 
 public class CannonClient {
 	
@@ -15,19 +13,22 @@ public class CannonClient {
     byte[] torrentArray = readTorrent(torrentFile);
 
     try{
-      Object decoded = Bencoder2.decode(torrentArray);
+      TorrentInfo decoded = new TorrentInfo(torrentArray);
+      System.out.print(decoded.announce_url);
       
       //get url from decoded torrent
       
       byte[] response = getURL("http://abe.is"); 
-    } catch (Exception e){}
+    } catch (Exception e){
+      System.out.println(e);
+    }
 	}
 	
 	public static byte[] readTorrent(String torrentFile) {
     StringBuffer buffer = new StringBuffer();
     try {
         FileInputStream fis = new FileInputStream(torrentFile);
-        InputStreamReader isr = new InputStreamReader(fis, "UTF8");
+        InputStreamReader isr = new InputStreamReader(fis);
         Reader in = new BufferedReader(isr);
         int ch;
         while ((ch = in.read()) > -1) {

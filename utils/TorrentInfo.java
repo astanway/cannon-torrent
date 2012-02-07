@@ -27,8 +27,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
-import BencodingException;
-import Bencoder2;
+import utils.BencodingException;
+import utils.Bencoder2;
 
 /**
  * This is a data structure class that extracts basic information from a bencoded torrent metainfo
