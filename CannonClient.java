@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
+import utils.Bencoder2;
+
 public class CannonClient {
 	
 	public static void main(String[] args) {
@@ -11,9 +13,12 @@ public class CannonClient {
     String torrentFile = args[0];
     String savedFile = args[1];
     byte[] torrentArray = readTorrent(torrentFile);
-    // Object decoded = Bencoder2.decode(torrentArray);
-    //get url from decoded torrent
-    try{ 
+
+    try{
+      Object decoded = Bencoder2.decode(torrentArray);
+      
+      //get url from decoded torrent
+      
       byte[] response = getURL("http://abe.is"); 
     } catch (Exception e){}
 	}

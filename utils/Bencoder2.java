@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import BencodingException;
+import utils.BencodingException;
 
 /**
  * Parses a Bencoded byte array and returns a combination of {@code Map},
