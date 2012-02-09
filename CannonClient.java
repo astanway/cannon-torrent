@@ -13,12 +13,18 @@ public class CannonClient {
     String torrentFile = args[0];
     String savedFile = args[1];
     byte[] torrentArray = readTorrent(torrentFile);
-    String url = constructQuery(torrentArray);
+    String url = constructQuery(torrentArray); 
     byte[] response = getURL(url);
+
+    try{
+      Object decoded_response = Bencoder2.decode(response);
+    } catch (Exception e){
+      
+    }
     
-    // byte[] decoded_response = Bencoder2.decode(response);
 	}
 	
+	//construct the url for initially querying the tracker
 	public static String constructQuery(byte[] torrentArray){
 	  String url_string = "";
 	  try{
