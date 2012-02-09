@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 import utils.TorrentInfo;
 import utils.Bencoder2;
@@ -12,20 +13,62 @@ public class CannonClient {
     String torrentFile = args[0];
     String savedFile = args[1];
     byte[] torrentArray = readTorrent(torrentFile);
-
-    try{
+    String url = constructQuery(torrentArray);
+    byte[] response = getURL(url);
+    
+    // byte[] decoded_response = Bencoder2.decode(response);
+	}
+	
+	public static String constructQuery(byte[] torrentArray){
+	  String url_string = "";
+	  try{
+      //get initial decoded torrent inf0rz
       TorrentInfo decoded = new TorrentInfo(torrentArray);
+      
+      //get url
       byte[] escaped = new byte[20];
       decoded.info_hash.get(escaped, 0, escaped.length);
-      String url = toURLHex(escaped);
-      //get list of peers from this decoded response
+      String escaped_hash = toURLHex(escaped);
       
-      byte[] response = getURL(decoded.announce_url.toString());
-      Object decoded_response = Bencoder2.decode(response);
+      //generate random id
+      Random ran = new Random();
+      int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
+      String peer_id = "GROUP4AREL33t" + rand_id;
+
+      if(peer_id.length() != 20 ){
+        System.out.print("ID is incorrect");
+        System.exit(1);
+      }
       
+      //set the port
+      int port = 6881;
+      
+      //uploaded
+      int uploaded = 0;
+      
+      //downloaded
+      int downloaded = 0;
+      
+      //left
+      int left = 0;
+      
+      //ip address
+      String ip = "128.6.5.130";
+      
+      url_string = decoded.announce_url.toString() 
+                    + "?port=" + port
+                    + "&peer_id=" + peer_id
+                    + "&info_hash=" + escaped_hash 
+                    + "&uploaded=" + uploaded
+                    + "&downloaded=" + downloaded
+                    + "&left=" + left
+                    + "&ip=" +  ip;
+
     } catch (Exception e){
       System.out.println(e);
     }
+    
+    return url_string;
 	}
 	
 	public static final char[] HEX_CHARS = 
@@ -60,17 +103,26 @@ public class CannonClient {
     }
   }
   
-  public static byte[] getURL(String url) throws Exception {
-    URL destination = new URL(url);
-    StringBuffer buffer = new StringBuffer();
-    BufferedReader in = new BufferedReader( new InputStreamReader(destination.openStream()));
-    int ch;
-    while ((ch = in.read()) > -1) {
-            buffer.append((char)ch);
-    }
-    in.close();
-    return buffer.toString().getBytes();
+  //returns a byte[] consisting of the contents at the given url
+  public static byte[] getURL(String string_url) {
+    ByteArrayOutputStream bais = new ByteArrayOutputStream();
+    InputStream is = null;
+    try {
+      URL url = new URL(string_url);
+      is = url.openStream();
+      byte[] byteChunk = new byte[4096];
+      int n;
 
+      while ( (n = is.read(byteChunk)) > 0 ) {
+        bais.write(byteChunk, 0, n);
+      }
+      
+      is.close();
     }
+    catch (IOException e) {
+    }
+    
+    return bais.toByteArray();
+  }
 }
 
