@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import utils.TorrentInfo;
 import utils.Bencoder2;
+import utils.Helpers;
 
 public class CannonClient {
 	
@@ -17,11 +18,40 @@ public class CannonClient {
     byte[] response = getURL(url);
 
     try{
-      Object decoded_response = Bencoder2.decode(response);
-    } catch (Exception e){
+      //decode the response and slap it in an array for perusal
+      Object decodedResponse = Bencoder2.decode(response);
+      Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
+      Object[] responseArray = responseMap.values().toArray();
       
+      //the interval returned by the tracker
+      int interval = (Integer)responseArray[0];
+      
+      //the list of peers returned by the tracker
+      Object peers = responseArray[1];
+      ArrayList<Object> peerArray = (ArrayList<Object>)peers;
+      
+      //iterate through the list
+      for (Object peer : peerArray){
+        Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
+        
+        //get all the properties
+        for (Map.Entry<ByteBuffer, Object> entry : peerMap.entrySet()){          
+           String key = Helpers.bufferToString(entry.getKey());
+           Object value = entry.getValue();
+           if (key.compareTo("ip") == 0){
+             String ip = Helpers.bufferToString((ByteBuffer)value);
+           }
+           if (key.compareTo("peer id") == 0){
+             String peer_id = Helpers.bufferToString((ByteBuffer)value);
+           }
+           if (key.compareTo("port") == 0){
+             int port = (Integer)value;
+          }
+        }
+      }      
+    } catch (Exception e){
+      System.out.print(e);
     }
-    
 	}
 	
 	//construct the url for initially querying the tracker
@@ -34,7 +64,7 @@ public class CannonClient {
       //get url
       byte[] escaped = new byte[20];
       decoded.info_hash.get(escaped, 0, escaped.length);
-      String escaped_hash = toURLHex(escaped);
+      String escaped_hash = Helpers.toURLHex(escaped);
       
       //generate random id
       Random ran = new Random();
@@ -76,20 +106,7 @@ public class CannonClient {
     
     return url_string;
 	}
-	
-	public static final char[] HEX_CHARS = 
-   {'0','1','2','3','4','5','6','7',
-    '8','9','A','B','C','D','E','F'};
 
-  public static String toURLHex(byte[] bytes){
-     StringBuffer sb = new StringBuffer();
-     for(int i = 0; i < bytes.length; ++i){
-      sb.append('%')
-       .append(HEX_CHARS[(bytes[i]>>4&0x0F)])
-       .append(HEX_CHARS[(bytes[i]&0x0F)]);
-     }
-     return sb.toString();
-  }
 	
 	public static byte[] readTorrent(String torrentFile) {
     StringBuffer buffer = new StringBuffer();
@@ -108,6 +125,7 @@ public class CannonClient {
         return null;
     }
   }
+  
   
   //returns a byte[] consisting of the contents at the given url
   public static byte[] getURL(String string_url) {
