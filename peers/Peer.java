@@ -67,7 +67,7 @@ public class Peer {
 		outlength += _our_peer_id.length;
     
     //why isn't this showing the initial 19 at out[0]?
-    Helpers.printBytes(out_);
+    // Helpers.printBytes(out_);
 		try{
       //throwing null pointer exception.
 			to_peer_.write(out_);

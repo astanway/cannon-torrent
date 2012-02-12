@@ -23,7 +23,13 @@ public class CannonClient {
     String url = constructQuery(torrentArray); 
     byte[] response = getURL(url);
     ArrayList<Peer> peerList = getPeers(response);
-    Peer.sendHandshake(PEER_ID, INFO_HASH);
+    for(Peer peer : peerList){
+      if (peer.ip_.equals("128.6.5.130") && peer.peer_id_.indexOf("RUBT") != -1){
+        System.out.println("Peer Found");
+        Peer.sendHandshake(PEER_ID, INFO_HASH);
+      }
+    }
+    
 	}
 	
 	public static ArrayList<Peer> getPeers(byte[] response){
@@ -107,7 +113,7 @@ public class CannonClient {
       int downloaded = 0;
       
       //left
-      int left = 0;
+      int left = decoded.file_length;
       
       //ip address
       String ip = "128.6.5.130";
