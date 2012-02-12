@@ -7,13 +7,16 @@ import java.net.Socket;
 
 public class Peer {
 	
-	String peer_id_ = null;
-	String ip_ = null;
-	int port_ = 0;
-	Socket socket_= null;
-	DataOutputStream to_peer_ = null;
-	BufferedReader from_peer_ = null;
+	public static String peer_id_ = null;
+	public static String ip_ = null;
+	public static int port_ = 0;
+	public static Socket socket_= null;
+	public static DataOutputStream to_peer_ = null;
+	public static BufferedReader from_peer_ = null;	
 	
+	public Peer(){
+	  
+	}
 	
 	public Peer(String _peer_id,String _ip, int _port){
 		peer_id_ = _peer_id;

@@ -8,6 +8,8 @@ import utils.Bencoder2;
 import utils.Helpers;
 import utils.ToolKit;
 
+import peers.Peer;
+
 public class CannonClient {
 	
 	public static void main(String[] args) {
@@ -17,6 +19,7 @@ public class CannonClient {
     byte[] torrentArray = readTorrent(torrentFile);
     String url = constructQuery(torrentArray); 
     byte[] response = getURL(url);
+    ArrayList<Peer> peerList = new ArrayList<Peer>(10);
     
     try{
       //decode the response and slap it in an array for perusal
@@ -30,11 +33,13 @@ public class CannonClient {
       
       //the list of peers returned by the tracker
       Object peers = responseArray[1];
+
       ArrayList<Object> peerArray = (ArrayList<Object>)peers;
       
       //iterate through the list
       for (Object peer : peerArray){
         Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
+        peers.Peer newPeer = new Peer();
         
         //get all the properties
         for (Map.Entry<ByteBuffer, Object> entry : peerMap.entrySet()){          
@@ -42,15 +47,20 @@ public class CannonClient {
            Object value = entry.getValue();
            if (key.compareTo("ip") == 0){
              String ip = Helpers.bufferToString((ByteBuffer)value);
+             Peer.ip_ = ip;
            }
            if (key.compareTo("peer id") == 0){
              String peer_id = Helpers.bufferToString((ByteBuffer)value);
+             Peer.peer_id_ = peer_id;
            }
            if (key.compareTo("port") == 0){
              int port = (Integer)value;
+             Peer.port_ = port;
           }
         }
-      }      
+        
+        peerList.add(newPeer);
+      }
     } catch (Exception e){
       System.out.print(e);
     }
