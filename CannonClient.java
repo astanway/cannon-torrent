@@ -11,6 +11,9 @@ import utils.ToolKit;
 import peers.Peer;
 
 public class CannonClient {
+  
+  public static byte[] PEER_ID = new byte[20];
+  public static byte[] INFO_HASH = new byte[20];
 	
 	public static void main(String[] args) {
     
@@ -19,12 +22,18 @@ public class CannonClient {
     byte[] torrentArray = readTorrent(torrentFile);
     String url = constructQuery(torrentArray); 
     byte[] response = getURL(url);
-    ArrayList<Peer> peerList = new ArrayList<Peer>(10);
-    
-    try{
+    ArrayList<Peer> peerList = getPeers(response);
+    Peer.sendHandshake(PEER_ID, INFO_HASH);
+	}
+	
+	public static ArrayList<Peer> getPeers(byte[] response){
+	  ArrayList<Peer> peerList = new ArrayList<Peer>(10);
+
+	  try{
       //decode the response and slap it in an array for perusal
       Object decodedResponse = Bencoder2.decode(response);
-      ToolKit.print(decodedResponse, 1);
+      // ToolKit.print(decodedResponse, 1);
+      
       Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
       Object[] responseArray = responseMap.values().toArray();
       
@@ -46,6 +55,7 @@ public class CannonClient {
            String key = Helpers.bufferToString(entry.getKey());
            Object value = entry.getValue();
            if (key.compareTo("ip") == 0){
+             //TODO: substitute this method for a method in ToolKit
              String ip = Helpers.bufferToString((ByteBuffer)value);
              Peer.ip_ = ip;
            }
@@ -59,11 +69,14 @@ public class CannonClient {
           }
         }
         
+        //add the fleshed out peer to the peerList
         peerList.add(newPeer);
       }
     } catch (Exception e){
       System.out.print(e);
     }
+
+    return peerList;
 	}
 	
 	//construct the url for initially querying the tracker
@@ -73,22 +86,18 @@ public class CannonClient {
       //get initial decoded torrent inf0rz
       TorrentInfo decoded = new TorrentInfo(torrentArray);
       
-      //get url
-      byte[] escaped = new byte[20];
-      decoded.info_hash.get(escaped, 0, escaped.length);
-      String escaped_hash = Helpers.toURLHex(escaped);
+      //get info hash
+      decoded.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
+      String escaped_hash = Helpers.toURLHex(INFO_HASH);
       
       //generate random id
       Random ran = new Random();
       int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
-      String peer_id = "GROUP4AREL33t" + rand_id;
-
-      if(peer_id.length() != 20 ){
-        System.out.print("ID is incorrect");
-        System.exit(1);
-      }
+      String peer_id_string = "GROUP4AREL33t" + rand_id;
+      PEER_ID = peer_id_string.getBytes();
       
       //set the port
+      //TODO: add cycle logic
       int port = 6881;
       
       //uploaded
@@ -105,7 +114,7 @@ public class CannonClient {
       
       url_string = decoded.announce_url.toString() 
                     + "?port=" + port
-                    + "&peer_id=" + peer_id
+                    + "&peer_id=" + peer_id_string
                     + "&info_hash=" + escaped_hash 
                     + "&uploaded=" + uploaded
                     + "&downloaded=" + downloaded

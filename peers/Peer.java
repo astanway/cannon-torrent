@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+
+import utils.Helpers;
 
 public class Peer {
 	
@@ -18,7 +21,7 @@ public class Peer {
 	  
 	}
 	
-	public Peer(String _peer_id,String _ip, int _port){
+	public Peer(String _peer_id, String _ip, int _port){
 		peer_id_ = _peer_id;
 		ip_ = _ip;
 		port_ = _port;
@@ -26,7 +29,7 @@ public class Peer {
 	
 	public boolean createSocket(String _ip, int _port){
 		try{
-			socket_ = new Socket(_ip,_port);
+			socket_ = new Socket(_ip, _port);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -47,24 +50,26 @@ public class Peer {
 			return true;
 	}
 	
-	public void sendHandshake(String _our_peer_id, byte[] _hash){
-		int outlength =0;
+	public static void sendHandshake(byte[] _our_peer_id, byte[] _hash){
+		int outlength = 0;
 		byte out_[] = new byte[85];
-		out_[0] = new Integer(19).byteValue();
+		out_[0] = 0x13;
 		outlength ++;
 		byte temp[] = new String("BitTorrent protocol").getBytes();
 		System.arraycopy(temp, 0, out_, outlength, temp.length);
-		outlength+=temp.length;
-		byte zeroes[] = new byte[8];
+		outlength += temp.length;
+    byte[] zeroes = ByteBuffer.allocate(4).putInt(00000000).array();
 		System.arraycopy(zeroes, 0, out_, outlength, zeroes.length);
-		outlength+=zeroes.length;
-		System.arraycopy(_hash,0,out_,outlength,_hash.length);
-		outlength+=_hash.length;
-		temp = _our_peer_id.getBytes();
-		System.arraycopy(temp, 0, out_, outlength, temp.length);
-		outlength+=temp.length;
-
+		outlength += zeroes.length;
+		System.arraycopy(_hash, 0, out_, outlength, _hash.length);
+		outlength += _hash.length;
+		System.arraycopy(_our_peer_id, 0, out_, outlength, _our_peer_id.length);
+		outlength += _our_peer_id.length;
+    
+    //why isn't this showing the initial 19 at out[0]?
+    Helpers.printBytes(out_);
 		try{
+      //throwing null pointer exception.
 			to_peer_.write(out_);
 		}catch(Exception e){
 			e.printStackTrace();
