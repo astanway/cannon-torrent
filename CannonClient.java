@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import utils.TorrentInfo;
 import utils.Bencoder2;
 import utils.Helpers;
+import utils.ToolKit;
 
 public class CannonClient {
 	
@@ -16,10 +17,11 @@ public class CannonClient {
     byte[] torrentArray = readTorrent(torrentFile);
     String url = constructQuery(torrentArray); 
     byte[] response = getURL(url);
-
+    
     try{
       //decode the response and slap it in an array for perusal
       Object decodedResponse = Bencoder2.decode(response);
+      ToolKit.print(decodedResponse, 1);
       Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
       Object[] responseArray = responseMap.values().toArray();
       
