@@ -11,12 +11,12 @@ import utils.ToolKit;
 
 public class Peer {
 	
-	public  String peer_id_ = null;
-	public  String ip_ = null;
-	public  int port_ = 0;
-	public  Socket socket_= null;
-	public  DataOutputStream to_peer_ = null;
-	public  BufferedReader from_peer_ = null;	
+	public String peer_id_ = null;
+	public String ip_ = null;
+	public int port_ = 0;
+	public Socket socket_= null;
+	public DataOutputStream to_peer_ = null;
+	public BufferedReader from_peer_ = null;	
 		
 	public Peer(String _peer_id, String _ip, int _port){
 		this.peer_id_ = _peer_id;
@@ -60,6 +60,7 @@ public class Peer {
 		}else
 			return true;
 	}
+
 	//Sends Handshake message to peer
 	public void sendHandshake(byte[] _our_peer_id, byte[] _hash){
 		int outlength = 0;
@@ -70,7 +71,6 @@ public class Peer {
 		System.arraycopy(temp, 0, out_, outlength, temp.length);
 		outlength += temp.length;
 		byte[] zeroes = new byte[8];
-		ToolKit.print(zeroes);
 		System.arraycopy(zeroes, 0, out_, outlength, zeroes.length);
 		outlength += zeroes.length;
 		System.arraycopy(_hash, 0, out_, outlength, _hash.length);
@@ -79,9 +79,7 @@ public class Peer {
 		outlength += _our_peer_id.length;
     
     //why isn't this showing the initial 19 at out[0]?
-    Helpers.printBytes(out_);
 		try{
-      //throwing null pointer exception.
 			to_peer_.write(out_);
 		}catch(Exception e){
 			e.printStackTrace();

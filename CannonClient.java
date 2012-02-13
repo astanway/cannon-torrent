@@ -33,24 +33,27 @@ public class CannonClient {
     
     //query tracker
     //TODO: write a loop that cycles through ports
-    try{
-      String url = constructQuery(6881, 0, 0, TORRENT_INFO.file_length); 
-      byte[] response = getURL(url);
-      ArrayList<Peer> peerList = getPeers(response);
-      for(Peer peer : peerList){
-        if (peer.isValid()){
-          System.out.println("Peer Found");
-          peer.createSocket(peer.ip_,peer.port_);
-          peer.establishStreams();
-          peer.sendHandshake(PEER_ID, INFO_HASH);
+    for (int i=6881; i<=6889;){
+      try{
+        String url = constructQuery(i, 0, 0, TORRENT_INFO.file_length); 
+        byte[] response = getURL(url);
+        ArrayList<Peer> peerList = getPeers(response);
+        for(Peer peer : peerList){
+          if (peer.isValid()){
+            System.out.println("Peer Found");
+            peer.createSocket(peer.ip_, peer.port_);
+            peer.establishStreams();
+            peer.sendHandshake(PEER_ID, INFO_HASH);
+          }
         }
+        
+        break;
+      } catch (Exception e){
+      	e.printStackTrace();
+        System.out.println("Port " + i + " failed."); 
+        i++;
       }
-    } catch (Exception e){
-    	e.printStackTrace();
-     System.out.println("Tracker could not be queried."); 
     }
-    
-    
 	}
 	
 	public static ArrayList<Peer> getPeers(byte[] response){
@@ -59,7 +62,7 @@ public class CannonClient {
 	  try{
       //decode the response and slap it in an array for perusal
       Object decodedResponse = Bencoder2.decode(response);
-      ToolKit.print(decodedResponse, 1);
+      // ToolKit.print(decodedResponse, 1);
       
       Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
       Object[] responseArray = responseMap.values().toArray();
