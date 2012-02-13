@@ -37,10 +37,10 @@ public class CannonClient {
       byte[] response = getURL(url);
       ArrayList<Peer> peerList = getPeers(response);
       for(Peer peer : peerList){
-        // if (peer.ip_.equals("128.6.5.130") && peer.peer_id_.indexOf("RUBT") != -1){
-        //   System.out.println("Peer Found");
-        //   Peer.sendHandshake(PEER_ID, INFO_HASH);
-        // }
+        if (peer.isValid()){
+          System.out.println("Peer Found");
+          Peer.sendHandshake(PEER_ID, INFO_HASH);
+        }
       }
     } catch (Exception e){
      System.out.println("Tracker could not be queried."); 
@@ -89,7 +89,6 @@ public class CannonClient {
              port_ = (Integer)value;
           }
         }
-        
         //add the fleshed out peer to the peerList
         Peer newPeer = new Peer(peer_id_, ip_, port_);
         peerList.add(newPeer);
@@ -97,9 +96,7 @@ public class CannonClient {
     } catch (Exception e){
       System.out.print(e);
     }
-    peerList.get(0).print();
-    peerList.get(1).print();
-    peerList.get(2).print();
+
     return peerList;
 	}
 	

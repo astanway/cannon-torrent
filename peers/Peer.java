@@ -11,9 +11,9 @@ import utils.ToolKit;
 
 public class Peer {
 	
-	String peer_id_;
-	String ip_;
-	int port_;
+	public String peer_id_;
+	public String ip_;
+	public int port_;
 	public static Socket socket_= null;
 	public static DataOutputStream to_peer_ = null;
 	public static BufferedReader from_peer_ = null;	
@@ -28,6 +28,14 @@ public class Peer {
 	  System.out.println(this.peer_id_);
 	  System.out.println(this.ip_);
 	  System.out.println(this.port_);
+	  System.out.println("");
+	}
+	
+	public boolean isValid(){
+	  if (this.ip_.equals("128.6.5.130") && this.peer_id_.indexOf("RUBT") != -1){
+	    return true;
+    }
+    return false;
 	}
 	
 	public boolean createSocket(String _ip, int _port){
