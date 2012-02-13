@@ -7,24 +7,27 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import utils.Helpers;
+import utils.ToolKit;
 
 public class Peer {
 	
-	public static String peer_id_ = null;
-	public static String ip_ = null;
-	public static int port_ = 0;
+	String peer_id_;
+	String ip_;
+	int port_;
 	public static Socket socket_= null;
 	public static DataOutputStream to_peer_ = null;
 	public static BufferedReader from_peer_ = null;	
-	
-	public Peer(){
-	  
+		
+	public Peer(String _peer_id, String _ip, int _port){
+		this.peer_id_ = _peer_id;
+		this.ip_ = _ip;
+		this.port_ = _port;
 	}
 	
-	public Peer(String _peer_id, String _ip, int _port){
-		peer_id_ = _peer_id;
-		ip_ = _ip;
-		port_ = _port;
+	public void print(){
+	  System.out.println(this.peer_id_);
+	  System.out.println(this.ip_);
+	  System.out.println(this.port_);
 	}
 	
 	public boolean createSocket(String _ip, int _port){
@@ -58,7 +61,9 @@ public class Peer {
 		byte temp[] = new String("BitTorrent protocol").getBytes();
 		System.arraycopy(temp, 0, out_, outlength, temp.length);
 		outlength += temp.length;
-    byte[] zeroes = ByteBuffer.allocate(4).putInt(00000000).array();
+    byte[] zeroes = new byte[8];
+    ToolKit.print(zeroes);
+    
 		System.arraycopy(zeroes, 0, out_, outlength, zeroes.length);
 		outlength += zeroes.length;
 		System.arraycopy(_hash, 0, out_, outlength, _hash.length);
@@ -67,7 +72,7 @@ public class Peer {
 		outlength += _our_peer_id.length;
     
     //why isn't this showing the initial 19 at out[0]?
-    // Helpers.printBytes(out_);
+    Helpers.printBytes(out_);
 		try{
       //throwing null pointer exception.
 			to_peer_.write(out_);

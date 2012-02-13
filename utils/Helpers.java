@@ -5,12 +5,23 @@ import java.util.ArrayList;
 
 public final class Helpers 
 {
-  //converts a byte buffer to a string
   public static String bufferToString(ByteBuffer buffer)
   {
     byte[] bufferBytes = new byte[buffer.capacity()];
     buffer.get(bufferBytes, 0, bufferBytes.length);
     String value = new String(bufferBytes);
+    return value;
+  }
+  
+  public static int bufferToInt(ByteBuffer buffer)
+  {
+    byte[] bufferBytes = new byte[buffer.capacity()];
+    buffer.get(bufferBytes, 0, bufferBytes.length);
+    int value = 0;
+    for (int i = 0; i < 4; i++) {
+       int shift = (4 - 1 - i) * 8;
+       value += (bufferBytes[i] & 0x000000FF) << shift;
+    }
     return value;
   }
   
