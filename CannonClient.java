@@ -44,6 +44,9 @@ public class CannonClient {
             peer.createSocket(peer.ip_, peer.port_);
             peer.establishStreams();
             peer.sendHandshake(PEER_ID, INFO_HASH);
+            if(peer.receiveHandshake(INFO_HASH)){
+             System.out.println("happy days!"); 
+            }
           }
         }
         

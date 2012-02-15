@@ -77,13 +77,33 @@ public class Peer {
 		outlength += _hash.length;
 		System.arraycopy(_our_peer_id, 0, out_, outlength, _our_peer_id.length);
 		outlength += _our_peer_id.length;
-    
-    //why isn't this showing the initial 19 at out[0]?
+
 		try{
 			to_peer_.write(out_);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	//Recieves incoming handshake from remote peer
+	public boolean receiveHandshake(byte[] _hash){
+		try{
+		  char[] responseHash = new char[20];
+		  byte[] byteResponseHash = new byte[20];
+		  char[] response = new char[68];		  
+      from_peer_.read(response);
+      System.arraycopy(response, 28, responseHash, 0, 20);
+      String c = new String(responseHash);
+      byteResponseHash = c.getBytes();
+      for(int i=0; i<20; i++){
+        if(byteResponseHash[i] != _hash[i]){
+          return false;
+        }
+      }
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+    return true;
 	}
 	
 	public void sendKeepAlive(){
