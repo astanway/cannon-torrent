@@ -45,7 +45,13 @@ public class CannonClient {
             peer.establishStreams();
             peer.sendHandshake(PEER_ID, INFO_HASH);
             if(peer.receiveHandshake(INFO_HASH)){
-             System.out.println("happy days!"); 
+
+             //TODO: do we want what they have?
+             peer.sendInterested();
+
+             //listen for the unchoke message
+             while(true){ if(peer.listenForUnchoke()){ break; }}
+             
             }
           }
         }

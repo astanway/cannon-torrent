@@ -103,7 +103,20 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+    System.out.println("Handshake verified");
     return true;
+	}
+	
+	public boolean listenForUnchoke(){
+    try{
+      if(from_peer_.read() == 1 && from_peer_.read() == 1){
+        System.out.println("Unchoked");
+        return true;
+      }
+    }catch(Exception e){
+  		e.printStackTrace();
+  	}
+  	return false;
 	}
 	
 	public void sendKeepAlive(){
