@@ -119,6 +119,14 @@ public class Peer {
   	return false;
 	}
 	
+	public void listenForPiece(){
+	  try{
+	    System.out.println(from_peer_.read());
+	  }catch(Exception e){
+      e.printStackTrace();
+    }
+	}
+	
 	public void sendKeepAlive(){
 		byte out_bytes_[] = new byte[4];
 		try{

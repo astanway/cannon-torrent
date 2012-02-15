@@ -52,6 +52,9 @@ public class CannonClient {
              //listen for the unchoke message
              while(true){ if(peer.listenForUnchoke()){ break; }}
              
+             //start downloading!
+             peer.sendRequest(0, 0, 16384);
+             while(true){ peer.listenForPiece(); }
             }
           }
         }
