@@ -16,6 +16,7 @@ public class CannonClient {
 	public static byte[] INFO_HASH = new byte[20];
 	public static TorrentInfo TORRENT_INFO;
 	public static RandomAccessFile file = null;
+	public static int BLOCK_LENGTH = 16384;
 	
 	public static void main(String[] args) {
 
@@ -34,7 +35,7 @@ public class CannonClient {
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
 			numLeft = numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
   		leftoverBytes = TORRENT_INFO.file_length % TORRENT_INFO.piece_length;
-  		blocksPerPiece = TORRENT_INFO.piece_length / 16384;
+  		blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
   		havePiece = new boolean[numPieces];
   		file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
@@ -68,17 +69,18 @@ public class CannonClient {
 							  byte[] piece = new byte[TORRENT_INFO.piece_length];
 							  
 								for(int k=0; k<blocksPerPiece; k++){
-									peer.sendRequest(j,k,16384);
-									byte[] pieceBytes = new byte[16384];
+								  System.out.print("Block " + k + " :\n");
+									peer.sendRequest(j, k, BLOCK_LENGTH);
+									byte[] pieceBytes = new byte[BLOCK_LENGTH];
 									peer.from_peer_.read(pieceBytes);
 									Helpers.printBytes(pieceBytes);
-									System.arraycopy(pieceBytes, 0, piece, 16384*k, 16384);									
+									System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, BLOCK_LENGTH);									
 								}
 								
 								byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
 								Helpers.verifyHash(piece, pieceHash);
 								System.out.print("Piece " + j + " :\n");
-								Helpers.printBytes(piece);
+                // Helpers.printBytes(piece);
 								file.write(piece);
 							}
 						}
