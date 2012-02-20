@@ -65,15 +65,22 @@ public class CannonClient {
 
 							//start downloading!
 							for(int j=0; j<numPieces; j++){
+							  byte[] piece = new byte[TORRENT_INFO.piece_length];
+							  
 								for(int k=0; k<blocksPerPiece; k++){
 									peer.sendRequest(j,k,16384);
-									//Need to figure out how to do this efficiently
-                  // file.write(peer.from_peer_.read(b), off, len);
+									byte[] pieceBytes = new byte[16384];
+									peer.from_peer_.read(pieceBytes);
+									Helpers.printBytes(pieceBytes);
+									System.arraycopy(pieceBytes, 0, piece, 16384*k, 16384);									
 								}
+								
+								byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+								Helpers.verifyHash(piece, pieceHash);
+								System.out.print("Piece " + j + " :\n");
+								Helpers.printBytes(piece);
+								file.write(piece);
 							}
-							peer.sendRequest(0, 0, 16384);
-							
-							while(true){ peer.listenForPiece(); }
 						}
 					}
 				}
@@ -125,7 +132,8 @@ public class CannonClient {
 						peer_id_ = Helpers.bufferToString((ByteBuffer)value);
 					}
 					if (key.compareTo("port") == 0){
-	//TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
+	          
+	          //TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
 						port_ = (Integer)value;
 					}
 				}

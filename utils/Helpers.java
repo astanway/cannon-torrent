@@ -2,9 +2,23 @@ package utils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.security.MessageDigest;
 
 public final class Helpers 
 {
+  public static void verifyHash(byte[] piece, byte[] pieceHash){
+    try{
+      MessageDigest digest = MessageDigest.getInstance("SHA-1");
+      if (Arrays.equals(digest.digest(piece), pieceHash)){
+        throw new Exception ("Piece hash does not match");
+      } 
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+  }
+  
+  
   public static String bufferToString(ByteBuffer buffer)
   {
     byte[] bufferBytes = new byte[buffer.capacity()];

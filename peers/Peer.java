@@ -121,13 +121,6 @@ public class Peer {
 		return false;
 	}
 
-	public void listenForPiece(){
-		try{
-      // System.out.println(from_peer_.read());
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
 
 	public void sendKeepAlive(){
 		byte out_bytes_[] = new byte[4];
@@ -167,7 +160,7 @@ public class Peer {
 		out_bytes_.putInt(_length);
 		byte write_out_[] = out_bytes_.array();
 		try{
-      // to_peer_.write(write_out_);
+      to_peer_.write(write_out_);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
