@@ -19,10 +19,10 @@ public class Peer {
 	public DataOutputStream to_peer_ = null;
 	public DataInputStream from_peer_ = null;	
 	
-	public static final int CHOKE         = 0x01;
-	public static final int INTERESTED    = 0x02;
-	public static final int UNINTERESTED  = 0x03;
-	public static final int HAVE          = 0x04;
+	public static final byte CHOKE         = 0x01;
+	public static final byte INTERESTED    = 0x02;
+	public static final byte UNINTERESTED  = 0x03;
+	public static final byte HAVE          = 0x04;
 
 	public Peer(String _peer_id, String _ip, int _port){
 		this.peer_id_ = _peer_id;
@@ -140,7 +140,8 @@ public class Peer {
 
 	public void sendMessage(byte _byte){
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(5);
-
+    
+    //4-byte big endian?
 		if (_byte == this.HAVE){
 		  out_bytes_.putInt(5);
 		} else {

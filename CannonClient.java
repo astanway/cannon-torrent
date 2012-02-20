@@ -22,7 +22,7 @@ public class CannonClient {
 		String torrentFile = args[0];
 		String savedFile = args[1];
 		int numPieces = 0;
-		int numLeft =0;
+		int numLeft = 0;
 		int leftoverBytes =0;
 		int blocksPerPiece = 0;
 		boolean havePiece[] = null;
@@ -37,13 +37,14 @@ public class CannonClient {
 			System.out.println("Torrent could not be loaded.");
 		}
 		
-		numPieces = TORRENT_INFO.file_length/TORRENT_INFO.piece_length + 1;
+		numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
 		numLeft = numPieces;
-		leftoverBytes = TORRENT_INFO.file_length%TORRENT_INFO.piece_length;
-		blocksPerPiece = TORRENT_INFO.piece_length/16384;
+		leftoverBytes = TORRENT_INFO.file_length % TORRENT_INFO.piece_length;
+		blocksPerPiece = TORRENT_INFO.piece_length / 16384;
+		ToolKit.print(TORRENT_INFO.piece_hashes);
 		havePiece = new boolean[numPieces+1];
 		try{
-		file = new RandomAccessFile(savedFile,"rws");
+		  file = new RandomAccessFile(savedFile,"rws");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -73,8 +74,8 @@ public class CannonClient {
 							while(true){ if(peer.listenForUnchoke()){ break; }}
 
 							//start downloading!
-							for(int j = 0;j<numPieces;j++){
-								for(int k = 0;k<blocksPerPiece;k++){
+							for(int j=0; j<numPieces; j++){
+								for(int k=0; k<blocksPerPiece; k++){
 									peer.sendRequest(j,k,16384);
 									//Need to figure out how to do this efficiently
                   // file.write(peer.from_peer_.read(b), off, len);
