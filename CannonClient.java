@@ -23,7 +23,7 @@ public class CannonClient {
 		String savedFile = args[1];
 		int numPieces = 0;
 		int numLeft = 0;
-		int leftoverBytes =0;
+		int leftoverBytes = 0;
 		int blocksPerPiece = 0;
 		boolean havePiece[] = null;
 		setPeerId();
@@ -32,27 +32,17 @@ public class CannonClient {
 		try{
 			TORRENT_INFO = new TorrentInfo(readTorrent(torrentFile));
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
+			numLeft = numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
+  		leftoverBytes = TORRENT_INFO.file_length % TORRENT_INFO.piece_length;
+  		blocksPerPiece = TORRENT_INFO.piece_length / 16384;
+  		havePiece = new boolean[numPieces];
+  		file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
 			e.printStackTrace();
 			System.out.println("Torrent could not be loaded.");
 		}
-		
-		numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
-		numLeft = numPieces;
-		leftoverBytes = TORRENT_INFO.file_length % TORRENT_INFO.piece_length;
-		blocksPerPiece = TORRENT_INFO.piece_length / 16384;
-		ToolKit.print(TORRENT_INFO.piece_hashes);
-		havePiece = new boolean[numPieces+1];
-		try{
-		  file = new RandomAccessFile(savedFile,"rws");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-		
 
 		//query tracker
-		//TODO: write a loop that cycles through ports
 		for (int i=6881; i<=6889;){
 			try{
 				String url = constructQuery(i, 0, 0, TORRENT_INFO.file_length); 
