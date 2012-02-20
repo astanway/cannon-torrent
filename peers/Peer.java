@@ -18,6 +18,11 @@ public class Peer {
 	public Socket socket_= null;
 	public DataOutputStream to_peer_ = null;
 	public DataInputStream from_peer_ = null;	
+	
+	public static final int CHOKE         = 0x01;
+	public static final int INTERESTED    = 0x02;
+	public static final int UNINTERESTED  = 0x03;
+	public static final int HAVE          = 0x04;
 
 	public Peer(String _peer_id, String _ip, int _port){
 		this.peer_id_ = _peer_id;
@@ -93,7 +98,7 @@ public class Peer {
 			from_peer_.read(response);
 			System.arraycopy(response, 28, responseHash, 0, 20);
 			for(int i=0; i<20; i++){
-				if(responseHash[i]!=_hash[i]){
+				if(responseHash[i] != _hash[i]){
 					return false;
 				}
 			}
@@ -118,7 +123,7 @@ public class Peer {
 
 	public void listenForPiece(){
 		try{
-			System.out.println(from_peer_.read());
+      // System.out.println(from_peer_.read());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -133,9 +138,15 @@ public class Peer {
 		}
 	}
 
-	public void sendMessage(int _int,byte _byte){
+	public void sendMessage(byte _byte){
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(5);
-		out_bytes_.putInt(_int);
+
+		if (_byte == this.HAVE){
+		  out_bytes_.putInt(5);
+		} else {
+		  out_bytes_.putInt(1);
+		}
+		
 		out_bytes_.put(_byte);
 		byte write_out_[] = out_bytes_.array();
 		try{
@@ -155,7 +166,7 @@ public class Peer {
 		out_bytes_.putInt(_length);
 		byte write_out_[] = out_bytes_.array();
 		try{
-			to_peer_.write(write_out_);
+      // to_peer_.write(write_out_);
 		}catch(Exception e){
 			e.printStackTrace();
 		}

@@ -15,8 +15,8 @@ public class CannonClient {
 	public static byte[] PEER_ID = new byte[20];
 	public static byte[] INFO_HASH = new byte[20];
 	public static TorrentInfo TORRENT_INFO;
-	public static RandomAccessFile file= null;
-
+	public static RandomAccessFile file = null;
+	
 	public static void main(String[] args) {
 
 		String torrentFile = args[0];
@@ -67,9 +67,7 @@ public class CannonClient {
 
 							//TODO: do we want what they have?
 							//Sends interested message
-							int temp1 = 1;
-							byte temp2 = 0x02;
-							peer.sendMessage(temp1, temp2);
+							peer.sendMessage(Peer.INTERESTED);
 
 							//listen for the unchoke message
 							while(true){ if(peer.listenForUnchoke()){ break; }}
@@ -79,10 +77,11 @@ public class CannonClient {
 								for(int k = 0;k<blocksPerPiece;k++){
 									peer.sendRequest(j,k,16384);
 									//Need to figure out how to do this efficiently
-									//file.write(peer.from_peer_.read(b), off, len)
+                  // file.write(peer.from_peer_.read(b), off, len);
 								}
 							}
 							peer.sendRequest(0, 0, 16384);
+							
 							while(true){ peer.listenForPiece(); }
 						}
 					}
@@ -103,7 +102,7 @@ public class CannonClient {
 		try{
 			//decode the response and slap it in an array for perusal
 			Object decodedResponse = Bencoder2.decode(response);
-			// ToolKit.print(decodedResponse, 1);
+      ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			Object[] responseArray = responseMap.values().toArray();
