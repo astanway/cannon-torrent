@@ -17,7 +17,7 @@ public class CannonClient {
 	public static TorrentInfo TORRENT_INFO;
 	public static RandomAccessFile file = null;
 	public static int BLOCK_LENGTH = 16384;
-	
+
 	public static void main(String[] args) {
 
 		String torrentFile = args[0];
@@ -28,16 +28,17 @@ public class CannonClient {
 		int blocksPerPiece = 0;
 		boolean havePiece[] = null;
 		setPeerId();
+		boolean lastBlock = false;
 
 		//set up the torrent info
 		try{
 			TORRENT_INFO = new TorrentInfo(readTorrent(torrentFile));
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
 			numLeft = numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
-  		leftoverBytes = TORRENT_INFO.file_length % TORRENT_INFO.piece_length;
-  		blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
-  		havePiece = new boolean[numPieces];
-  		file = new RandomAccessFile(savedFile,"rws");
+			leftoverBytes = TORRENT_INFO.file_length % BLOCK_LENGTH;
+			blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
+			havePiece = new boolean[numPieces];
+			file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
 			e.printStackTrace();
 			System.out.println("Torrent could not be loaded.");
@@ -66,29 +67,39 @@ public class CannonClient {
 
 							//start downloading!
 							for(int j=0; j<numPieces; j++){
-                System.out.print("Piece " + j + " :\n");
+								System.out.print("Piece " + j + " :\n");
 								byte[] piece;
-								if (j == numPieces){
-								  piece = new byte[leftoverBytes];
+								if (j == numPieces-1){
+									piece = new byte[leftoverBytes+BLOCK_LENGTH];
 								} else {
-								  piece = new byte[TORRENT_INFO.piece_length];
+									piece = new byte[TORRENT_INFO.piece_length];
 								}
-							  
+								System.out.println("piece size " + piece.length);
+
 								for(int k=0; k<blocksPerPiece; k++){
-                  System.out.print("Block " + k + " :\n");
-									peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
-									byte[] pieceBytes = new byte[BLOCK_LENGTH];
+									System.out.print("Block " + k + " :\n");
+									if(j==numPieces-1&&k==blocksPerPiece-1){
+										peer.sendRequest(j, k*BLOCK_LENGTH,leftoverBytes);
+										lastBlock = true;
+									}
+									else{
+										peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
+									}
+									byte[] pieceBytes = null;
+									if(lastBlock){pieceBytes = new byte[leftoverBytes];}
+									else{ pieceBytes = new byte[BLOCK_LENGTH];}
+									System.out.println(pieceBytes.length);
 									try{
-									  peer.from_peer_.readFully(pieceBytes);  
-									  System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, BLOCK_LENGTH);
-									  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-    								Helpers.verifyHash(piece, pieceHash);
-                    Helpers.printBytes(pieceBytes);
+										peer.from_peer_.readFully(pieceBytes);  
+										System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
+										byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+										Helpers.verifyHash(piece, pieceHash);
+										//Helpers.printBytes(pieceBytes);
 									} catch (Exception e){
-									  System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, leftoverBytes % BLOCK_LENGTH);
-									  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-    								Helpers.verifyHash(piece, pieceHash);
-                    Helpers.printBytes(pieceBytes);
+										System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, leftoverBytes % BLOCK_LENGTH);
+										byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+										Helpers.verifyHash(piece, pieceHash);
+										//Helpers.printBytes(pieceBytes);
 									}
 								}
 								file.write(piece);
@@ -112,7 +123,7 @@ public class CannonClient {
 		try{
 			//decode the response and slap it in an array for perusal
 			Object decodedResponse = Bencoder2.decode(response);
-      // ToolKit.print(decodedResponse, 1);
+			// ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			Object[] responseArray = responseMap.values().toArray();
@@ -144,8 +155,8 @@ public class CannonClient {
 						peer_id_ = Helpers.bufferToString((ByteBuffer)value);
 					}
 					if (key.compareTo("port") == 0){
-	          
-	          //TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
+
+						//TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
 						port_ = (Integer)value;
 					}
 				}
@@ -168,13 +179,13 @@ public class CannonClient {
 			String escaped_hash = Helpers.toURLHex(INFO_HASH);
 			String ip = "128.6.5.130";
 			url_string =  TORRENT_INFO.announce_url.toString()
-			+ "?port=" + port
-			+ "&peer_id=" + PEER_ID
-			+ "&info_hash=" + escaped_hash 
-			+ "&uploaded=" + uploaded
-			+ "&downloaded=" + downloaded
-			+ "&left=" + left
-			+ "&ip=" +  ip;
+					+ "?port=" + port
+					+ "&peer_id=" + PEER_ID
+					+ "&info_hash=" + escaped_hash 
+					+ "&uploaded=" + uploaded
+					+ "&downloaded=" + downloaded
+					+ "&left=" + left
+					+ "&ip=" +  ip;
 
 		} catch (Exception e){
 			System.out.println(e);
