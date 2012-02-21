@@ -66,27 +66,37 @@ public class CannonClient {
 
 							//start downloading!
 							for(int j=0; j<numPieces; j++){
-							  byte[] piece = new byte[TORRENT_INFO.piece_length];
+                System.out.print("Piece " + j + " :\n");
+								byte[] piece;
+								if (j == numPieces){
+								  piece = new byte[leftoverBytes];
+								} else {
+								  piece = new byte[TORRENT_INFO.piece_length];
+								}
 							  
 								for(int k=0; k<blocksPerPiece; k++){
-								  System.out.print("Block " + k + " :\n");
-									peer.sendRequest(j, k, BLOCK_LENGTH);
+                  System.out.print("Block " + k + " :\n");
+									peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
 									byte[] pieceBytes = new byte[BLOCK_LENGTH];
-									peer.from_peer_.read(pieceBytes);
-									Helpers.printBytes(pieceBytes);
-									System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, BLOCK_LENGTH);									
+									try{
+									  peer.from_peer_.readFully(pieceBytes);  
+									  System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, BLOCK_LENGTH);
+									  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+    								Helpers.verifyHash(piece, pieceHash);
+                    Helpers.printBytes(pieceBytes);
+									} catch (Exception e){
+									  System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, leftoverBytes % BLOCK_LENGTH);
+									  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+    								Helpers.verifyHash(piece, pieceHash);
+                    Helpers.printBytes(pieceBytes);
+									}
 								}
-								
-								byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-								Helpers.verifyHash(piece, pieceHash);
-								System.out.print("Piece " + j + " :\n");
-                // Helpers.printBytes(piece);
 								file.write(piece);
 							}
 						}
 					}
 				}
-
+				System.exit(1);
 				break;
 			} catch (Exception e){
 				e.printStackTrace();
@@ -102,7 +112,7 @@ public class CannonClient {
 		try{
 			//decode the response and slap it in an array for perusal
 			Object decodedResponse = Bencoder2.decode(response);
-      ToolKit.print(decodedResponse, 1);
+      // ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			Object[] responseArray = responseMap.values().toArray();
