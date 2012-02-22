@@ -88,7 +88,13 @@ public class CannonClient {
 										pieceBytes = new byte[BLOCK_LENGTH];
 									}
 									
+									int prefix = peer.from_peer_.readInt();
+                  byte id = peer.from_peer_.readByte();
+                  int index = peer.from_peer_.readInt();
+                  int begin = peer.from_peer_.readInt();
+                  
 									System.out.println(pieceBytes.length);
+									
 									try{
 										peer.from_peer_.readFully(pieceBytes);  
 										System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
