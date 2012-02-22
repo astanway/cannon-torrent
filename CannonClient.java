@@ -12,32 +12,24 @@ import peers.Peer;
 
 public class CannonClient {
 
-	public static byte[] PEER_ID = new byte[20];
-	public static byte[] INFO_HASH = new byte[20];
-	public static TorrentInfo TORRENT_INFO;
-	public static RandomAccessFile file = null;
-	public static int BLOCK_LENGTH = 16384;
+	public static byte[] PEER_ID             = new byte[20];
+	public static byte[] INFO_HASH           = new byte[20];
+	public static TorrentInfo TORRENT_INFO   = null;
+	public static RandomAccessFile file      = null;
+	public static int BLOCK_LENGTH           = 16384;
+	public static boolean[] HAVE_PIECE       = null;
 
 	public static void main(String[] args) {
 
-		String torrentFile = args[0];
-		String savedFile = args[1];
-		int numPieces = 0;
-		int numLeft = 0;
-		int leftoverBytes = 0;
-		int blocksPerPiece = 0;
-		boolean havePiece[] = null;
+		String torrentFile   = args[0];
+		String savedFile     = args[1];
+		
 		setPeerId();
-		boolean lastBlock = false;
 
 		//set up the torrent info
 		try{
 			TORRENT_INFO = new TorrentInfo(readTorrent(torrentFile));
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
-			numLeft = numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
-			leftoverBytes = TORRENT_INFO.file_length % BLOCK_LENGTH;
-			blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
-			havePiece = new boolean[numPieces];
 			file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
 			e.printStackTrace();
@@ -45,82 +37,100 @@ public class CannonClient {
 		}
 
 		//query tracker
+		byte[] response = null;
 		for (int i=6881; i<=6889;){
 			try{
-				String url = constructQuery(i, 0, 0, TORRENT_INFO.file_length); 
-				byte[] response = getURL(url);
-				ArrayList<Peer> peerList = getPeers(response);
-				for(Peer peer : peerList){
-					if (peer.isValid()){
-						System.out.println("Peer Found");
-						peer.createSocket(peer.ip_, peer.port_);
-						peer.establishStreams();
-						peer.sendHandshake(PEER_ID, INFO_HASH);
-						if(peer.receiveHandshake(INFO_HASH)){
-
-							//TODO: do we want what they have?
-							//Sends interested message
-							peer.sendMessage(Peer.INTERESTED);
-
-							//listen for the unchoke message
-							while(true){ if(peer.listenForUnchoke()){ break; }}
-
-							//start downloading!
-							for(int j=0; j<numPieces; j++){
-								System.out.print("Piece " + j + " :\n");
-								byte[] piece;
-								if (j == numPieces-1){
-									piece = new byte[leftoverBytes + BLOCK_LENGTH];
-								} else {
-									piece = new byte[TORRENT_INFO.piece_length];
-								}
-
-								System.out.println("piece size " + piece.length);
-
-								for(int k=0; k<blocksPerPiece; k++){
-									System.out.print("Block " + k + " :\n");
-									byte[] pieceBytes = null;
-									
-									if(j == numPieces - 1 && k == blocksPerPiece - 1){
-										peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
-										pieceBytes = new byte[leftoverBytes];
-									}
-									else{
-										peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
-										pieceBytes = new byte[BLOCK_LENGTH];
-									}
-                  
-                  //verify the piece before we play with it
-                  peer.from_peer_.mark(pieceBytes.length + 13);
-                  byte[] toVerify = new byte[pieceBytes.length + 13];
-                  peer.from_peer_.readFully(toVerify);
-                  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-									Helpers.verifyHash(toVerify, pieceHash);
-                  peer.from_peer_.reset();
-                  
-                  //TODO: make sure all the headers check out
-                  int prefix = peer.from_peer_.readInt();
-                  byte id = peer.from_peer_.readByte();
-                  int index = peer.from_peer_.readInt();
-                  int begin = peer.from_peer_.readInt();
-									
-									//cop dat data
-									peer.from_peer_.readFully(pieceBytes);
-									System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
-								}
-								file.write(piece);
-							}
-							System.out.println("done with that idiot");
-						}
-					}
-				}
-				System.exit(1);
-				break;
+			  response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length));  
+			  break;
 			} catch (Exception e){
-				e.printStackTrace();
-				System.out.println("Port " + i + " failed."); 
-				i++;
+			  System.out.println("Port " + i + "failed");
+			  i++;
+			  continue;
 			}
+		}
+				
+		ArrayList<Peer> peerList = getPeers(response);
+  	for(Peer peer : peerList){
+  		if (peer.isValid()){
+				System.out.println("Peer Found");
+				peer.createSocket(peer.ip_, peer.port_);
+				peer.establishStreams();
+				peer.sendHandshake(PEER_ID, INFO_HASH);
+  			if(peer.receiveHandshake(INFO_HASH)){
+  			  
+  				//TODO: do we want what they have?
+  				peer.sendMessage(Peer.INTERESTED);
+
+  				//listen for the unchoke message
+  				while(true){ if(peer.listenForUnchoke()){ break; }}
+				
+  				//start downloading!
+  				download(peer);
+  				System.out.println("done with that idiot");
+  			}
+			}
+		}
+	}
+	
+	public static void download (Peer peer){
+	  int numPieces        = 0;
+		int numLeft          = 0;
+		int leftoverBytes    = 0;
+		int blocksPerPiece   = 0;
+		
+	  numLeft = numPieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length + 1;
+		leftoverBytes = TORRENT_INFO.file_length % BLOCK_LENGTH;
+		blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
+		HAVE_PIECE = new boolean[numPieces];
+	  
+	  try{
+  	  for(int j=0; j<numPieces; j++){
+  			System.out.print("Piece " + j + " :\n");
+  			byte[] piece;
+  			if (j == numPieces-1){
+  				piece = new byte[leftoverBytes + BLOCK_LENGTH];
+  			} else {
+  				piece = new byte[TORRENT_INFO.piece_length];
+  			}
+
+  			System.out.println("piece size " + piece.length);
+
+  			for(int k=0; k<blocksPerPiece; k++){
+  				System.out.print("Block " + k + " :\n");
+  				byte[] pieceBytes = null;
+				
+  				if(j == numPieces - 1 && k == blocksPerPiece - 1){
+  					peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
+  					pieceBytes = new byte[leftoverBytes];
+  				}
+  				else{
+  					peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
+  					pieceBytes = new byte[BLOCK_LENGTH];
+  				}
+        
+          //verify the piece before we play with it
+          peer.from_peer_.mark(pieceBytes.length + 13);
+          byte[] toVerify = new byte[pieceBytes.length + 13];
+          peer.from_peer_.readFully(toVerify);
+          byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+  				Helpers.verifyHash(toVerify, pieceHash);
+          peer.from_peer_.reset();
+        
+          //TODO: make sure all the headers check out
+          int prefix = peer.from_peer_.readInt();
+          byte id = peer.from_peer_.readByte();
+          int index = peer.from_peer_.readInt();
+          int begin = peer.from_peer_.readInt();
+				
+  				//cop dat data
+  				peer.from_peer_.readFully(pieceBytes);
+  				System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
+  			}
+  			file.write(piece);
+  			HAVE_PIECE[j] = true;
+  		}
+		} catch (Exception e){
+		  System.out.println("Download failure for peer " + peer.peer_id_);
 		}
 	}
 
@@ -162,7 +172,6 @@ public class CannonClient {
 						peer_id_ = Helpers.bufferToString((ByteBuffer)value);
 					}
 					if (key.compareTo("port") == 0){
-
 						//TODO: this sometimes throws an error, for god knows why: java.nio.HeapByteBuffer cannot be cast to java.lang.Integer
 						port_ = (Integer)value;
 					}
@@ -239,6 +248,7 @@ public class CannonClient {
 			is.close();
 		}
 		catch (IOException e) {
+		  System.out.println("URL failure with: " + string_url);
 		}
 
 		return bais.toByteArray();
