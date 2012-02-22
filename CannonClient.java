@@ -138,18 +138,18 @@ public class CannonClient {
 	}
 	
 	public static void setProgress(double completed, double total) {
-	    final int width = 50; // progress bar width in chars
-      double prog = completed/total;
-      System.out.print("\r[");
-      int i = 0;
-      for (; i <= (int)(prog*width); i++) {
-        System.out.print("=");
-      }
-      System.out.print(">");
-      for (; i < width; i++) {
-        System.out.print(" ");
-      }
-      System.out.print("] " + prog*100 + "%");
+    int width = 50;
+    double prog = completed/total;
+    System.out.print("\r[");
+    int i = 0;
+    for (; i <= (int)(prog*width); i++) {
+      System.out.print("=");
+    }
+    System.out.print(">");
+    for (; i < width; i++) {
+      System.out.print(" ");
+    }
+    System.out.print("] " + prog*100 + "%");
   }
 
 	public static ArrayList<Peer> getPeers(byte[] response){
