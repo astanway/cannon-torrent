@@ -12,7 +12,8 @@ public final class Helpers
       MessageDigest digest = MessageDigest.getInstance("SHA-1");
       if (Arrays.equals(digest.digest(piece), pieceHash)){
         throw new Exception ("Piece hash does not match");
-      } 
+      }
+      System.out.println("Piece seems legit.");
     } catch (Exception e){
       e.printStackTrace();
     }
