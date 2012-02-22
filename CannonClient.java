@@ -80,6 +80,7 @@ public class CannonClient {
 								for(int k=0; k<blocksPerPiece; k++){
 									System.out.print("Block " + k + " :\n");
 									byte[] pieceBytes = null;
+									
 									if(j == numPieces - 1 && k == blocksPerPiece - 1){
 										peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
 										pieceBytes = new byte[leftoverBytes];
@@ -90,8 +91,8 @@ public class CannonClient {
 									}
                   
                   //verify the piece before we play with it
-                  peer.from_peer_.mark(BLOCK_LENGTH + 13);
-                  byte[] toVerify = new byte[BLOCK_LENGTH + 13];
+                  peer.from_peer_.mark(pieceBytes.length + 13);
+                  byte[] toVerify = new byte[pieceBytes.length + 13];
                   peer.from_peer_.readFully(toVerify);
                   byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
 									Helpers.verifyHash(toVerify, pieceHash);
@@ -109,6 +110,7 @@ public class CannonClient {
 								}
 								file.write(piece);
 							}
+							System.out.println("done with that idiot");
 						}
 					}
 				}
