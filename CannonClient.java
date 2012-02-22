@@ -1,4 +1,4 @@
-import java.io.*;
+  import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -78,16 +78,16 @@ public class CannonClient {
 
 								for(int k=0; k<blocksPerPiece; k++){
 									System.out.print("Block " + k + " :\n");
-									if(j==numPieces-1&&k==blocksPerPiece-1){
-										peer.sendRequest(j, k*BLOCK_LENGTH,leftoverBytes);
-										lastBlock = true;
+									byte[] pieceBytes = null;
+									if(j == numPieces - 1 && k == blocksPerPiece - 1){
+										peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
+										pieceBytes = new byte[leftoverBytes];
 									}
 									else{
 										peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
+										pieceBytes = new byte[BLOCK_LENGTH];
 									}
-									byte[] pieceBytes = null;
-									if(lastBlock){pieceBytes = new byte[leftoverBytes];}
-									else{ pieceBytes = new byte[BLOCK_LENGTH];}
+									
 									System.out.println(pieceBytes.length);
 									try{
 										peer.from_peer_.readFully(pieceBytes);  
