@@ -11,11 +11,10 @@ public final class Helpers
     try{
       MessageDigest digest = MessageDigest.getInstance("SHA-1");
       if (Arrays.equals(digest.digest(piece), pieceHash)){
-        throw new Exception ("Piece hash does not match");
+        throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
       }
-      System.out.println("Piece seems legit.");
     } catch (Exception e){
-      e.printStackTrace();
+      System.exit(1);
     }
   }
   

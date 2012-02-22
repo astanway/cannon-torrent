@@ -71,10 +71,10 @@ public class CannonClient {
 				
   				//start downloading!
   				download(peer);
-  				System.out.println("done with that idiot");
   			}
 			}
 		}
+		System.out.println("\nFile finished.");
 	}
 	
 	public static void download (Peer peer){
@@ -87,10 +87,10 @@ public class CannonClient {
 		leftoverBytes = TORRENT_INFO.file_length % BLOCK_LENGTH;
 		blocksPerPiece = TORRENT_INFO.piece_length / BLOCK_LENGTH;
 		HAVE_PIECE = new boolean[numPieces];
-	  
+	  double downloaded = 0;
+	  System.out.print("=>");
 	  try{
   	  for(int j=0; j<numPieces; j++){
-  			System.out.print("Piece " + j + " :\n");
   			byte[] piece;
   			if (j == numPieces-1){
   				piece = new byte[leftoverBytes + BLOCK_LENGTH];
@@ -98,10 +98,7 @@ public class CannonClient {
   				piece = new byte[TORRENT_INFO.piece_length];
   			}
 
-  			System.out.println("piece size " + piece.length);
-
   			for(int k=0; k<blocksPerPiece; k++){
-  				System.out.print("Block " + k + " :\n");
   				byte[] pieceBytes = null;
 				
   				if(j == numPieces - 1 && k == blocksPerPiece - 1){
@@ -130,6 +127,7 @@ public class CannonClient {
   				//cop dat data
   				peer.from_peer_.readFully(pieceBytes);
   				System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
+          setProgress(++downloaded, numPieces*blocksPerPiece);
   			}
   			file.write(piece);
   			HAVE_PIECE[j] = true;
@@ -138,6 +136,21 @@ public class CannonClient {
 		  System.out.println("Download failure for peer " + peer.peer_id_);
 		}
 	}
+	
+	public static void setProgress(double completed, double total) {
+	    final int width = 50; // progress bar width in chars
+      double prog = completed/total;
+      System.out.print("\r[");
+      int i = 0;
+      for (; i <= (int)(prog*width); i++) {
+        System.out.print("=");
+      }
+      System.out.print(">");
+      for (; i < width; i++) {
+        System.out.print(" ");
+      }
+      System.out.print("] " + prog*100 + "%");
+  }
 
 	public static ArrayList<Peer> getPeers(byte[] response){
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
