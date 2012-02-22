@@ -3,6 +3,7 @@ package peers;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -56,7 +57,7 @@ public class Peer {
 	public boolean establishStreams(){
 		try{
 			to_peer_ = new DataOutputStream(socket_.getOutputStream());
-			from_peer_ = new DataInputStream(socket_.getInputStream());
+			from_peer_ = new DataInputStream(new BufferedInputStream(socket_.getInputStream()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}

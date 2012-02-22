@@ -1,4 +1,4 @@
-  import java.io.*;
+import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -82,25 +82,30 @@ public class CannonClient {
 									byte[] pieceBytes = null;
 									if(j == numPieces - 1 && k == blocksPerPiece - 1){
 										peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
-										pieceBytes = new byte[leftoverBytes + 13];
+										pieceBytes = new byte[leftoverBytes];
 									}
 									else{
 										peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
-										pieceBytes = new byte[BLOCK_LENGTH + 13];
+										pieceBytes = new byte[BLOCK_LENGTH];
 									}
-
-                  // int prefix = peer.from_peer_.readInt();
-                  // byte id = peer.from_peer_.readByte();
-                  // int index = peer.from_peer_.readInt();
-                  // int begin = peer.from_peer_.readInt();
                   
-                  //this stores all the header bytes in pieceBytes, which can then be checked later for lulz.
+                  //verify the piece before we play with it
+                  peer.from_peer_.mark(BLOCK_LENGTH + 13);
+                  byte[] toVerify = new byte[BLOCK_LENGTH + 13];
+                  peer.from_peer_.readFully(toVerify);
+                  byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+									Helpers.verifyHash(toVerify, pieceHash);
+                  peer.from_peer_.reset();
+                  
+                  //TODO: make sure all the headers check out
+                  int prefix = peer.from_peer_.readInt();
+                  byte id = peer.from_peer_.readByte();
+                  int index = peer.from_peer_.readInt();
+                  int begin = peer.from_peer_.readInt();
+									
+									//cop dat data
 									peer.from_peer_.readFully(pieceBytes);
-									System.arraycopy(pieceBytes, 13, piece, BLOCK_LENGTH*k, pieceBytes.length - 14);
-									byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-									Helpers.verifyHash(piece, pieceHash);
-										//Helpers.printBytes(pieceBytes);
-
+									System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
 								}
 								file.write(piece);
 							}
