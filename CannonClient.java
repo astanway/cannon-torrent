@@ -70,10 +70,11 @@ public class CannonClient {
 								System.out.print("Piece " + j + " :\n");
 								byte[] piece;
 								if (j == numPieces-1){
-									piece = new byte[leftoverBytes+BLOCK_LENGTH];
+									piece = new byte[leftoverBytes + BLOCK_LENGTH];
 								} else {
 									piece = new byte[TORRENT_INFO.piece_length];
 								}
+
 								System.out.println("piece size " + piece.length);
 
 								for(int k=0; k<blocksPerPiece; k++){
@@ -81,32 +82,25 @@ public class CannonClient {
 									byte[] pieceBytes = null;
 									if(j == numPieces - 1 && k == blocksPerPiece - 1){
 										peer.sendRequest(j, k*BLOCK_LENGTH, leftoverBytes);
-										pieceBytes = new byte[leftoverBytes];
+										pieceBytes = new byte[leftoverBytes + 13];
 									}
 									else{
 										peer.sendRequest(j, BLOCK_LENGTH*k, BLOCK_LENGTH);
-										pieceBytes = new byte[BLOCK_LENGTH];
+										pieceBytes = new byte[BLOCK_LENGTH + 13];
 									}
-									
-									int prefix = peer.from_peer_.readInt();
-                  byte id = peer.from_peer_.readByte();
-                  int index = peer.from_peer_.readInt();
-                  int begin = peer.from_peer_.readInt();
+
+                  // int prefix = peer.from_peer_.readInt();
+                  // byte id = peer.from_peer_.readByte();
+                  // int index = peer.from_peer_.readInt();
+                  // int begin = peer.from_peer_.readInt();
                   
-									System.out.println(pieceBytes.length);
-									
-									try{
-										peer.from_peer_.readFully(pieceBytes);  
-										System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
-										byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-										Helpers.verifyHash(piece, pieceHash);
+                  //this stores all the header bytes in pieceBytes, which can then be checked later for lulz.
+									peer.from_peer_.readFully(pieceBytes);
+									System.arraycopy(pieceBytes, 13, piece, BLOCK_LENGTH*k, pieceBytes.length - 14);
+									byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
+									Helpers.verifyHash(piece, pieceHash);
 										//Helpers.printBytes(pieceBytes);
-									} catch (Exception e){
-										System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, leftoverBytes % BLOCK_LENGTH);
-										byte[] pieceHash = TORRENT_INFO.piece_hashes[j].array();
-										Helpers.verifyHash(piece, pieceHash);
-										//Helpers.printBytes(pieceBytes);
-									}
+
 								}
 								file.write(piece);
 							}
