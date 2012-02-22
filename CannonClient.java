@@ -21,8 +21,13 @@ public class CannonClient {
 
 	public static void main(String[] args) {
 
-		String torrentFile   = args[0];
-		String savedFile     = args[1];
+		if (args.length < 2) {
+      System.out.println("USAGE: RUBTClient [torrent-file] [file-name]");
+      System.exit(1);      
+    }
+
+    String torrentFile = args[0];
+		String savedFile   = args[1];
 		
 		setPeerId();
 
@@ -32,8 +37,8 @@ public class CannonClient {
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
 			file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
-			e.printStackTrace();
-			System.out.println("Torrent could not be loaded.");
+			System.out.println("Torrent file could not be loaded.");
+			System.exit(1);
 		}
 
 		//query tracker
@@ -43,7 +48,7 @@ public class CannonClient {
 			  response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length));  
 			  break;
 			} catch (Exception e){
-			  System.out.println("Port " + i + "failed");
+			  System.out.println("Port " + i + " failed");
 			  i++;
 			  continue;
 			}
@@ -136,24 +141,18 @@ public class CannonClient {
 
 	public static ArrayList<Peer> getPeers(byte[] response){
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
-
 		try{
-			//decode the response and slap it in an array for perusal
 			Object decodedResponse = Bencoder2.decode(response);
 			// ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			Object[] responseArray = responseMap.values().toArray();
-
-			//the interval returned by the tracker
+			
 			int interval = (Integer)responseArray[0];
-
-			//the list of peers returned by the tracker
 			Object peers = responseArray[1];
-
+			
 			ArrayList<Object> peerArray = (ArrayList<Object>)peers;
-
-			//iterate through the list
+			
 			for (Object peer : peerArray){
 				String ip_ = "";
 				String peer_id_ = "";
@@ -176,7 +175,7 @@ public class CannonClient {
 						port_ = (Integer)value;
 					}
 				}
-				//add the fleshed out peer to the peerList
+
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 				peerList.add(newPeer);
 			}
@@ -187,11 +186,10 @@ public class CannonClient {
 		return peerList;
 	}
 
-	//construct the url for initially querying the tracker
+	//construct the url for tracker querying
 	public static String constructQuery(int port, int uploaded, int downloaded, int left){
 		String url_string = "";
 		try{
-
 			String escaped_hash = Helpers.toURLHex(INFO_HASH);
 			String ip = "128.6.5.130";
 			url_string =  TORRENT_INFO.announce_url.toString()
