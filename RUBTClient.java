@@ -19,10 +19,10 @@ public class RUBTClient {
 	public static int BLOCK_LENGTH           = 16384;
 	public static boolean[] HAVE_PIECE       = null;
 	
-	public final String STARTED   = "started"
-	public final String COMPLETED = "completed"
-	public final String STOPPED   = "stopped"
-	public final String EMPTY     = ""
+	public final String STARTED   = "started";
+	public final String COMPLETED = "completed";
+	public final String STOPPED   = "stopped";
+	public final String EMPTY     = "";
 
 	public static void main(String[] args) {
 
