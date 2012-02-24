@@ -29,9 +29,10 @@ public class RUBTClient {
 		String torrentFile = args[0];
 		String savedFile   = args[1];
 
+    //set our peer id
 		setPeerId();
-
-		//set up the torrent info
+    
+    //set up torrent info
 		try{
 			TORRENT_INFO = new TorrentInfo(readTorrent(torrentFile));
 			TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
@@ -43,9 +44,10 @@ public class RUBTClient {
 
 		//query tracker
 		byte[] response = null;
-		for (int i=6881; i<=6889;){
+		int i = 0;
+		for (i=6881; i<=6889;){
 			try{
-				response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length));  
+				response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length, "empty"));
 				break;
 			} catch (Exception e){
 				System.out.println("Port " + i + " failed");
@@ -53,7 +55,8 @@ public class RUBTClient {
 				continue;
 			}
 		}
-
+    
+    //loop through peers
 		ArrayList<Peer> peerList = getPeers(response);
 		for(Peer peer : peerList){
 			if (peer.isValid()){
@@ -62,21 +65,20 @@ public class RUBTClient {
 				peer.establishStreams();
 				peer.sendHandshake(PEER_ID, INFO_HASH);
 				if(peer.receiveHandshake(INFO_HASH)){
-
-					//TODO: do we want what they have?
+				  
 					peer.sendMessage(Peer.INTERESTED);
-
-					//listen for the unchoke message
+					
 					while(true){ if(peer.listenForUnchoke()){ break; }}
-
-					//start downloading!
+					
 					download(peer);
 					
-					//close socket
 					peer.closeSocket();
 				}
 			}
 		}
+
+		//announce that we've finished
+		response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, "stopped"));
 		System.out.println("\nFile finished.");
 	}
 
@@ -154,7 +156,7 @@ public class RUBTClient {
 		double prog = completed/total;
 		System.out.print("\r[");
 		int i = 0;
-		for (; i <= (int)(prog*width); i++) {
+		for (; i < prog*width; i++) {
 			System.out.print("=");
 		}
 		System.out.print(">");
@@ -222,9 +224,10 @@ public class RUBTClient {
 	 * @param uploaded		amount uploaded
 	 * @param downloaded	amount downloaded
 	 * @param left			  amount left
+ 	 * @param event		    event type
 	 * @return				    String to be sent as query
 	 */
-	public static String constructQuery(int port, int uploaded, int downloaded, int left){
+	public static String constructQuery(int port, int uploaded, int downloaded, int left, String event){
 		String url_string = "";
 		try{
 			String escaped_hash = Helpers.toURLHex(INFO_HASH);
@@ -236,7 +239,8 @@ public class RUBTClient {
 			+ "&uploaded=" + uploaded
 			+ "&downloaded=" + downloaded
 			+ "&left=" + left
-			+ "&ip=" +  ip;
+			+ "&ip=" +  ip
+      + "&event=" + event;
 
 		} catch (Exception e){
 			System.out.println(e);
@@ -278,7 +282,7 @@ public class RUBTClient {
 	 * @return byte[] of contents
 	 */
 	public static byte[] getURL(String string_url) {
-		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		InputStream is = null;
 		try {
 			URL url = new URL(string_url);
@@ -287,7 +291,7 @@ public class RUBTClient {
 			int n;
 
 			while ( (n = is.read(byteChunk)) > 0 ) {
-				bais.write(byteChunk, 0, n);
+				baos.write(byteChunk, 0, n);
 			}
 
 			is.close();
@@ -296,7 +300,7 @@ public class RUBTClient {
 			System.out.println("URL failure with: " + string_url);
 		}
 
-		return bais.toByteArray();
+		return baos.toByteArray();
 	}
 }
 
