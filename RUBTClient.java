@@ -18,6 +18,11 @@ public class RUBTClient {
 	public static RandomAccessFile file      = null;
 	public static int BLOCK_LENGTH           = 16384;
 	public static boolean[] HAVE_PIECE       = null;
+	
+	public final String STARTED   = "started"
+	public final String COMPLETED = "completed"
+	public final String STOPPED   = "stopped"
+	public final String EMPTY     = ""
 
 	public static void main(String[] args) {
 
@@ -47,7 +52,7 @@ public class RUBTClient {
 		int i = 0;
 		for (i=6881; i<=6889;){
 			try{
-				response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length, "empty"));
+				response = getURL(constructQuery(i, 0, 0, TORRENT_INFO.file_length, EMPTY));
 				break;
 			} catch (Exception e){
 				System.out.println("Port " + i + " failed");
@@ -70,15 +75,18 @@ public class RUBTClient {
 					
 					while(true){ if(peer.listenForUnchoke()){ break; }}
 					
-					download(peer);
+					response = getURL(constructQuery(i, TORRENT_INFO.file_length, 0, 0, STARTED));
 					
+					download(peer);
+
+		      response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, COMPLETED));
+
 					peer.closeSocket();
 				}
 			}
 		}
 
-		//announce that we've finished
-		response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, "stopped"));
+		response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, STOPPED));
 		System.out.println("\nFile finished.");
 	}
 
