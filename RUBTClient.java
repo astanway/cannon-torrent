@@ -147,7 +147,7 @@ public class RUBTClient {
 	/**
 	 * Used for the progress bar
 	 * @param completed	completed value
-	 * @param total		total value
+	 * @param total	  	total value
 	 */
 	public static void setProgress(double completed, double total) {
 		int width = 50;
@@ -167,7 +167,7 @@ public class RUBTClient {
 	/**
 	 * Gets the peer list from a response from the tracker
 	 * @param response	byte array response from 
-	 * @return			returns the array list of peers
+	 * @return			    returns the array list of peers
 	 */
 	public static ArrayList<Peer> getPeers(byte[] response){
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
@@ -218,11 +218,11 @@ public class RUBTClient {
 
 	/**
 	 * Construct the url for tracker querying
-	 * @param port			port to be used
+	 * @param port			  port to be used
 	 * @param uploaded		amount uploaded
 	 * @param downloaded	amount downloaded
-	 * @param left			amount left
-	 * @return				String to be sent as query
+	 * @param left			  amount left
+	 * @return				    String to be sent as query
 	 */
 	public static String constructQuery(int port, int uploaded, int downloaded, int left){
 		String url_string = "";
@@ -248,7 +248,7 @@ public class RUBTClient {
 	/**
 	 * Changes the torrentfile into a bytearray
 	 * @param torrentFile	the file to be read
-	 * @return				byte array from the file
+	 * @return byte array from the file
 	 */
 	public static byte[] readTorrent(String torrentFile) {
 		try {
@@ -275,7 +275,7 @@ public class RUBTClient {
 	/**
 	 * returns a byte[] consisting of the contents at the given url
 	 * @param string_url 	url to be queried
-	 * @return				byte[] of contents
+	 * @return byte[] of contents
 	 */
 	public static byte[] getURL(String string_url) {
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();

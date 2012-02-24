@@ -52,7 +52,8 @@ public class Peer {
 		return false;
 	}
 	
-	/** opens sockets for the peer on the given ip and port
+	/** 
+	 * opens sockets for the peer on the given ip and port
 	 * @param _ip ip to open socket
 	 * @param _port port to open the socket
 	 * @return true if they are opened, false otherwise
@@ -78,7 +79,8 @@ public class Peer {
 	}
 
 	
-	/** opens the streams of communication
+	/** 
+	 * opens the streams of communication
 	 * @return true of the peers are established, false otherwise
 	 */
 	public boolean establishStreams(){
@@ -95,7 +97,8 @@ public class Peer {
 	}
 
 
-	/** send our handshake message to the peer
+	/** 
+	 * send our handshake message to the peer
 	 * @param _our_peer_id our peer id to send in the handshake
 	 * @param _hash the has we got in the metainfo
 	 */
@@ -123,7 +126,8 @@ public class Peer {
 	}
 
 
-	/** receives the peers handshake message and verifies it
+	/** 
+	 * receives the peers handshake message and verifies it
 	 * @param _hash sha-1 hash to be verified with their handshake
 	 * @return true if handshake is good
 	 */
@@ -145,7 +149,8 @@ public class Peer {
 		return true;
 	}
 
-	/** blocks until unchoked
+	/** 
+	 * blocks until unchoked
 	 * @return returns true for unchoke message, blocks otherwise
 	 */
 	public boolean listenForUnchoke(){
@@ -173,7 +178,8 @@ public class Peer {
 		}
 	}
 
-	/** sends a message with the specified byte
+	/** 
+	 * sends a message with the specified byte
 	 * @param _byte byte to send
 	 */
 	public void sendMessage(byte _byte){
@@ -195,7 +201,8 @@ public class Peer {
 		}
 	}
 
-	/** Request piece call
+	/**  
+	 * Request piece call
 	 * @param _index piece number
 	 * @param _begin offset in byte array
 	 * @param _length length of requested byte array
@@ -217,7 +224,8 @@ public class Peer {
 	}
 
 
-	/** Sends Piece Message with data
+	/** 
+	 * Sends Piece Message with data
 	 * @param _index piece number
 	 * @param _begin offset in piece
 	 * @param _block data to be transferred
@@ -245,30 +253,35 @@ public class Peer {
 
 	}
 
-	/** get method for ip
+	/** 
+	 * get method for ip
 	 * @return ip address
 	 */
 	public String getIP(){
 		return this.ip_;
 	}
-	/** set method for ip
+	
+	/** 
+	 * set method for ip
 	 * @param _ip ip to be set
 	 */
 	public void setIP(String _ip){
 		this.ip_= _ip;
 	}
-	/** get method for port
+	
+	/** 
+	 * get method for port
 	 * @return port number
 	 */
 	public int getPort(){
 		return this.port_;
 	}
-	/** set method for port
+	
+	/** 
+	 * set method for port
 	 * @param _port port to be set as port in class
 	 */
 	public void setPort(int _port){
 		this.port_ = _port;
 	}
-
-
 }
