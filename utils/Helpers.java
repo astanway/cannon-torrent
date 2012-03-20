@@ -2,10 +2,11 @@ package utils;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.security.MessageDigest;
+
+import peers.Peer;
 
 public final class Helpers 
 {
@@ -24,7 +25,79 @@ public final class Helpers
 			System.exit(1);
 		}
 	}
+	
+	/**
+   * Changes the torrentfile into a bytearray
+   * @param torrentFile   the file to be read
+   * @return byte array from the file
+   */
+  public static byte[] readTorrent(String torrentFile) {
+    try {
+      RandomAccessFile rFile = new RandomAccessFile(torrentFile,"rw");
+      byte[] fileBytes = new byte[(int)rFile.length()];
+      rFile.read(fileBytes);
+      return fileBytes;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
 
+	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
+	public static final ByteBuffer minIntervalKey = 
+		ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer downloadedKey =
+		ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
+	public static final ByteBuffer completeKey =
+		ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
+	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
+	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
+	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
+
+	/**
+	 * Gets the peer list from a response from the tracker
+	 * @param response	byte array response from 
+	 * @return			    returns the array list of peers
+	 */
+	public static ArrayList<Peer> getPeerList(byte[] response){
+		ArrayList<Peer> peerList = new ArrayList<Peer>();
+		try{
+			Object decodedResponse = Bencoder2.decode(response);
+      ToolKit.print(decodedResponse, 1);
+
+      //Unauthorised? WTF?
+      
+			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
+			int interval = (Integer)responseMap.get(intervalKey);
+
+			ArrayList<Object> peerArray = (ArrayList<Object>)responseMap.get(peersKey);
+
+			for (int i = 0;i<peerArray.size();i++){
+				Object peer = peerArray.get(i);
+				String ip_ = "";
+				String peer_id_ = "";
+				int port_ = 0;
+
+				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
+				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
+				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
+				port_ = (Integer)peerMap.get(portKey);
+				System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
+				//get all the properties
+				Peer newPeer = new Peer(peer_id_, ip_, port_);
+				
+				if(newPeer.isValid()){
+				  peerList.add(newPeer);
+				}
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+
+		return peerList;
+	}
 
 	/**
 	 * returns a byte[] consisting of the contents at the given url

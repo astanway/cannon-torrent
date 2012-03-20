@@ -13,6 +13,10 @@ public class PeerManager {
 	public static TorrentInfo TORRENT_INFO   = null;
 	public static RandomAccessFile file      = null;
 
+	public static final String STARTED   = "started";
+	public static final String COMPLETED = "completed";
+	public static final String STOPPED   = "stopped";
+	public static final String EMPTY     = "";
 	
 	public static ArrayList<Peer> peerList_  = null;
 	
@@ -28,6 +32,27 @@ public class PeerManager {
 	  this.peerList_ = _peerList;
 	}
 	
+	public static void setInfo(String torrentFile, String savedFile){
+  	try{
+  	  TORRENT_INFO = new TorrentInfo(Helpers.readTorrent(torrentFile));
+  		TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
+  		file = new RandomAccessFile(savedFile,"rws");
+  	} catch (Exception e){
+  	  System.out.println(e);
+  		System.out.println("Torrent file could not be loaded.");
+  		System.exit(1);
+  	}
+	}
+	
+	/**
+   * Generates our random PeerID
+   */
+  public static void setPeerId(){
+    Random ran = new Random();
+    int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
+    String peer_id_string = "GROUP4AREL33t" + rand_id;
+    PEER_ID = peer_id_string.getBytes();
+  }
 
   public boolean download(){
     // for(Peer peer : peerList){
@@ -123,12 +148,12 @@ public class PeerManager {
 
 	/**
    * Construct the url for tracker querying
-   * @param port                    port to be used
-   * @param uploaded              amount uploaded
-   * @param downloaded    amount downloaded
-   * @param left                    amount left
-   * @param event             event type
-   * @return                                  String to be sent as query
+   * @param port  port to be used
+   * @param uploaded  amount uploaded
+   * @param downloaded  amount downloaded
+   * @param left amount left
+   * @param event event type
+   * @return String to be sent as query
    */
   public static String constructQuery(int port, int uploaded, int downloaded, int left, String event){
     String url_string = "";
