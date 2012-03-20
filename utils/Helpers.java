@@ -1,5 +1,7 @@
 package utils;
 
+import java.io.*;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +23,34 @@ public final class Helpers
 		} catch (Exception e){
 			System.exit(1);
 		}
+	}
+
+
+	/**
+	 * returns a byte[] consisting of the contents at the given url
+	 * @param string_url 	url to be queried
+	 * @return byte[] of contents
+	 */
+	public static byte[] getURL(String string_url) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		InputStream is = null;
+		try {
+			URL url = new URL(string_url);
+			is = url.openStream();
+			byte[] byteChunk = new byte[4096];
+			int n;
+
+			while ( (n = is.read(byteChunk)) > 0 ) {
+				baos.write(byteChunk, 0, n);
+			}
+
+			is.close();
+		}
+		catch (IOException e) {
+			System.out.println("URL failure with: " + string_url);
+		}
+
+		return baos.toByteArray();
 	}
 
 
