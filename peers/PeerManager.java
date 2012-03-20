@@ -21,15 +21,15 @@ public class PeerManager {
 	public static ArrayList<Peer> peerList_  = null;
 	
 	public PeerManager(){
-	  
 	}
 
-  public PeerManager(ArrayList<Peer> _peerList){
-		this.peerList_ = _peerList;
+  public static void setPeerList (ArrayList<Peer> _peerList){
+		peerList_ = _peerList;
 	}
 	
-	public void setPeerList(ArrayList<Peer> _peerList){
-	  this.peerList_ = _peerList;
+  @SuppressWarnings("rawtypes")
+	public static ArrayList getPeerList(){
+		return peerList_;
 	}
 	
 	public static void setInfo(String torrentFile, String savedFile){
@@ -135,7 +135,7 @@ public class PeerManager {
 					//cop dat data
 					peer.from_peer_.readFully(pieceBytes);
 					System.arraycopy(pieceBytes, 0, piece, BLOCK_LENGTH*k, pieceBytes.length);
-					setProgress(++downloaded, numPieces*blocksPerPiece);
+					Helpers.setProgress(++downloaded, numPieces*blocksPerPiece);
 				}
 
 				file.write(piece);
@@ -176,30 +176,5 @@ public class PeerManager {
 
     return url_string;
   }
-
-	/**
-	 * Used for the progress bar
-	 * @param completed	completed value
-	 * @param total	  	total value
-	 */
-	public static void setProgress(double completed, double total) {
-		int width = 50;
-		double prog = completed/total;
-		System.out.print("\r[");
-		int i = 0;
-		for (; i < prog*width; i++) {
-			System.out.print("=");
-		}
-		System.out.print(">");
-		for (; i < width; i++) {
-			System.out.print(" ");
-		}
-		System.out.print("] " + prog*100 + "%");
-	}
-  
-	@SuppressWarnings("rawtypes")
-	public static ArrayList getPeerList(){
-		return peerList_;
-	}	
 }
 

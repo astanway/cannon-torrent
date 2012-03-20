@@ -183,5 +183,26 @@ public final class Helpers
 			.append(HEX_CHARS[(bytes[i]&0x0F)]);
 		}
 		return sb.toString();
+	}
+	
+	
+	/**
+	 * Used for the progress bar
+	 * @param completed	completed value
+	 * @param total	  	total value
+	 */
+	public static void setProgress(double completed, double total) {
+		int width = 50;
+		double prog = completed/total;
+		System.out.print("\r[");
+		int i = 0;
+		for (; i < prog*width; i++) {
+			System.out.print("=");
+		}
+		System.out.print(">");
+		for (; i < width; i++) {
+			System.out.print(" ");
+		}
+		System.out.print("] " + prog*100 + "%");
 	}  
 }
