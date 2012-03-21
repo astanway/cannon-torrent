@@ -31,30 +31,10 @@ public class PeerManager {
 	public static ArrayList getPeerList(){
 		return peerList_;
 	}
-	
-	public static void setInfo(String torrentFile, String savedFile){
-  	try{
-  	  TORRENT_INFO = new TorrentInfo(Helpers.readTorrent(torrentFile));
-  		TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
-  		file = new RandomAccessFile(savedFile,"rws");
-  	} catch (Exception e){
-  	  System.out.println(e);
-  		System.out.println("Torrent file could not be loaded.");
-  		System.exit(1);
-  	}
-	}
-	
-	/**
-   * Generates our random PeerID
-   */
-  public static void setPeerId(){
-    Random ran = new Random();
-    int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
-    String peer_id_string = "GROUP4AREL33t" + rand_id;
-    PEER_ID = peer_id_string.getBytes();
-  }
 
   public boolean download(){
+    //create thread for each peer
+    
     // for(Peer peer : peerList){
     //  System.out.println("Peer Found");
     //  peer.createSocket(peer.ip_, peer.port_);
@@ -159,22 +139,47 @@ public class PeerManager {
     String url_string = "";
     try{
       String escaped_hash = Helpers.toURLHex(INFO_HASH);
+      String escaped_id = Helpers.toURLHex(PEER_ID);
       String ip = "128.6.5.130";
       url_string =  TORRENT_INFO.announce_url.toString()
       + "?port=" + port
-      + "&peer_id=" + PEER_ID
+      + "&peer_id=" + escaped_id
       + "&info_hash=" + escaped_hash 
       + "&uploaded=" + uploaded
       + "&downloaded=" + downloaded
       + "&left=" + left
       + "&ip=" +  ip
       + "&event=" + event;
+      
+      System.out.println(url_string);
 
     } catch (Exception e){
       System.out.println(e);
     }
 
     return url_string;
+  }
+  
+  public static void setInfo(String torrentFile, String savedFile){
+  	try{
+  	  TORRENT_INFO = new TorrentInfo(Helpers.readTorrent(torrentFile));
+  		TORRENT_INFO.info_hash.get(INFO_HASH, 0, INFO_HASH.length);
+  		file = new RandomAccessFile(savedFile,"rws");
+  	} catch (Exception e){
+  	  System.out.println(e);
+  		System.out.println("Torrent file could not be loaded.");
+  		System.exit(1);
+  	}
+	}
+	
+	/**
+   * Generates our random PeerID
+   */
+  public static void setPeerId(){
+    Random ran = new Random();
+    int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
+    String peer_id_string = "GROUP4AREL33t" + rand_id;
+    PEER_ID = peer_id_string.getBytes();
   }
 }
 

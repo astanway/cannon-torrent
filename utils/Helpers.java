@@ -43,15 +43,11 @@ public final class Helpers
     }
   }
   
-
-	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
+  public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
 	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
-	public static final ByteBuffer minIntervalKey = 
-		ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
-	public static final ByteBuffer downloadedKey =
-		ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
-	public static final ByteBuffer completeKey =
-		ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
+	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
+	public static final ByteBuffer completeKey = ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
 	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
 	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
 	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
@@ -61,13 +57,11 @@ public final class Helpers
 	 * @param response	byte array response from 
 	 * @return			    returns the array list of peers
 	 */
-	public static ArrayList<Peer> getPeerList(byte[] response){
+	public static ArrayList<Peer> getPeerList(byte[] response){	  
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
 		try{
 			Object decodedResponse = Bencoder2.decode(response);
       ToolKit.print(decodedResponse, 1);
-
-      //Unauthorised? WTF?
       
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			int interval = (Integer)responseMap.get(intervalKey);
@@ -85,7 +79,6 @@ public final class Helpers
 				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
 				port_ = (Integer)peerMap.get(portKey);
 				System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
-				//get all the properties
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 				
 				if(newPeer.isValid()){
