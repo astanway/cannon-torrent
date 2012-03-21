@@ -11,7 +11,9 @@ public class PeerManager {
 	public static int BLOCK_LENGTH           = 16384;
 	public static boolean[] HAVE_PIECE       = null;
 	public static TorrentInfo TORRENT_INFO   = null;
+	public static int[][] REFERENCE          = null;
 	public static RandomAccessFile file      = null;
+	public static int PORT                   = 0;
 
 	public static final String STARTED   = "started";
 	public static final String COMPLETED = "completed";
@@ -31,33 +33,38 @@ public class PeerManager {
 	public static ArrayList getPeerList(){
 		return peerList_;
 	}
+	
+	public void setReference(){
+	  int pieces = TORRENT_INFO.file_length / TORRENT_INFO.piece_length;
+	  int blocks = TORRENT_INFO.piece_length / BLOCK_LENGTH;
+	  REFERENCE = new int[pieces][blocks];
+	}
 
   public boolean download(){
-    //create thread for each peer
     
-    // for(Peer peer : peerList){
-    //  System.out.println("Peer Found");
-    //  peer.createSocket(peer.ip_, peer.port_);
-    //  peer.establishStreams();
-    //  peer.sendHandshake(PEER_ID, INFO_HASH);
-    //  if(peer.receiveHandshake(INFO_HASH)){
-    // 
-    //    peer.sendMessage(Peer.INTERESTED);
-    // 
-    //    while(true){ if(peer.listenForUnchoke()){ break; }}
-    // 
-    //    response = getURL(constructQuery(i, TORRENT_INFO.file_length, 0, 0, STARTED));
-    // 
-    //    downloadPieces(peer);
-    // 
-    //    response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-    // 
-    //    peer.closeSocket();
-    //  }
-    // }
-    // 
-    // response = getURL(constructQuery(i, 0, TORRENT_INFO.file_length, 0, STOPPED));
-    // System.out.println("\nFile finished.");
+    byte[] response = null;
+    for(Peer peer : peerList_){
+     peer.createSocket(peer.ip_, peer.port_);
+     peer.establishStreams();
+     peer.sendHandshake(PEER_ID, INFO_HASH);
+     // if(peer.receiveHandshake(INFO_HASH)){
+     //     
+     //   peer.sendMessage(Peer.INTERESTED);
+     //     
+     //   while(true){ if(peer.listenForUnchoke()){ break; }}
+     //     
+     //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
+     //     
+     //   downloadPieces(peer);
+     //     
+     //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
+     //     
+     //   peer.closeSocket();
+     // }
+    }
+    
+    response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, STOPPED));
+    System.out.println("\nFile finished.");
     return false;
   }
   
@@ -150,8 +157,6 @@ public class PeerManager {
       + "&left=" + left
       + "&ip=" +  ip
       + "&event=" + event;
-      
-      System.out.println(url_string);
 
     } catch (Exception e){
       System.out.println(e);

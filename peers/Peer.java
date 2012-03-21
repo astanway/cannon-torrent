@@ -46,7 +46,7 @@ public class Peer {
 	 * @return true if the peer is a valid one we want to use
 	 */
 	public boolean isValid(){
-		if (this.ip_.equals("128.6.5.130") && this.peer_id_.indexOf("RUBT") != -1){
+		if ((this.ip_.equals("128.6.5.130") || this.ip_.equals("128.6.5.131")) && this.peer_id_.indexOf("RUBT") != -1){
 			return true;
 		}
 		return false;

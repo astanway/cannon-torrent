@@ -26,6 +26,7 @@ public class RUBTClient {
 	  manager.setInfo(torrentFile, savedFile);
 		manager.setPeerId();
 		manager.setPeerList(getPeers());
+		manager.setReference();
 		manager.download();
 	}
 	
@@ -36,6 +37,7 @@ public class RUBTClient {
   	for (i=6881; i<=6889;){
   		try{
   			response = Helpers.getURL(manager.constructQuery(i, 0, 0, manager.TORRENT_INFO.file_length, ""));
+  			manager.PORT = i;
   			break;
   		} catch (Exception e){
   			System.out.println("Port " + i + " failed");
