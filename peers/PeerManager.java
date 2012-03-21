@@ -44,23 +44,9 @@ public class PeerManager {
     
     byte[] response = null;
     for(Peer peer : peerList_){
-     peer.createSocket(peer.ip_, peer.port_);
-     peer.establishStreams();
-     peer.sendHandshake(PEER_ID, INFO_HASH);
-     // if(peer.receiveHandshake(INFO_HASH)){
-     //     
-     //   peer.sendMessage(Peer.INTERESTED);
-     //     
-     //   while(true){ if(peer.listenForUnchoke()){ break; }}
-     //     
-     //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
-     //     
-     //   downloadPieces(peer);
-     //     
-     //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-     //     
-     //   peer.closeSocket();
-     // }
+      SocketThread p = new SocketThread(peer, PEER_ID, INFO_HASH);
+      Thread a = new Thread(p);
+      a.start();
     }
     
     response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, STOPPED));

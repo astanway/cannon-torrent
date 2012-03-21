@@ -61,7 +61,7 @@ public final class Helpers
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
 		try{
 			Object decodedResponse = Bencoder2.decode(response);
-      ToolKit.print(decodedResponse, 1);
+      // ToolKit.print(decodedResponse, 1);
       
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
 			int interval = (Integer)responseMap.get(intervalKey);
@@ -78,7 +78,7 @@ public final class Helpers
 				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
 				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
 				port_ = (Integer)peerMap.get(portKey);
-				System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
+        // System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 				
 				if(newPeer.isValid()){
