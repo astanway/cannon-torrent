@@ -149,7 +149,7 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-    System.out.println("Handshake verified");
+    System.out.println(peer_id_ + " handshake");
 		return true;
 	}
 
@@ -160,7 +160,7 @@ public class Peer {
 	public boolean listenForUnchoke(){
 		try{
 			if(from_peer_.read() == 1 && from_peer_.read() == 1){
-        System.out.println("Unchoked");
+        System.out.println(peer_id_ + " unchoked");
 				return true;
 			}
 		}catch(Exception e){
@@ -228,6 +228,7 @@ public class Peer {
 		}catch(Exception e){
 			System.out.println(e);
 		}
+    System.out.println("Requested (" + _index + ", " + _begin + ") from " + peer_id_);      
 	}
 
 

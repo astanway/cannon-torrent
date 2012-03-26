@@ -23,19 +23,21 @@ public class DownloadThread implements Runnable {
         
       while(true){ if(peer.listenForUnchoke()){ break; }}
       
-      while(!Manager.q.isEmpty()){
+      // while(!Manager.q.isEmpty()){
         Block p = Manager.q.poll();
+        System.out.println(Manager.q.size());
+        p.print();
         downloadBlock(p);
         // System.out.println(peer.peer_id_ + " " + q.size());
         // Piece.print();
-      }
+      // }
     //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
     //
     // downloadPieces(peer);
     //     
     //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
     //     
-      // peer.closeSocket();
+      peer.closeSocket();
     }
   }
   
@@ -48,7 +50,7 @@ public class DownloadThread implements Runnable {
 
     try{
       peer.sendRequest(b);
-      
+
       //verify the data
       peer.from_peer_.mark(l + 13);
 			byte[] toVerify = new byte[l + 13];
@@ -56,6 +58,9 @@ public class DownloadThread implements Runnable {
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
 			Helpers.verifyHash(toVerify, pieceHash);
 			peer.from_peer_.reset();
+			
+			System.out.println("verified");
+      
 
 			//TODO: make sure all the headers check out
 			int prefix = peer.from_peer_.readInt();
@@ -71,8 +76,9 @@ public class DownloadThread implements Runnable {
 			file.write(data);
 			file.close();
       // System.arraycopy(data, 0, piece, b, l);
+      System.out.println("GOT A BLOCK!");
     } catch (Exception e){
-      System.out.print("Probably a broken pipe on peer " + peer.peer_id_);
+      System.out.println(peer.peer_id_ + " " + e);
     }
   }
   

@@ -3,48 +3,48 @@ package peers;
 import utils.*;
 
 public class Block{
-  private static int piece = 0;
-  private static int block = 0;
-	private static byte[] data = null;
-	private static boolean isFilled = false;
+  private  int piece = 0;
+  private  int block = 0;
+	private  byte[] data = null;
+	private  boolean isFilled = false;
 	
 	public Block(int p, int b, byte[] d){
-	  piece = p;
-		block = b;
-		data = d;
+	  this.piece = p;
+		this.block = b;
+		this.data = d;
 	}
 
-  public static void setData(byte[] d){
-    data = d;
+  public  void setData(byte[] d){
+    this.data = d;
     isFilled = true;
   }
-
-	public static void print(){
-	  System.out.println(piece + " " + block);
+	
+	public  int getBlockIndex(){
+	  return this.block * Manager.block_length;
 	}
 	
-	public static int getBlockIndex(){
-	  return block * Manager.block_length;
+	public  int getPiece(){
+	  return this.piece;
 	}
 	
-	public static int getPiece(){
-	  return piece;
+	public  int getBlock(){
+	  return this.block;
 	}
 	
-	public static int getBlock(){
-	  return block;
-	}
-	
-	public static byte[] getData(){
-	  return data;
+	public  byte[] getData(){
+	  return this.data;
 	}
 	
 	//16384 or the remainder
-	public static int getLength(){
-	  return data.length;
+	public  int getLength(){
+	  return this.data.length;
 	}
 	
 	public boolean isFilled(){
-	  return isFilled;
+	  return this.isFilled;
+	}
+	
+	public  void print(){
+	  System.out.println("("+ this.piece + ", " + this.block + ", " + this.isFilled + ")");
 	}
 }

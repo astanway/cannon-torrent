@@ -38,9 +38,9 @@ public class Manager {
 		numBlocks = torrent_info.piece_length / block_length;
 
     //set up the reference queue
-		q = new ConcurrentLinkedQueue<Block>();
+    q = new ConcurrentLinkedQueue<Block>();
 	  for(int j = 0; j < numPieces; j++){
-	    for(int k = 0; k<numBlocks; k++){
+	    for(int k = 0; k < numBlocks; k++){
 				byte[] data = null;
         
 				if(j == numPieces - 1 && k == numBlocks - 1){
@@ -50,8 +50,8 @@ public class Manager {
 					data = new byte[block_length];
 				}
 				
-				Block b = new Block(j, k, data);
-				q.add(b);
+        Block b = new Block(j, k, data);
+        q.add(b);
 	    }
 	  }
 	}
@@ -64,8 +64,8 @@ public class Manager {
       a.start();
 		}
 
-		response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
-		System.out.println("\nFile finished.");
+    // response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
+    // System.out.println("\nFile finished.");
 		return false;
 	}
 
