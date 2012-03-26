@@ -36,7 +36,7 @@ public class RUBTClient {
 		manager = new Manager(torrentFile,savedFile);
 		manager.setPeerId();
 		manager.setPeerList(getPeers());
-		//manager.download();
+    manager.download();
 	}
 
 	//query the tracker and get the initial list of peers
@@ -45,7 +45,7 @@ public class RUBTClient {
 		int i = 0;
 		for (i=6881; i<=6889;){
 			try{
-				response = Helpers.getURL(manager.constructQuery(i, 0, 0, manager.getTorrent_info().file_length, ""));
+				response = Helpers.getURL(manager.constructQuery(i, 0, 0, manager.getTorrentInfo().file_length, ""));
 				manager.setPort(i);
 				break;
 			} catch (Exception e){

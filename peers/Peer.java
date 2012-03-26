@@ -147,7 +147,7 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		System.out.println("Handshake verified");
+    System.out.println("Handshake verified");
 		return true;
 	}
 
@@ -158,7 +158,7 @@ public class Peer {
 	public boolean listenForUnchoke(){
 		try{
 			if(from_peer_.read() == 1 && from_peer_.read() == 1){
-				System.out.println("Unchoked");
+        System.out.println("Unchoked");
 				return true;
 			}
 		}catch(Exception e){
@@ -252,7 +252,7 @@ public class Peer {
 	 * Not needed yet, will be implemented later
 	 */
 	public void sendBitfield(){
-
+    
 	}
 
 	/** 

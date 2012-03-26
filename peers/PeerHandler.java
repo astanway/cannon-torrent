@@ -32,7 +32,7 @@ public class PeerHandler implements Runnable{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		System.out.println("Handshake verified");
+    // System.out.println("Handshake verified");
 		return;
 	}
 	

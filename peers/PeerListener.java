@@ -7,7 +7,7 @@ import java.net.Socket;
 import apps.RUBTClient;
 
 
-public class PeerListener implements Runnable{
+public class PeerListener implements Runnable {
 	
 	public ServerSocket listenSocket;
 	public Socket dataSocket;
