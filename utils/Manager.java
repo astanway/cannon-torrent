@@ -12,7 +12,7 @@ public class Manager {
 	public static byte[] info_hash		    	 = new byte[20];
 	public static boolean[] have_piece	  	 = null;
 	public static TorrentInfo torrent_info	 = null;
-	public static ConcurrentLinkedQueue<Piece> q = null;
+	public static ConcurrentLinkedQueue<Block> q = null;
 	public static RandomAccessFile file  	 = null;
 	public static int port			        		 = 0;
 	public static int numPieces			       = 0;
@@ -38,29 +38,21 @@ public class Manager {
 		numBlocks = torrent_info.piece_length / block_length;
 
     //set up the reference queue
-		q = new ConcurrentLinkedQueue<Piece>();
+		q = new ConcurrentLinkedQueue<Block>();
 	  for(int j = 0; j < numPieces; j++){
-	    byte[] data = null;
-  		if (j == numPieces - 1){
-				data = new byte[leftoverBytes + block_length];
-			} else {
-				data = new byte[torrent_info.piece_length];
-			}
-      Piece p = new Piece(j, data);
 	    for(int k = 0; k<numBlocks; k++){
-				byte[] block_data = null;
+				byte[] data = null;
         
 				if(j == numPieces - 1 && k == numBlocks - 1){
-					block_data = new byte[leftoverBytes];
+					data = new byte[leftoverBytes];
 				}
 				else{
-					block_data = new byte[block_length];
+					data = new byte[block_length];
 				}
 				
-				Block b = new Block(k, block_data);
-				p.addBlock(b);
+				Block b = new Block(j, k, data);
+				q.add(b);
 	    }
-      q.add(p);
 	  }
 	}
 

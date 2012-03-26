@@ -1,12 +1,13 @@
 package peers;
 
 public class Block{
-
+  private static int piece = 0;
   private static int block = 0;
 	private static byte[] data = null;
 	private static boolean isFilled = false;
 	
-	public Block(int b, byte[] d){
+	public Block(int p, int b, byte[] d){
+	  piece = p;
 		block = b;
 		data = d;
 	}
@@ -17,7 +18,7 @@ public class Block{
   }
 
 	public static void print(){
-	  System.out.println(block);
+	  System.out.println(piece + " " + block);
 	}
 	
 	public boolean isFilled(){

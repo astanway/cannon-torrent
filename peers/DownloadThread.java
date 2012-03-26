@@ -24,8 +24,8 @@ public class DownloadThread implements Runnable {
       while(true){ if(peer.listenForUnchoke()){ break; }}
       
       while(!Manager.q.isEmpty()){
-        Piece p = Manager.q.poll();
-        downloadPiece(p);
+        Block p = Manager.q.poll();
+        downloadBlock(p);
         // System.out.println(peer.peer_id_ + " " + q.size());
         // Piece.print();
       }
@@ -40,7 +40,7 @@ public class DownloadThread implements Runnable {
   }
   
   
-  public void downloadPiece(Piece p){
+  public void downloadBlock(Block p){
     try{
       
     } catch (Exception e){
