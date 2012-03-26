@@ -3,36 +3,32 @@ package peers;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import utils.Manager;
+
 public class DownloadThread implements Runnable {
   
   public Peer peer = null;
-  byte[] our_peer_id = null;
-  byte[] our_info_hash = null;
-  public static ConcurrentLinkedQueue<Piece> q = null;
   
-  public DownloadThread(Peer _peer, byte[] _peer_id, byte[] _info_hash, ConcurrentLinkedQueue<Piece> _q){
+  public DownloadThread(Peer _peer){
     peer = _peer;
-    our_peer_id = _peer_id;
-    our_info_hash = _info_hash;
-    q = _q;
   }
   
   public void run() {
-    System.out.println(peer.peer_id_);
     peer.createSocket(peer.ip_, peer.port_);
     peer.establishStreams();
-    peer.sendHandshake(our_peer_id, our_info_hash);
+    peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 
-    if(peer.receiveHandshake(our_info_hash)){
+    if(peer.receiveHandshake(Manager.info_hash)){
       peer.sendMessage(Peer.INTERESTED);
         
       while(true){ if(peer.listenForUnchoke()){ break; }}
       
-      // while(!q_.isEmpty()){
-        Piece p = q.poll();
-        System.out.println(peer.peer_id_ + " " + q.size());
+      while(!Manager.q.isEmpty()){
+        Piece p = Manager.q.poll();
+        downloadPiece(p);
+        // System.out.println(peer.peer_id_ + " " + q.size());
         // Piece.print();
-      // }
+      }
     //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
     //
     // downloadPieces(peer);
@@ -43,7 +39,18 @@ public class DownloadThread implements Runnable {
     }
   }
   
-  /*public static void downloadPieces(Peer peer){
+  
+  public void downloadPiece(Piece p){
+    try{
+      
+    } catch (Exception e){
+      
+    }
+  }
+  
+  
+  /*
+  public static void downloadPieces(Piece p){
 		int numPieces        = 0;
 		int numLeft          = 0;
 		int leftoverBytes    = 0;

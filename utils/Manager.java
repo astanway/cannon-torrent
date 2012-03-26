@@ -8,15 +8,15 @@ import peers.*;
 
 public class Manager {
 
-	private static byte[] peer_id            =	new byte[20];
-	private static byte[] info_hash		    	 = new byte[20];
-	private static boolean[] have_piece	  	 = null;
-	private static TorrentInfo TORRENT_INFO	 = null;
-	private static ConcurrentLinkedQueue<Piece> REF = null;
-	private static RandomAccessFile file  	 = null;
-	private static int port			        		 = 0;
-	private static int numPieces			       = 0;
-	private static int numBlocks			       = 0;
+	public static byte[] peer_id            =	new byte[20];
+	public static byte[] info_hash		    	 = new byte[20];
+	public static boolean[] have_piece	  	 = null;
+	public static TorrentInfo torrent_info	 = null;
+	public static ConcurrentLinkedQueue<Piece> q = null;
+	public static RandomAccessFile file  	 = null;
+	public static int port			        		 = 0;
+	public static int numPieces			       = 0;
+	public static int numBlocks			       = 0;
 
 	private static final int block_length	= 16384;
 	public static final String STARTED   = "started";
@@ -25,41 +25,62 @@ public class Manager {
 	public static final String EMPTY     = "";
 
 	public static ArrayList<Peer> peerList_  = null;
+	
+	public Manager(){
+	}
 
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile,fileName);
-		
-		numPieces = TORRENT_INFO.file_length % TORRENT_INFO.piece_length==0?
-				TORRENT_INFO.file_length / TORRENT_INFO.piece_length:
-				TORRENT_INFO.file_length / TORRENT_INFO.piece_length+1;
-		numBlocks = TORRENT_INFO.piece_length / block_length;
+		int leftoverBytes = torrent_info.file_length % block_length;	
+		numPieces = leftoverBytes == 0 ?
+        				torrent_info.file_length / torrent_info.piece_length :
+        				torrent_info.file_length / torrent_info.piece_length + 1;
+		numBlocks = torrent_info.piece_length / block_length;
 
     //set up the reference queue
-		REF = new ConcurrentLinkedQueue<Piece>();
-	  for(int i = 0; i<numPieces; i++){
-	    for(int j = 0; j<numBlocks; j++){
-        REF.add(new Piece(i, j));
+		q = new ConcurrentLinkedQueue<Piece>();
+	  for(int j = 0; j < numPieces; j++){
+	    byte[] data = null;
+  		if (j == numPieces - 1){
+				data = new byte[leftoverBytes + block_length];
+			} else {
+				data = new byte[torrent_info.piece_length];
+			}
+      Piece p = new Piece(j, data);
+	    for(int k = 0; k<numBlocks; k++){
+				byte[] block_data = null;
+        
+				if(j == numPieces - 1 && k == numBlocks - 1){
+					block_data = new byte[leftoverBytes];
+				}
+				else{
+					block_data = new byte[block_length];
+				}
+				
+				Block b = new Block(k, block_data);
+				p.addBlock(b);
 	    }
+      q.add(p);
 	  }
 	}
 
 	public boolean download(){
 		byte[] response = null;
 		for(Peer peer : peerList_){
-			DownloadThread p = new DownloadThread(peer, peer_id, info_hash, REF);
+			DownloadThread p = new DownloadThread(peer);
 			Thread a = new Thread(p);
       a.start();
 		}
 
-		response = Helpers.getURL(constructQuery(port, 0, TORRENT_INFO.file_length, 0, STOPPED));
+		response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
 		System.out.println("\nFile finished.");
 		return false;
 	}
 
 	public static void setInfo(String torrentFile, String savedFile){
 		try{
-			TORRENT_INFO = new TorrentInfo(Helpers.readTorrent(torrentFile));
-			TORRENT_INFO.info_hash.get(info_hash, 0, info_hash.length);
+			torrent_info = new TorrentInfo(Helpers.readTorrent(torrentFile));
+			torrent_info.info_hash.get(info_hash, 0, info_hash.length);
 			file = new RandomAccessFile(savedFile,"rws");
 		} catch (Exception e){
 			System.out.println(e);
@@ -93,11 +114,11 @@ public class Manager {
 	}
 
 	public static TorrentInfo getTorrentInfo() {
-		return TORRENT_INFO;
+		return torrent_info;
 	}
 
 	public static void setTorrentInfo(TorrentInfo torrent_info) {
-		Manager.TORRENT_INFO = torrent_info;
+		Manager.torrent_info = torrent_info;
 	}
 
 	public static RandomAccessFile getFile() {
@@ -162,7 +183,7 @@ public class Manager {
 			String escaped_hash = Helpers.toURLHex(info_hash);
 			String escaped_id = Helpers.toURLHex(peer_id);
 			String ip = "128.6.5.130";
-			url_string =  TORRENT_INFO.announce_url.toString()
+			url_string =  torrent_info.announce_url.toString()
 			+ "?port=" + port
 			+ "&peer_id=" + escaped_id
 			+ "&info_hash=" + escaped_hash 
