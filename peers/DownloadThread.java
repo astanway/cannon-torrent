@@ -20,17 +20,14 @@ public class DownloadThread implements Runnable {
 
     if(peer.receiveHandshake(Manager.info_hash)){
       peer.sendMessage(Peer.INTERESTED);
-        
-      while(true){ if(peer.listenForUnchoke()){ break; }}
       
-      // while(!Manager.q.isEmpty()){
+      //TODO: listen for choke messages during data transfer
+      while(true){ if(peer.listenForUnchoke()){ break; }}
+      while(!Manager.q.isEmpty()){
         Block p = Manager.q.poll();
-        System.out.println(Manager.q.size());
-        p.print();
         downloadBlock(p);
-        // System.out.println(peer.peer_id_ + " " + q.size());
-        // Piece.print();
-      // }
+      }
+      System.out.println("q empty");
     //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
     //
     // downloadPieces(peer);
@@ -58,9 +55,6 @@ public class DownloadThread implements Runnable {
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
 			Helpers.verifyHash(toVerify, pieceHash);
 			peer.from_peer_.reset();
-			
-			System.out.println("verified");
-      
 
 			//TODO: make sure all the headers check out
 			int prefix = peer.from_peer_.readInt();
@@ -71,13 +65,15 @@ public class DownloadThread implements Runnable {
 			//cop dat data
 			peer.from_peer_.readFully(data);
 			
-			String name = p + " " + b.getBlock();
+			String name = "blocks/" + p + " " + b.getBlock();
 			RandomAccessFile file = new RandomAccessFile(name,"rws");
 			file.write(data);
 			file.close();
       // System.arraycopy(data, 0, piece, b, l);
-      System.out.println("GOT A BLOCK!");
+      System.out.print("Got from " + peer.peer_id_);
+      b.print();
     } catch (Exception e){
+      Manager.q.add(b);
       System.out.println(peer.peer_id_ + " " + e);
     }
   }

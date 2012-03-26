@@ -149,7 +149,7 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-    System.out.println(peer_id_ + " handshake");
+    // System.out.println(peer_id_ + " handshake");
 		return true;
 	}
 
