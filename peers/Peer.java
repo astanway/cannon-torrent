@@ -6,6 +6,8 @@ import java.io.BufferedInputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import utils.*;
+
 public class Peer {
 
 	public String peer_id_ = null;
@@ -211,7 +213,7 @@ public class Peer {
 	 */
 	public void sendRequest(Block b){
 	  int _index = b.getPiece(); 
-	  int _begin = b.getBlock();
+	  int _begin = b.getBlockIndex();
 	  int _length = b.getLength();
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(17);
 		out_bytes_.putInt(13);
@@ -224,7 +226,7 @@ public class Peer {
 		try{
       to_peer_.write(write_out_);
 		}catch(Exception e){
-			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 

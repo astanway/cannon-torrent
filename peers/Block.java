@@ -1,5 +1,7 @@
 package peers;
 
+import utils.*;
+
 public class Block{
   private static int piece = 0;
   private static int block = 0;
@@ -21,12 +23,20 @@ public class Block{
 	  System.out.println(piece + " " + block);
 	}
 	
+	public static int getBlockIndex(){
+	  return block * Manager.block_length;
+	}
+	
 	public static int getPiece(){
 	  return piece;
 	}
 	
 	public static int getBlock(){
 	  return block;
+	}
+	
+	public static byte[] getData(){
+	  return data;
 	}
 	
 	//16384 or the remainder

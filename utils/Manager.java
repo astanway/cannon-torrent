@@ -18,7 +18,7 @@ public class Manager {
 	public static int numPieces			       = 0;
 	public static int numBlocks			       = 0;
 
-	private static final int block_length	= 16384;
+	public static final int block_length	= 16384;
 	public static final String STARTED   = "started";
 	public static final String COMPLETED = "completed";
 	public static final String STOPPED   = "stopped";

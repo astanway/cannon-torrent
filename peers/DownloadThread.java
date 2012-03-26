@@ -1,9 +1,9 @@
 package peers;
 
+import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import utils.Manager;
+import utils.*;
 
 public class DownloadThread implements Runnable {
   
@@ -35,16 +35,44 @@ public class DownloadThread implements Runnable {
     //     
     //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
     //     
-      peer.closeSocket();
+      // peer.closeSocket();
     }
   }
   
   
-  public void downloadBlock(Block p){
+  public void downloadBlock(Block b){
+    int p = b.getPiece(); 
+	  int i = b.getBlockIndex();
+	  int l = b.getLength();
+	  byte[] data = b.getData();
+
     try{
-      peer.sendRequest(p);
-    } catch (Exception e){
+      peer.sendRequest(b);
       
+      //verify the data
+      peer.from_peer_.mark(l + 13);
+			byte[] toVerify = new byte[l + 13];
+			peer.from_peer_.readFully(toVerify);
+			byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
+			Helpers.verifyHash(toVerify, pieceHash);
+			peer.from_peer_.reset();
+
+			//TODO: make sure all the headers check out
+			int prefix = peer.from_peer_.readInt();
+			byte id = peer.from_peer_.readByte();
+			int index = peer.from_peer_.readInt();
+			int begin = peer.from_peer_.readInt();
+
+			//cop dat data
+			peer.from_peer_.readFully(data);
+			
+			String name = p + " " + b.getBlock();
+			RandomAccessFile file = new RandomAccessFile(name,"rws");
+			file.write(data);
+			file.close();
+      // System.arraycopy(data, 0, piece, b, l);
+    } catch (Exception e){
+      System.out.print("Probably a broken pipe on peer " + peer.peer_id_);
     }
   }
   
