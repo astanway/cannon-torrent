@@ -1,11 +1,10 @@
-package	utils;
+package utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 
 public class Message {
 
@@ -63,20 +62,19 @@ public class Message {
 			din.readFully(data);
 			return new PieceMessage(pieceIndex, begin, data);
 		}
-		case TYPE_REQUEST:{
+		case TYPE_REQUEST: {
 			int pieceIndex = din.readInt();
 			int begin = din.readInt();
 			int blockLength = din.readInt();
 			return new RequestMessage(pieceIndex, begin, blockLength);
 		}
-		case TYPE_BITFIELD:{
+		case TYPE_BITFIELD: {
 			byte[] data;
 			int bitLength = Manager.getNumPieces();
-			if(bitLength%8==0){
-				data = new byte[bitLength/8];
-			}
-			else{
-				data = new byte[bitLength/8 + 1];
+			if (bitLength % 8 == 0) {
+				data = new byte[bitLength / 8];
+			} else {
+				data = new byte[bitLength / 8 + 1];
 			}
 			din.readFully(data);
 			return new BitfieldMessage(data);
@@ -96,22 +94,68 @@ public class Message {
 		} else {
 
 			switch (message.getId()) {
+			case TYPE_NOT_INTERESTED:
+				dout.writeInt(NOT_INTERESTED.getLength());
+				dout.writeByte(NOT_INTERESTED.getId());
+				break;
+			case TYPE_INTERESTED:
+				dout.writeInt(INTERESTED.getLength());
+				dout.writeByte(INTERESTED.getId());
+				break;
+			case TYPE_UNCHOKE:
+				dout.writeInt(UNCHOKE.getLength());
+				dout.writeByte(UNCHOKE.getId());
+				break;
 			case TYPE_CHOKE:
 				dout.writeInt(CHOKE.getLength());
 				dout.writeByte(CHOKE.getId());
 				break;
-			case TYPE_PIECE:
-				if(!(message instanceof PieceMessage)){
-					throw new IllegalArgumentException("How did you make a raw message???");
+			case TYPE_HAVE:
+				if (!(message instanceof HaveMessage)) {
+					throw new IllegalArgumentException(
+							"How did you make a raw message???");
 				}
-				PieceMessage msg = (PieceMessage)message;
+				HaveMessage mess = (HaveMessage) message;
+				dout.writeInt(mess.getLength());
+				dout.writeByte(mess.getId());
+				dout.writeInt(mess.getPieceIndex());
+				break;
+			case TYPE_PIECE:
+				if (!(message instanceof PieceMessage)) {
+					throw new IllegalArgumentException(
+							"How did you make a raw message???");
+				}
+				PieceMessage msg = (PieceMessage) message;
 				dout.writeInt(message.getLength());
 				dout.writeByte(message.getId());
 				dout.writeInt(msg.getPieceIndex());
 				dout.writeInt(msg.getBegin());
 				dout.write(msg.getData());
 				break;
+			case TYPE_REQUEST:
+				if (!(message instanceof RequestMessage)) {
+					throw new IllegalArgumentException(
+							"How did you make a raw message??");
+				}
+				RequestMessage temp = (RequestMessage) message;
+				dout.writeInt(temp.getLength());
+				dout.writeByte(temp.getId());
+				dout.writeInt(temp.getPieceIndex());
+				dout.writeInt(temp.getBegin());
+				dout.writeInt(temp.getBlockLength());
+				break;
+			case TYPE_BITFIELD:
+				if (!(message instanceof BitfieldMessage)) {
+					throw new IllegalArgumentException(
+							"How did you make a raw message??");
+				}
+				BitfieldMessage tmp = (BitfieldMessage) message;
+				dout.writeInt(tmp.getLength());
+				dout.writeByte(tmp.getId());
+				dout.write(tmp.getData());
+				break;
 			}
+
 		}
 		dout.flush();
 	}
@@ -177,20 +221,20 @@ public class Message {
 		}
 
 	}
-	
+
 	public static final class RequestMessage extends Message {
 		private final int pieceIndex;
 		private final int begin;
 		private final int blockLength;
-		
+
 		public RequestMessage(final int pieceIndex, final int begin,
-				final int blockLength){
+				final int blockLength) {
 			super(TYPE_REQUEST, 13);
 			this.pieceIndex = pieceIndex;
 			this.begin = begin;
 			this.blockLength = blockLength;
 		}
-		
+
 		public int getPieceIndex() {
 			return pieceIndex;
 		}
@@ -203,14 +247,19 @@ public class Message {
 			return blockLength;
 		}
 	}
-	
-	public static final class BitfieldMessage extends Message{
+
+	public static final class BitfieldMessage extends Message {
 		private final byte[] data;
-		
-		public BitfieldMessage(final byte[] data){
-			super(TYPE_BITFIELD,5);
-			this.data=data;
+
+		public BitfieldMessage(final byte[] data) {
+			super(TYPE_BITFIELD, 5);
+			this.data = data;
 		}
+
+		public byte[] getData() {
+			return data;
+		}
+
 	}
 
 }
