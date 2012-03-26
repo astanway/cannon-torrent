@@ -209,7 +209,10 @@ public class Peer {
 	 * @param _begin offset in byte array
 	 * @param _length length of requested byte array
 	 */
-	public void sendRequest(int _index, int _begin, int _length){
+	public void sendRequest(Block b){
+	  int _index = b.getPiece(); 
+	  int _begin = b.getBlock();
+	  int _length = b.getLength();
 		ByteBuffer out_bytes_ = ByteBuffer.allocate(17);
 		out_bytes_.putInt(13);
 		byte temp = 0x06;

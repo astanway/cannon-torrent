@@ -42,7 +42,7 @@ public class DownloadThread implements Runnable {
   
   public void downloadBlock(Block p){
     try{
-      
+      peer.sendRequest(p);
     } catch (Exception e){
       
     }
