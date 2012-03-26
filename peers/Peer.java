@@ -217,7 +217,6 @@ public class Peer {
 	    System.out.println(e);
 	    return null;
 	  }
-	  return null;
 	}
 
 	/**  

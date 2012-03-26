@@ -101,7 +101,7 @@ public class DownloadThread implements Runnable {
         Manager.q.add(b);
         return;
       } else if (m.getId() == Message.TYPE_PIECE){
-        PieceMessage pm = (PieceMessage) m; 
+        PieceMessage pm = (PieceMessage) m;
         byte[] piece_data = pm.getData();
         
 
