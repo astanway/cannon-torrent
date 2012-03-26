@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import utils.*;
+import utils.Message.*;
 
 public class Peer {
 
@@ -15,7 +16,9 @@ public class Peer {
 	public int port_ = 0;
 	public Socket socket_= null;
 	public DataOutputStream to_peer_ = null;
-	public DataInputStream from_peer_ = null;	
+	public DataInputStream from_peer_ = null;
+	
+	public boolean choked = true;
 	
 	public static final byte CHOKE         = 0x01;
 	public static final byte INTERESTED    = 0x02;
@@ -203,6 +206,18 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	public Message listen(){
+	  try{
+	    Message m = Message.decode(from_peer_);
+	    System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
+	    return m;
+	  } catch (Exception e){
+	    System.out.println(e);
+	    return null;
+	  }
+	  return null;
 	}
 
 	/**  

@@ -3,16 +3,17 @@ package utils;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import peers.*;
 
 public class Manager {
 
-	public static byte[] peer_id            =	new byte[20];
+	public static byte[] peer_id             =	new byte[20];
 	public static byte[] info_hash		    	 = new byte[20];
-	public static boolean[] have_piece	  	 = null;
 	public static TorrentInfo torrent_info	 = null;
 	public static ConcurrentLinkedQueue<Block> q = null;
+	public static AtomicIntegerArray have_piece = null;
 	public static RandomAccessFile file  	 = null;
 	public static int port			        		 = 0;
 	public static int numPieces			       = 0;
@@ -36,6 +37,8 @@ public class Manager {
         				torrent_info.file_length / torrent_info.piece_length :
         				torrent_info.file_length / torrent_info.piece_length + 1;
 		numBlocks = torrent_info.piece_length / block_length;
+		
+		have_piece = new AtomicIntegerArray(numPieces);
 
     //set up the reference queue
     q = new ConcurrentLinkedQueue<Block>();
@@ -95,14 +98,6 @@ public class Manager {
 
 	public static void setInfoHash(byte[] info_hash) {
 		Manager.info_hash = info_hash;
-	}
-
-	public static boolean[] getHavePiece() {
-		return have_piece;
-	}
-
-	public static void setHavePiece(boolean[] have_piece) {
-		Manager.have_piece = have_piece;
 	}
 
 	public static TorrentInfo getTorrentInfo() {

@@ -1,12 +1,26 @@
 package utils;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Class to convert between bit-mapped {@code byte[]} and {@code boolean[]}.
  * @author Robert Moore
  */
 public class BitToBoolean {
+
+  public static boolean[] convert(AtomicIntegerArray array){
+    boolean[] retVal = new boolean[array.length()];
+    for(int i = 0; i < array.length(); i++){
+      boolean val = false;
+      if(array.get(i) == 1){
+        val = true;
+      }
+      retVal[i] = val;
+    }
+		return retVal;
+  }
+  
 	/**
 	 * Converts a {@code byte[]} to a {@code boolean[]}. It is assumed that the
 	 * values are in most-significant-bit first order. Meaning that most

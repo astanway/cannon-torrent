@@ -45,6 +45,6 @@ public class Block{
 	}
 	
 	public void print(){
-	  System.out.println("("+ this.piece + ", " + this.block + ", " + this.isFilled + ")");
+	  System.out.println("("+ this.piece + ", " + this.block*Manager.block_length + ", " + this.isFilled + ")");
 	}
 }

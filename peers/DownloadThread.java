@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import utils.*;
+import utils.Message.*;
 
 public class DownloadThread implements Runnable {
   
@@ -19,22 +20,59 @@ public class DownloadThread implements Runnable {
     peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 
     if(peer.receiveHandshake(Manager.info_hash)){
-      peer.sendMessage(Peer.INTERESTED);
+      Message m = peer.listen();
+      byte[] bf = null;
       
-      //TODO: listen for choke messages during data transfer
-      while(true){ if(peer.listenForUnchoke()){ break; }}
-      while(!Manager.q.isEmpty()){
-        Block p = Manager.q.poll();
-        downloadBlock(p);
+      while(m.getId() == Message.TYPE_KEEP_ALIVE){
+        m = peer.listen();
       }
+      
+      //only download if we get a bitfield
+      if(m.getId() == Message.TYPE_BITFIELD){
+        BitfieldMessage bfm = (BitfieldMessage) m;
+        bf = bfm.getData();
+        boolean[] bfb = BitToBoolean.convert(bf);
+        
+        //need have array
+
+        //send bitfield
+
+        //if we're interested:
+        while(!Manager.q.isEmpty()){
+          Block p = Manager.q.poll();
+
+          if(bfb[p.getPiece()] == true && Manager.have_piece.get(p.getPiece()) == 0){
+            peer.sendMessage(Peer.INTERESTED);
+            if(peer.choked == false){
+              downloadBlock(p);
+            } else {
+              m = peer.listen();
+              if(m.getId() == Message.TYPE_UNCHOKE){
+                System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+                downloadBlock(p);
+                peer.choked = false;
+              }
+            }
+          }
+
+
+            // while(true){ if(peer.listenForUnchoke()){ break; }}
+
+
+            //listen
+            //if we have a full piece, broadcast
+        }
+        System.out.println("done.");
+      }
+      
       System.out.println("q empty");
-    //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
-    //
-    // downloadPieces(peer);
-    //     
-    //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-    //     
-      peer.closeSocket();
+      //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
+      //
+      // downloadPieces(peer);
+      //     
+      //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
+      //
+      // peer.closeSocket();
     }
   }
   
@@ -47,34 +85,49 @@ public class DownloadThread implements Runnable {
 
     try{
       peer.sendRequest(b);
+      Message m = peer.listen();
+      
+      if (m == null){
+        Manager.q.add(b);
+        return;
+      } else if(m.getId() == Message.TYPE_UNCHOKE){
+        System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+        Manager.q.add(b);
+        peer.choked = false;
+        return;
+      } else if (m.getId() == Message.TYPE_CHOKE){
+        System.out.println("Peer " + peer.peer_id_ + " choked us");
+        peer.choked = true;
+        Manager.q.add(b);
+        return;
+      } else if (m.getId() == Message.TYPE_PIECE){
+        PieceMessage pm = (PieceMessage) m; 
+        byte[] piece_data = pm.getData();
+        
 
-      //verify the data
-      peer.from_peer_.mark(l + 13);
-			byte[] toVerify = new byte[l + 13];
-			peer.from_peer_.readFully(toVerify);
-			byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
-			Helpers.verifyHash(toVerify, pieceHash);
-			peer.from_peer_.reset();
-
-			//TODO: make sure all the headers check out
-			int prefix = peer.from_peer_.readInt();
-			byte id = peer.from_peer_.readByte();
-			int index = peer.from_peer_.readInt();
-			int begin = peer.from_peer_.readInt();
-
-			//cop dat data
-			peer.from_peer_.readFully(data);
+        //         //verify the data
+        //         peer.from_peer_.mark(l + 13);
+        // byte[] toVerify = new byte[l + 13];
+        // peer.from_peer_.readFully(toVerify);
+        // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
+        // Helpers.verifyHash(toVerify, pieceHash);
+        // peer.from_peer_.reset();
+        // 
+        // //cop dat data
+        // peer.from_peer_.readFully(data);
 			
-			String name = "blocks/" + p + " " + b.getBlock();
-			RandomAccessFile file = new RandomAccessFile(name,"rws");
-			file.write(data);
-			file.close();
-      // System.arraycopy(data, 0, piece, b, l);
-      System.out.print("Got from " + peer.peer_id_);
-      b.print();
+  			String name = "blocks/" + p + " " + b.getBlock();
+  			RandomAccessFile file = new RandomAccessFile(name,"rws");
+  			file.write(piece_data);
+  			file.close();
+        // System.arraycopy(data, 0, piece, b, l);
+        System.out.print("Got from " + peer.peer_id_);
+        b.print();
+      }
     } catch (Exception e){
       Manager.q.add(b);
       System.out.println(peer.peer_id_ + " " + e);
+      System.exit(1);
     }
   }
   
