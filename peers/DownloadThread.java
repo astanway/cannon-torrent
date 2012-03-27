@@ -37,37 +37,38 @@ public class DownloadThread implements Runnable {
 
         //send bitfield
 
-        //if we're interested:
         while(!Manager.q.isEmpty()){
           Block p = Manager.q.poll();
-
-          if(bfb[p.getPiece()] == true && Manager.have_piece.get(p.getPiece()) == 0){
-            peer.sendMessage(Peer.INTERESTED);
-            if(peer.choked == false){
-              downloadBlock(p);
-            } else {
-              m = peer.listen();
-              if(m.getId() == Message.TYPE_UNCHOKE){
-                System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+          if(bfb[p.getPiece()] == true){
+            if(Manager.have_piece.get(p.getPiece()) == 0){
+              peer.sendMessage(Peer.INTERESTED);
+              if(peer.choked == false){
                 downloadBlock(p);
-                peer.choked = false;
+              } else {
+                  m = peer.listen();
+                  if(m.getId() == Message.TYPE_UNCHOKE){
+                    System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+                    downloadBlock(p);
+                    peer.choked = false;
+                }
               }
+            } else {
+              peer.sendMessage(Peer.UNINTERESTED);
+              Manager.q.add(p);
             }
-          }
-
-
+          } 
+        }
             // while(true){ if(peer.listenForUnchoke()){ break; }}
 
 
             //listen
             //if we have a full piece, broadcast
-        }
-        System.out.println("done.");
+      } else if (m.getId() == Message.TYPE_HAVE){
+        System.out.println("They want something from us.");
       }
       
       System.out.println("q empty");
-      //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
-      //
+      System.out.println(Manager.q.size());
       // downloadPieces(peer);
       //     
       //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
@@ -92,8 +93,8 @@ public class DownloadThread implements Runnable {
         return;
       } else if(m.getId() == Message.TYPE_UNCHOKE){
         System.out.println("Peer " + peer.peer_id_ + " unchoked us");
-        Manager.q.add(b);
         peer.choked = false;
+        Manager.q.add(b);
         return;
       } else if (m.getId() == Message.TYPE_CHOKE){
         System.out.println("Peer " + peer.peer_id_ + " choked us");
@@ -105,8 +106,8 @@ public class DownloadThread implements Runnable {
         byte[] piece_data = pm.getData();
         
 
-        //         //verify the data
-        //         peer.from_peer_.mark(l + 13);
+        // verify the data
+        // peer.from_peer_.mark(l + 13);
         // byte[] toVerify = new byte[l + 13];
         // peer.from_peer_.readFully(toVerify);
         // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
@@ -127,7 +128,6 @@ public class DownloadThread implements Runnable {
     } catch (Exception e){
       Manager.q.add(b);
       System.out.println(peer.peer_id_ + " " + e);
-      System.exit(1);
     }
   }
   

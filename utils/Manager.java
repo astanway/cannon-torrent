@@ -1,5 +1,6 @@
 package utils;
 
+import java.nio.ByteBuffer;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,17 +10,19 @@ import peers.*;
 
 public class Manager {
 
-	public static byte[] peer_id             =	new byte[20];
-	public static byte[] info_hash		    	 = new byte[20];
-	public static TorrentInfo torrent_info	 = null;
+	public static byte[] peer_id                 = new byte[20];
+	public static byte[] info_hash		    	     = new byte[20];
+	public static TorrentInfo torrent_info	     = null;
 	public static ConcurrentLinkedQueue<Block> q = null;
-	public static AtomicIntegerArray have_piece = null;
-	public static RandomAccessFile file  	 = null;
-	public static int port			        		 = 0;
-	public static int numPieces			       = 0;
-	public static int numBlocks			       = 0;
+	public static AtomicIntegerArray have_piece  = null;
+	public static RandomAccessFile file  	       = null;
+	public static int port			        		     = 0;
+	public static int interval                   = 0;
+	public static int numPieces   			         = 0;
+	public static int numBlocks		    	         = 0;
+	public static boolean ready                  = false;
 
-	public static final int block_length	= 16384;
+	public static final int block_length = 16384;
 	public static final String STARTED   = "started";
 	public static final String COMPLETED = "completed";
 	public static final String STOPPED   = "stopped";
@@ -126,6 +129,7 @@ public class Manager {
 	
 	public static void setPeerList (ArrayList<Peer> _peerList){
 		Manager.peerList_ = _peerList;
+		Manager.ready = true;
 	}
 
 	public static ArrayList<Peer> getPeerList(){
@@ -186,6 +190,76 @@ public class Manager {
 
 		return url_string;
 	}
+	
+	//query the tracker and get the initial list of peers
+	public static void queryTracker(){
+		byte[] response = null;
+		int i = 0;
+		for (i=6881; i<=6889;){
+			try{
+				response = Helpers.getURL(constructQuery(i, 0, 0, torrent_info.file_length, ""));
+				setPort(i);
+				break;
+			} catch (Exception e){
+				System.out.println("Port " + i + " failed");
+				i++;
+				continue;
+			}
+		}
 
+		setPeerList(response);
+	}
+	
+	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
+	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
+	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
+	public static final ByteBuffer completeKey = ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
+	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
+	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
+	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
+
+	/**
+	 * Gets the peer list from a response from the tracker
+	 * @param response	byte array response from 
+	 * @return			    returns the array list of peers
+	 */
+	public static void setPeerList(byte[] response){	  
+		ArrayList<Peer> peerList = new ArrayList<Peer>();
+		try{
+			Object decodedResponse = Bencoder2.decode(response);
+      // ToolKit.print(decodedResponse, 1);
+
+			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
+			interval = (Integer)responseMap.get(intervalKey);
+
+			ArrayList<Object> peerArray = (ArrayList<Object>)responseMap.get(peersKey);
+
+			for (int i = 0;i<peerArray.size();i++){
+				Object peer = peerArray.get(i);
+				String ip_ = "";
+				String peer_id_ = "";
+				int port_ = 0;
+
+				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
+				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
+				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
+				port_ = (Integer)peerMap.get(portKey);
+				// System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
+				Peer newPeer = new Peer(peer_id_, ip_, port_);
+
+				if(newPeer.isValid()){
+					peerList.add(newPeer);
+				}
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+
+		peerList_ = peerList;
+		
+		//ready to start! THIS IS TERRIBLE CODE
+		ready = true;
+	}
 }
 

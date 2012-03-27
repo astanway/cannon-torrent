@@ -35,27 +35,13 @@ public class RUBTClient {
 		//start the manager
 		manager = new Manager(torrentFile,savedFile);
 		manager.setPeerId();
-		manager.setPeerList(getPeers());
-    manager.download();
-	}
+		manager.queryTracker();
 
-	//query the tracker and get the initial list of peers
-	public static ArrayList<Peer> getPeers(){
-		byte[] response = null;
-		int i = 0;
-		for (i=6881; i<=6889;){
-			try{
-				response = Helpers.getURL(manager.constructQuery(i, 0, 0, manager.getTorrentInfo().file_length, ""));
-				manager.setPort(i);
-				break;
-			} catch (Exception e){
-				System.out.println("Port " + i + " failed");
-				i++;
-				continue;
-			}
-		}
-
-		return Helpers.getPeerList(response);
+    //wait for the manager to be ready
+		while(!manager.ready){}
+		System.out.println("All systems go.");
+		System.out.println(manager.q.size());
+	  manager.download();
 	}
 	
 	public static void executeTask(Runnable r){

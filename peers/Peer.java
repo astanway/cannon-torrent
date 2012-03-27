@@ -214,7 +214,7 @@ public class Peer {
 	    System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
 	    return m;
 	  } catch (Exception e){
-	    System.out.println(e);
+		  System.out.println("Error on listen for peer " + peer_id_);
 	    return null;
 	  }
 	}
@@ -240,7 +240,7 @@ public class Peer {
 		try{
       to_peer_.write(write_out_);
 		}catch(Exception e){
-			System.out.println(e);
+		  System.out.println("Error on sendRequest for peer " + peer_id_);
 		}
     System.out.println("Requested (" + _index + ", " + _begin + ") from " + peer_id_);      
 	}
