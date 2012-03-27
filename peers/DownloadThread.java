@@ -82,7 +82,7 @@ public class DownloadThread implements Runnable {
 	  byte[] data = b.getData();
 
     try{
-      peer.sendRequest(b);
+      peer.requestBlock(b);
       Message m = peer.listen();
       
       if (m == null){

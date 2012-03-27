@@ -225,24 +225,17 @@ public class Peer {
 	 * @param _begin offset in byte array
 	 * @param _length length of requested byte array
 	 */
-	public void sendRequest(Block b){
-	  int _index = b.getPiece(); 
-	  int _begin = b.getBlockIndex();
-	  int _length = b.getLength();
-		ByteBuffer out_bytes_ = ByteBuffer.allocate(17);
-		out_bytes_.putInt(13);
-		byte temp = 0x06;
-		out_bytes_.put(temp);
-		out_bytes_.putInt(_index);
-		out_bytes_.putInt(_begin);
-		out_bytes_.putInt(_length);
-		byte write_out_[] = out_bytes_.array();
-		try{
-      to_peer_.write(write_out_);
-		}catch(Exception e){
-		  System.out.println("Error on sendRequest for peer " + peer_id_);
-		}
-    System.out.println("Requested (" + _index + ", " + _begin + ") from " + peer_id_);      
+	public void requestBlock(Block b){
+	  int x = b.getPiece(); 
+	  int y = b.getBlockIndex();
+	  int z = b.getLength();
+	  Message m = new RequestMessage(x, y, z);
+    try {
+    	  Message.encode(to_peer_, m);
+    } catch(Exception e){
+      System.out.println("Error on sendRequest for peer " + peer_id_);
+    }
+    System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);      
 	}
 
 

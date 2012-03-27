@@ -19,6 +19,7 @@ public class Manager {
 	public static int port			        		     = 0;
 	public static int interval                   = 0;
 	public static int numPieces   			         = 0;
+	public static int numLeft                    = 0;
 	public static int numBlocks		    	         = 0;
 	public static boolean ready                  = false;
 
@@ -35,11 +36,12 @@ public class Manager {
 
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile,fileName);
-		int leftoverBytes = torrent_info.file_length % block_length;	
-		numPieces = leftoverBytes == 0 ?
-        				torrent_info.file_length / torrent_info.piece_length :
-        				torrent_info.file_length / torrent_info.piece_length + 1;
-		numBlocks = torrent_info.piece_length / block_length;
+		
+    int leftoverBytes = torrent_info.file_length % block_length; 
+    numPieces = leftoverBytes == 0 ?
+                   torrent_info.file_length / torrent_info.piece_length :
+                   torrent_info.file_length / torrent_info.piece_length + 1;
+    numBlocks = torrent_info.piece_length / block_length;
 		
 		have_piece = new AtomicIntegerArray(numPieces);
 
