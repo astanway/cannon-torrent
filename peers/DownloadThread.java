@@ -33,9 +33,9 @@ public class DownloadThread implements Runnable {
         bf = bfm.getData();
         boolean[] bfb = BitToBoolean.convert(bf);
         
-        //need have array
+        //TODO: need have array
 
-        //send bitfield
+        //TODO: send bitfield
 
         while(!Manager.q.isEmpty()){
           Block p = Manager.q.poll();
@@ -58,11 +58,8 @@ public class DownloadThread implements Runnable {
             }
           } 
         }
-            // while(true){ if(peer.listenForUnchoke()){ break; }}
 
-
-            //listen
-            //if we have a full piece, broadcast
+        //TODO: if we have a full piece, broadcast
       } else if (m.getId() == Message.TYPE_HAVE){
         System.out.println("They want something from us.");
       }
@@ -104,18 +101,10 @@ public class DownloadThread implements Runnable {
       } else if (m.getId() == Message.TYPE_PIECE){
         PieceMessage pm = (PieceMessage) m;
         byte[] piece_data = pm.getData();
-        
 
         // verify the data
-        // peer.from_peer_.mark(l + 13);
-        // byte[] toVerify = new byte[l + 13];
-        // peer.from_peer_.readFully(toVerify);
-        // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
-        // Helpers.verifyHash(toVerify, pieceHash);
-        // peer.from_peer_.reset();
-        // 
-        // //cop dat data
-        // peer.from_peer_.readFully(data);
+        byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
+        Helpers.verifyHash(piece_data, pieceHash);
 			
   			String name = "blocks/" + p + " " + b.getBlock();
   			RandomAccessFile file = new RandomAccessFile(name,"rws");
