@@ -20,7 +20,7 @@ public class Manager {
 	public static int interval                   = 0;
 	public static int numPieces   			         = 0;
 	public static int numLeft                    = 0;
-	public static int numBlocks		    	         = 0;
+	public static int blocksPerPiece		    	         = 0;
 	public static boolean ready                  = false;
 
 	public static final int block_length = 16384;
@@ -37,24 +37,30 @@ public class Manager {
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile,fileName);
 
+    // should be 686 fucking blocks. i'll fix this tomorrow.
+
     int leftoverBytes = torrent_info.file_length % block_length; 
     numPieces = leftoverBytes == 0 ?
                    torrent_info.file_length / torrent_info.piece_length :
                    torrent_info.file_length / torrent_info.piece_length + 1;
-    numBlocks = torrent_info.piece_length / block_length;
+    blocksPerPiece = torrent_info.piece_length / block_length;
+    int numBlocks = numPieces * blocksPerPiece;
+    System.out.println(numBlocks);
 		
 		have_piece = new AtomicIntegerArray(numPieces);
 		System.out.println(leftoverBytes);
 		System.out.println(numPieces);
-		System.out.println(numBlocks);
+		System.out.println(blocksPerPiece);
+		System.out.println(torrent_info.file_length);
+		System.out.println(torrent_info.piece_length);
 
     //set up the reference queue
     q = new ConcurrentLinkedQueue<Block>();
-	  for(int j = 0; j < numPieces; j++){
-	    for(int k = 0; k < numBlocks; k++){
+	  for(int total = 0, j = 0; j < numPieces; j++){
+	    for(int k = 0; k < blocksPerPiece; k++, total++){
 				byte[] data = null;
         
-				if(j == numPieces - 1 && k == numBlocks - 1){
+				if(j == numPieces - 1 && total == numBlocks - 1){
 					data = new byte[leftoverBytes];
 				}
 				else{
