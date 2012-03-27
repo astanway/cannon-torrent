@@ -36,7 +36,7 @@ public class Manager {
 
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile,fileName);
-		
+
     int leftoverBytes = torrent_info.file_length % block_length; 
     numPieces = leftoverBytes == 0 ?
                    torrent_info.file_length / torrent_info.piece_length :
@@ -44,6 +44,9 @@ public class Manager {
     numBlocks = torrent_info.piece_length / block_length;
 		
 		have_piece = new AtomicIntegerArray(numPieces);
+		System.out.println(leftoverBytes);
+		System.out.println(numPieces);
+		System.out.println(numBlocks);
 
     //set up the reference queue
     q = new ConcurrentLinkedQueue<Block>();

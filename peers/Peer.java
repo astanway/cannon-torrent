@@ -221,9 +221,7 @@ public class Peer {
 
 	/**  
 	 * Request piece call
-	 * @param _index piece number
-	 * @param _begin offset in byte array
-	 * @param _length length of requested byte array
+	 * @param b block we need
 	 */
 	public void requestBlock(Block b){
 	  int x = b.getPiece(); 
