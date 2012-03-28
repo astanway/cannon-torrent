@@ -36,7 +36,10 @@ public class DownloadThread implements Runnable {
         //TODO: need have array
 
         //TODO: send bitfield
-
+        
+        //TODO: send start message
+        
+        //loop as long as there are blocks on the queue
         while(!Manager.q.isEmpty()){
           Block b = Manager.q.poll();
           System.out.print("Trying ");
@@ -46,6 +49,7 @@ public class DownloadThread implements Runnable {
               peer.sendMessage(Peer.INTERESTED);
               if(peer.choked == false){
                 if(!downloadBlock(b)){
+                  //restart connection if download fails
                   run();
                   return;
                 }
@@ -54,36 +58,39 @@ public class DownloadThread implements Runnable {
                   if(m.getId() == Message.TYPE_UNCHOKE){
                     System.out.println("Peer " + peer.peer_id_ + " unchoked us");
                     if(!downloadBlock(b)){
+                      //restart connection if download fails
                       run();
                       return;
                     }
-                    peer.choked = false;
+                  peer.choked = false;
                 }
               }
             } else {
-              //we don't want it
+                //we don't want it
+                peer.sendMessage(Peer.UNINTERESTED);
+                Manager.q.add(b);
+              }
+            } else {
+              //they don't have it
               peer.sendMessage(Peer.UNINTERESTED);
-              Manager.q.add(b)
-            }
-          } else {
-            //they don't have it
-            peer.sendMessage(Peer.UNINTERESTED);
-            Manager.q.add(b)
+              Manager.q.add(b);
             } 
           }
 
-        //TODO: if we have a full piece, broadcast
+        //TODO: if we have a full piece, broadcast to tracker.
+        
       } else if (m.getId() == Message.TYPE_HAVE){
+        
+        //TODO: put in upload logic here.
+        
         System.out.println("They want something from us.");
       }
       
-      System.out.println("q empty");
-      System.out.println(Manager.q.size());
-      // downloadPieces(peer);
-      //     
+      System.out.println("File downloaded.");
+      
       //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-      //
-      // peer.closeSocket();
+
+      peer.closeSocket();
     }
   }
   
@@ -99,18 +106,19 @@ public class DownloadThread implements Runnable {
       Message m = peer.listen();
       
       if (m == null){
-        Manager.q.add(b)
+        //add it back onto the queue and restart the connection
+        Manager.q.add(b);
         System.out.println("restarting");
         return false;
       } else if(m.getId() == Message.TYPE_UNCHOKE){
         System.out.println("Peer " + peer.peer_id_ + " unchoked us");
         peer.choked = false;
-        Manager.q.add(b)
+        Manager.q.add(b);
         return true;
       } else if (m.getId() == Message.TYPE_CHOKE){
         System.out.println("Peer " + peer.peer_id_ + " choked us");
         peer.choked = true;
-        Manager.q.add(b)
+        Manager.q.add(b);
         return true;
       } else if (m.getId() == Message.TYPE_PIECE){
         PieceMessage pm = (PieceMessage) m;
@@ -124,13 +132,16 @@ public class DownloadThread implements Runnable {
   			RandomAccessFile file = new RandomAccessFile(name,"rws");
   			file.write(piece_data);
   			file.close();
+  			
+  			//TODO: put it all into one file.
+
         // System.arraycopy(data, 0, piece, b, l);
         System.out.print("Got from " + peer.peer_id_);
         b.print();
         return true;
       }
     } catch (Exception e){
-      Manager.q.add(b)
+      Manager.q.add(b);
       System.out.println(peer.peer_id_ + " " + e);
       return true;
     }

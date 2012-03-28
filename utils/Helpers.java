@@ -33,7 +33,8 @@ public final class Helpers
 				throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
 			}
 		} catch (Exception e){
-			System.exit(1);
+		  System.out.println(e);
+		  System.exit(1);
 		}
 	}
 

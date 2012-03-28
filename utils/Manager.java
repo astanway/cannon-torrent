@@ -40,33 +40,30 @@ public class Manager {
     // should be 686 fucking blocks. i'll fix this tomorrow.
 
     int leftoverBytes = torrent_info.file_length % block_length; 
+
     numPieces = leftoverBytes == 0 ?
                    torrent_info.file_length / torrent_info.piece_length :
                    torrent_info.file_length / torrent_info.piece_length + 1;
     blocksPerPiece = torrent_info.piece_length / block_length;
-    int numBlocks = numPieces * blocksPerPiece;
-    System.out.println(numBlocks);
-		
+    
+    int numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
+    
+
 		have_piece = new AtomicIntegerArray(numPieces);
-		System.out.println(leftoverBytes);
-		System.out.println(numPieces);
-		System.out.println(blocksPerPiece);
-		System.out.println(torrent_info.file_length);
-		System.out.println(torrent_info.piece_length);
 
     //set up the reference queue
     q = new ConcurrentLinkedQueue<Block>();
 	  for(int total = 0, j = 0; j < numPieces; j++){
 	    for(int k = 0; k < blocksPerPiece; k++, total++){
-				byte[] data = null;
-        
-				if(j == numPieces - 1 && total == numBlocks - 1){
+				byte[] data = null;        
+				if(j == numPieces - 1 && total == numBlocks){
 					data = new byte[leftoverBytes];
-				}
-				else{
+					Block b = new Block(j, k, data);
+					q.add(b);
+					break;
+				} else{
 					data = new byte[block_length];
 				}
-				
         Block b = new Block(j, k, data);
         q.add(b);
 	    }
