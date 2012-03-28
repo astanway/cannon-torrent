@@ -61,14 +61,16 @@ public class DownloadThread implements Runnable {
                 }
               }
             } else {
+              //we don't want it
               peer.sendMessage(Peer.UNINTERESTED);
-              if(!Manager.q.add(b)){
-                System.out.println("couldn't add it ");
-                b.print();
-              }
+              Manager.q.add(b)
             }
-          } 
-        }
+          } else {
+            //they don't have it
+            peer.sendMessage(Peer.UNINTERESTED);
+            Manager.q.add(b)
+            } 
+          }
 
         //TODO: if we have a full piece, broadcast
       } else if (m.getId() == Message.TYPE_HAVE){
@@ -97,27 +99,18 @@ public class DownloadThread implements Runnable {
       Message m = peer.listen();
       
       if (m == null){
-        if(!Manager.q.add(b)){
-          System.out.println("couldn't add it ");
-          b.print();
-        }
+        Manager.q.add(b)
         System.out.println("restarting");
         return false;
       } else if(m.getId() == Message.TYPE_UNCHOKE){
         System.out.println("Peer " + peer.peer_id_ + " unchoked us");
         peer.choked = false;
-        if(!Manager.q.add(b)){
-          System.out.println("couldn't add it ");
-          b.print();
-        }
+        Manager.q.add(b)
         return true;
       } else if (m.getId() == Message.TYPE_CHOKE){
         System.out.println("Peer " + peer.peer_id_ + " choked us");
         peer.choked = true;
-        if(!Manager.q.add(b)){
-          System.out.println("couldn't add it ");
-          b.print();
-        }
+        Manager.q.add(b)
         return true;
       } else if (m.getId() == Message.TYPE_PIECE){
         PieceMessage pm = (PieceMessage) m;
@@ -137,10 +130,7 @@ public class DownloadThread implements Runnable {
         return true;
       }
     } catch (Exception e){
-      if(!Manager.q.add(b)){
-        System.out.println("couldn't add it ");
-        b.print();
-      }
+      Manager.q.add(b)
       System.out.println(peer.peer_id_ + " " + e);
       return true;
     }
