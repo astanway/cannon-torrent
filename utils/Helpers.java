@@ -148,22 +148,7 @@ public final class Helpers
 	 * @return byte[]	file bytes
 	 * Taken from http://www.exampledepot.com/egs/java.io/file2bytearray.html
 	 */
-	public static byte[] getBytesFromFile(File file) throws IOException {
-	  
-    // FileInputStream in = new FileInputStream(file);
-    //     try {
-    //         java.nio.channels.FileLock lock = in.getChannel().tryLock();
-    //         try {
-    //             Reader reader = new InputStreamReader(in, charset);
-    //             ...
-    //         } finally {
-    //             lock.release();
-    //         }
-    //     } finally {
-    //         in.close();
-    //     }
-    
-    
+	public static byte[] getBytesFromFile(File file) throws IOException {  
       InputStream is = new FileInputStream(file);
       long length = file.length();
       

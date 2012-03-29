@@ -35,7 +35,9 @@ public class RUBTClient {
 		manager.setPeerId();
 
 		manager.setPeerList(getPeers());
-		manager.download();
+    manager.download();
+		
+		//This executes right after the above command, not after we're finished downloading.
 		Runtime.getRuntime().addShutdownHook(null);
 	}
 

@@ -9,6 +9,10 @@ import java.nio.channels.FileLock;
 public class PieceChecker extends TimerTask{
 
 	public void run(){
+	  if(Manager.fileDone == true){
+	    finish();
+	  }
+
 	  int[] pieces = new int[Manager.numPieces];
 	  File dir = new File("blocks");
     File files[] = dir.listFiles();
@@ -38,7 +42,7 @@ public class PieceChecker extends TimerTask{
       }
     }
     
-    checkDone();
+    finish();
 	}
 	
 	public boolean verify(int i, boolean last){
@@ -98,13 +102,65 @@ public class PieceChecker extends TimerTask{
     return true;
 	}
 	
-	public void checkDone(){
+	public static void finish(){
+	  
 	  for(int i = 0; i < Manager.have_piece.length(); i++){
       if(!(Manager.have_piece.get(i) == 1)){
+        System.out.println("Not finished yet.");
         return;
       }
     }
+	  
+	  System.out.println("Commencing file write...");
+    byte[] piece = null;
+    byte[] block = null;
+        
+    FileOutputStream out = null;
+    try{
+      out = new FileOutputStream(Manager.file);
+    } catch (Exception e){
+      System.out.print(e);
+    }
 
-    Manager.fileDone = true;
+    File dir = new File("blocks");
+    
+    for(File file : dir.listFiles()) {    
+      StringTokenizer st = new StringTokenizer(file.getName());
+      int p = Integer.parseInt(st.nextToken());
+      int b = Integer.parseInt(st.nextToken());
+      System.out.println(p);
+
+      if(p == Manager.numPieces - 1){
+        int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
+        piece = new byte[lastPieceSize];
+      } else {
+        piece = new byte[Manager.blocksPerPiece * Manager.block_length];
+      }
+
+      if(b == Manager.blocksInLastPiece - 1){
+        block = new byte[Manager.leftoverBytes];
+      } else {
+        block = new byte[Manager.block_length];
+      }
+
+      try{
+        byte[] fileBytes = Helpers.getBytesFromFile(file);
+        out.write(fileBytes);
+      } catch (Exception e){
+        System.out.print(e);
+      }
+    }
+    
+    try{
+      out.close();
+    } catch (Exception e){
+      System.out.print(e);
+    }
+    
+	  byte[] response = null;
+	  response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0, Manager.torrent_info.file_length, Manager.COMPLETED));
+    response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0, Manager.torrent_info.file_length, Manager.STOPPED));
+    System.out.println("Bye!");
+    System.exit(1);
 	}
 }

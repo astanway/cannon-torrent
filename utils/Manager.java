@@ -16,7 +16,7 @@ public class Manager {
 	public static TorrentInfo torrent_info	     = null;
 	public static ConcurrentLinkedQueue<Block> q = null;
 	public static AtomicIntegerArray have_piece  = null;
-	public static RandomAccessFile file  	       = null;
+	public static File file             	       = null;
 	public static int port			        		     = 0;
 	public static int interval                   = 0;
 	public static int numPieces   			         = 0;
@@ -77,11 +77,11 @@ public class Manager {
 		byte[] response = null;	  
     response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STARTED));
 
-		for(Peer peer : peerList_){
-			DownloadThread p = new DownloadThread(peer);
-			Thread a = new Thread(p);
-      a.start();
-		}
+    // for(Peer peer : peerList_){
+    //  DownloadThread p = new DownloadThread(peer);
+    //  Thread a = new Thread(p);
+    //       a.start();
+    // }
 		
 		Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();
@@ -89,34 +89,12 @@ public class Manager {
 
 		return false;
 	}
-	
-	public static void finish(){
-	  if(fileDone == false){
-	    System.out.println("File ain't done yet. Major fuck up.");
-	    return;
-	  }
 
-    //verify each piece
-    // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
-    // Helpers.verifyHash(piece_data, pieceHash);
-		
-		//TODO: put it all into one file.
-
-    // System.arraycopy(data, 0, piece, b, l);
-    
-    //write it to file
-    
-	  byte[] response = null;
-	  response = Helpers.getURL(constructQuery(port, 0, 0, torrent_info.file_length, COMPLETED));
-    response = Helpers.getURL(constructQuery(port, 0, 0, torrent_info.file_length, STOPPED));
- 
-	}
-
-	public static void setInfo(String torrentFile, String savedFile){
+	public static void setInfo(String torrentFile, String fileName){
 		try{
 			torrent_info = new TorrentInfo(Helpers.readTorrent(torrentFile));
 			torrent_info.info_hash.get(info_hash, 0, info_hash.length);
-			file = new RandomAccessFile(savedFile,"rws");
+			file = new File(fileName);
 		} catch (Exception e){
 			System.out.println(e);
 			System.out.println("Torrent file could not be loaded.");
@@ -148,11 +126,11 @@ public class Manager {
 		Manager.torrent_info = torrent_info;
 	}
 
-	public static RandomAccessFile getFile() {
+	public static File getFile() {
 		return file;
 	}
 
-	public static void setFile(RandomAccessFile file) {
+	public static void setFile(File file) {
 		Manager.file = file;
 	}
 

@@ -46,9 +46,9 @@ public class DownloadThread implements Runnable {
         while(!(Manager.have_piece.length() != Manager.numPieces)){
           Block b = Manager.q.poll();
           if(b == null){
+            peer.closeSocket();
             return;
           }
-
 
           //do they have what we want?
           if(bfb[b.getPiece()] == true){
@@ -97,8 +97,6 @@ public class DownloadThread implements Runnable {
       
       peer.closeSocket();
     }
-    
-    Manager.finish();
   }
   
   
