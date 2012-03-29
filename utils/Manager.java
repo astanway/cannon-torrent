@@ -96,6 +96,12 @@ public class Manager {
 	  }
 
     //verify each piece
+    // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
+    // Helpers.verifyHash(piece_data, pieceHash);
+		
+		//TODO: put it all into one file.
+
+    // System.arraycopy(data, 0, piece, b, l);
     
     //write it to file
     

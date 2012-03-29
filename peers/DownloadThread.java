@@ -2,6 +2,9 @@ package peers;
 
 import java.io.*;
 import java.util.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 import utils.*;
 import utils.Message.*;
@@ -42,8 +45,8 @@ public class DownloadThread implements Runnable {
         //loop as long as there are blocks on the queue
         while(!Manager.q.isEmpty()){
           Block b = Manager.q.poll();
-          System.out.print("Trying ");
-          b.print();
+          // System.out.print("Trying ");
+          // b.print();
 
           //do they have what we want?
           if(bfb[b.getPiece()] == true){
@@ -127,23 +130,16 @@ public class DownloadThread implements Runnable {
         byte[] piece_data = pm.getData();
         b.setData(piece_data);
 
+        ByteBuffer buf = ByteBuffer.wrap(piece_data);
         String name = "blocks/" + p + " " + b.getBlock();
-        RandomAccessFile file = new RandomAccessFile(name,"rws");
-        file.write(piece_data);
-        file.close();
-  			
-  			//TODO: verify each PIECE, as opposed to each block -> Make have array, check if it's full, and check the hash. 
-  			// If hash fails, reject entire piece, and put each block back on the queue. Possibly disconnect from peer, or at least
-  			// make sure we don't download the same piece from the same peer again.
-        // byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
-        // Helpers.verifyHash(piece_data, pieceHash);
-  			
-  			//TODO: put it all into one file.
-
-        // System.arraycopy(data, 0, piece, b, l);
+        RandomAccessFile file = new RandomAccessFile(name, "rw");
+        FileChannel ch = file.getChannel();
+        FileLock lock = ch.lock();
+        ch.write(buf);
+        lock.release();
+        ch.close();
         
-        
-        System.out.print("Got from " + peer.peer_id_);
+        System.out.print(peer.peer_id_ + " ");
         b.print();
         return true;
       }

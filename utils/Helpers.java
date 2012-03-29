@@ -25,16 +25,18 @@ public final class Helpers
 	 * Method to verify the hash for a piece
 	 * @param piece			the piece number
 	 * @param pieceHash		the hash for the piece from the torrentinfo
+	 * @return boolean if its verified or not
 	 */
-	public static void verifyHash(byte[] piece, byte[] pieceHash){
+	public static boolean verifyHash(byte[] piece, byte[] pieceHash){
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
 			if (!Arrays.equals(digest.digest(piece), pieceHash)){
 				throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
 			}
 		} catch (Exception e){
-		  System.out.println(e);
+		  return false;
 		}
+		return true;
 	}
 
 	/**
@@ -139,6 +141,48 @@ public final class Helpers
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * Read in bytes from a file
+	 * @param file	file
+	 * @return byte[]	file bytes
+	 * Taken from http://www.exampledepot.com/egs/java.io/file2bytearray.html
+	 */
+	public static byte[] getBytesFromFile(File file) throws IOException {
+	  
+    // FileInputStream in = new FileInputStream(file);
+    //     try {
+    //         java.nio.channels.FileLock lock = in.getChannel().tryLock();
+    //         try {
+    //             Reader reader = new InputStreamReader(in, charset);
+    //             ...
+    //         } finally {
+    //             lock.release();
+    //         }
+    //     } finally {
+    //         in.close();
+    //     }
+    
+    
+      InputStream is = new FileInputStream(file);
+      long length = file.length();
+      
+      byte[] bytes = new byte[(int)length];
+
+      int offset = 0;
+      int numRead = 0;
+      while (offset < bytes.length
+             && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+          offset += numRead;
+      }
+
+      if (offset < bytes.length) {
+          throw new IOException("Could not completely read file " + file.getName());
+      }
+      
+      is.close();
+      return bytes;
+  }
 
 
 	/**

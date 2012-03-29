@@ -218,7 +218,7 @@ public class Peer {
 	public Message listen(){
 	  try{
 	    Message m = Message.decode(from_peer_);
-	    System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
+      // System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
 	    return m;
 	  } catch (Exception e){
 		  System.out.println("Error on listen for peer " + peer_id_);
@@ -240,7 +240,7 @@ public class Peer {
     } catch(Exception e){
       System.out.println("Error on sendRequest for peer " + peer_id_);
     }
-    System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);      
+    // System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);
 	}
 
 
