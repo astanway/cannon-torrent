@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import utils.*;
+import utils.Message.*;
 
 public class Peer {
 
@@ -15,7 +16,9 @@ public class Peer {
 	public int port_ = 0;
 	public Socket socket_= null;
 	public DataOutputStream to_peer_ = null;
-	public DataInputStream from_peer_ = null;	
+	public DataInputStream from_peer_ = null;
+	
+	public boolean choked = true;
 	
 	public static final byte CHOKE         = 0x01;
 	public static final byte INTERESTED    = 0x02;
@@ -40,7 +43,7 @@ public class Peer {
 		this.ip_ = _ip;
 		this.port_ = _port;
 	}
-
+	
 	/**
 	 * Helper method to print out peer class
 	 */
@@ -211,31 +214,33 @@ public class Peer {
 			e.printStackTrace();
 		}
 	}
+	
+	public Message listen(){
+	  try{
+	    Message m = Message.decode(from_peer_);
+	    System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
+	    return m;
+	  } catch (Exception e){
+		  System.out.println("Error on listen for peer " + peer_id_);
+	    return null;
+	  }
+	}
 
 	/**  
 	 * Request piece call
-	 * @param _index piece number
-	 * @param _begin offset in byte array
-	 * @param _length length of requested byte array
+	 * @param b block we need
 	 */
-	public void sendRequest(Block b){
-	  int _index = b.getPiece(); 
-	  int _begin = b.getBlockIndex();
-	  int _length = b.getLength();
-		ByteBuffer out_bytes_ = ByteBuffer.allocate(17);
-		out_bytes_.putInt(13);
-		byte temp = 0x06;
-		out_bytes_.put(temp);
-		out_bytes_.putInt(_index);
-		out_bytes_.putInt(_begin);
-		out_bytes_.putInt(_length);
-		byte write_out_[] = out_bytes_.array();
-		try{
-      to_peer_.write(write_out_);
-		}catch(Exception e){
-			System.out.println(e);
-		}
-    System.out.println("Requested (" + _index + ", " + _begin + ") from " + peer_id_);      
+	public void requestBlock(Block b){
+	  int x = b.getPiece(); 
+	  int y = b.getBlockIndex();
+	  int z = b.getLength();
+	  Message m = new RequestMessage(x, y, z);
+    try {
+    	  Message.encode(to_peer_, m);
+    } catch(Exception e){
+      System.out.println("Error on sendRequest for peer " + peer_id_);
+    }
+    System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);      
 	}
 
 

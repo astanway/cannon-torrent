@@ -1,3 +1,4 @@
+rm blocks/*
 rm *.class
 rm peers/*.class
 rm utils/*.class

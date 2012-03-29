@@ -10,6 +10,17 @@ import peers.Peer;
 
 public final class Helpers 
 {
+  public static void printBoolArray(boolean[] arr){
+    for(int i = 0; i < arr.length; i++){
+      if(arr[i] == false){
+        System.out.print("0");
+      } else {
+        System.out.print("1");
+      }
+    }
+    System.out.println("");
+  }
+  
 	/**
 	 * Method to verify the hash for a piece
 	 * @param piece			the piece number
@@ -18,11 +29,11 @@ public final class Helpers
 	public static void verifyHash(byte[] piece, byte[] pieceHash){
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
-			if (Arrays.equals(digest.digest(piece), pieceHash)){
+			if (!Arrays.equals(digest.digest(piece), pieceHash)){
 				throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
 			}
 		} catch (Exception e){
-			System.exit(1);
+		  System.out.println(e);
 		}
 	}
 
@@ -41,55 +52,6 @@ public final class Helpers
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
-	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
-	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
-	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
-	public static final ByteBuffer completeKey = ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
-	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
-	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
-	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
-
-	/**
-	 * Gets the peer list from a response from the tracker
-	 * @param response	byte array response from 
-	 * @return			    returns the array list of peers
-	 */
-	public static ArrayList<Peer> getPeerList(byte[] response){	  
-		ArrayList<Peer> peerList = new ArrayList<Peer>();
-		try{
-			Object decodedResponse = Bencoder2.decode(response);
-      // ToolKit.print(decodedResponse, 1);
-
-			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
-			int interval = (Integer)responseMap.get(intervalKey);
-
-			ArrayList<Object> peerArray = (ArrayList<Object>)responseMap.get(peersKey);
-
-			for (int i = 0;i<peerArray.size();i++){
-				Object peer = peerArray.get(i);
-				String ip_ = "";
-				String peer_id_ = "";
-				int port_ = 0;
-
-				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
-				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
-				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
-				port_ = (Integer)peerMap.get(portKey);
-				// System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
-				Peer newPeer = new Peer(peer_id_, ip_, port_);
-
-				if(newPeer.isValid()){
-					peerList.add(newPeer);
-				}
-			}
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-
-		return peerList;
 	}
 
 	/**
