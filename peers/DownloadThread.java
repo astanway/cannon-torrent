@@ -131,7 +131,12 @@ public class DownloadThread implements Runnable {
         b.setData(piece_data);
 
         ByteBuffer buf = ByteBuffer.wrap(piece_data);
-        String name = "blocks/" + p + " " + b.getBlock();
+        String name = "";
+        if(b.getBlock() < 10){
+          name = "blocks/" + p + " 0" + b.getBlock();
+        } else {
+          name = "blocks/" + p + " " + b.getBlock(); 
+        }
         RandomAccessFile file = new RandomAccessFile(name, "rw");
         FileChannel ch = file.getChannel();
         FileLock lock = ch.lock();

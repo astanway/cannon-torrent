@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.TimerTask;
 import java.util.StringTokenizer;
 import java.nio.channels.FileChannel;
@@ -9,10 +10,6 @@ import java.nio.channels.FileLock;
 public class PieceChecker extends TimerTask{
 
 	public void run(){
-	  if(Manager.fileDone == true){
-	    finish();
-	  }
-
 	  int[] pieces = new int[Manager.numPieces];
 	  File dir = new File("blocks");
     File files[] = dir.listFiles();
@@ -28,6 +25,7 @@ public class PieceChecker extends TimerTask{
           Manager.have_piece.set(i, 1);
           System.out.println("Last piece verified.");
         } else {
+          deleteBlocks(i);
           //TODO: add all the block in this piece back onto the junk.
           System.exit(1);
         }
@@ -36,12 +34,13 @@ public class PieceChecker extends TimerTask{
           Manager.have_piece.set(i, 1);
           System.out.println("Piece " + i + " verified");
         } else {
+          deleteBlocks(i);
           //TODO: add all the block in this piece back onto the junk.
           System.exit(1);
         }
       }
     }
-    
+
     finish();
 	}
 	
@@ -50,6 +49,7 @@ public class PieceChecker extends TimerTask{
     byte[] piece = new byte[Manager.blocksPerPiece * Manager.block_length];
     byte[] block = new byte[Manager.block_length];
 
+    //is it the last piece?
     if(last){
       int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
       piece = new byte[lastPieceSize];
@@ -57,6 +57,7 @@ public class PieceChecker extends TimerTask{
       piece = new byte[Manager.blocksPerPiece * Manager.block_length];
     }
     
+    //get only the blocks in piece i
     File dir = new File("blocks");
     for(File file : dir.listFiles()) {
       StringTokenizer st = new StringTokenizer(file.getName());
@@ -94,7 +95,6 @@ public class PieceChecker extends TimerTask{
     }
 
     if(!Helpers.verifyHash(piece, pieceHash)){
-      //TODO: Add failed piece back onto q for re downloading.
       System.out.println("Verification failed at " + i);
       return false;
     }
@@ -102,8 +102,7 @@ public class PieceChecker extends TimerTask{
     return true;
 	}
 	
-	public static void finish(){
-	  
+	public static void finish(){	  
 	  for(int i = 0; i < Manager.have_piece.length(); i++){
       if(!(Manager.have_piece.get(i) == 1)){
         System.out.println("Not finished yet.");
@@ -122,26 +121,21 @@ public class PieceChecker extends TimerTask{
       System.out.print(e);
     }
 
+    //get rid of the spaces so we can make numbers out of the names
     File dir = new File("blocks");
-    
     for(File file : dir.listFiles()) {    
       StringTokenizer st = new StringTokenizer(file.getName());
-      int p = Integer.parseInt(st.nextToken());
-      int b = Integer.parseInt(st.nextToken());
-      System.out.println(p);
+      file.renameTo(new File("blocks/" + st.nextToken() + st.nextToken()));
+    }
+    
+    //sort the bastards
+    dir = new File("blocks");
+    File[] files = dir.listFiles();
+    Arrays.sort(files);
 
-      if(p == Manager.numPieces - 1){
-        int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
-        piece = new byte[lastPieceSize];
-      } else {
-        piece = new byte[Manager.blocksPerPiece * Manager.block_length];
-      }
-
-      if(b == Manager.blocksInLastPiece - 1){
-        block = new byte[Manager.leftoverBytes];
-      } else {
-        block = new byte[Manager.block_length];
-      }
+    //write 'em in the correct order
+    for(File file : files) {
+      int p = Integer.parseInt(file.getName());
 
       try{
         byte[] fileBytes = Helpers.getBytesFromFile(file);
@@ -157,10 +151,15 @@ public class PieceChecker extends TimerTask{
       System.out.print(e);
     }
     
+    //tell the tracker we're done
 	  byte[] response = null;
 	  response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0, Manager.torrent_info.file_length, Manager.COMPLETED));
     response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0, Manager.torrent_info.file_length, Manager.STOPPED));
     System.out.println("Bye!");
     System.exit(1);
+	}
+	
+	public static void deleteBlocks(int i){
+	  
 	}
 }
