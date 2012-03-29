@@ -6,50 +6,50 @@ import java.util.*;
 import utils.*;
 
 public class DownloadThread implements Runnable {
-  
-  public Peer peer = null;
-  
-  public DownloadThread(Peer _peer){
-    peer = _peer;
-  }
-  
-  public void run() {
-    peer.createSocket(peer.ip_, peer.port_);
-    peer.establishStreams();
-    peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 
-    if(peer.receiveHandshake(Manager.info_hash)){
-      peer.sendMessage(Peer.INTERESTED);
-      
-      //TODO: listen for choke messages during data transfer
-      while(true){ if(peer.listenForUnchoke()){ break; }}
-      while(!Manager.q.isEmpty()){
-        Block p = Manager.q.poll();
-        downloadBlock(p);
-      }
-      System.out.println("q empty");
-    //   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
-    //
-    // downloadPieces(peer);
-    //     
-    //   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
-    //     
-      peer.closeSocket();
-    }
-  }
-  
-  
-  public void downloadBlock(Block b){
-    int p = b.getPiece(); 
-	  int i = b.getBlockIndex();
-	  int l = b.getLength();
-	  byte[] data = b.getData();
+	public Peer peer = null;
 
-    try{
-      peer.sendRequest(b);
+	public DownloadThread(Peer _peer){
+		peer = _peer;
+	}
 
-      //verify the data
-      peer.from_peer_.mark(l + 13);
+	public void run() {
+		peer.createSocket(peer.ip_, peer.port_);
+		peer.establishStreams();
+		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
+
+		if(peer.receiveHandshake(Manager.info_hash)){
+			peer.sendMessage(Peer.INTERESTED);
+
+			//TODO: listen for choke messages during data transfer
+			while(true){ if(peer.listenForUnchoke()){ break; }}
+			while(!Manager.q.isEmpty()){
+				Block p = Manager.q.poll();
+				downloadBlock(p);
+			}
+			System.out.println("q empty");
+			//   response = Helpers.getURL(constructQuery(PORT, TORRENT_INFO.file_length, 0, 0, STARTED));
+			//
+			// downloadPieces(peer);
+			//     
+			//   response = Helpers.getURL(constructQuery(PORT, 0, TORRENT_INFO.file_length, 0, COMPLETED));
+			//     
+			peer.closeSocket();
+		}
+	}
+
+
+	public void downloadBlock(Block b){
+		int p = b.getPiece(); 
+		int i = b.getBlockIndex();
+		int l = b.getLength();
+		byte[] data = b.getData();
+
+		try{
+			peer.sendRequest(b);
+
+			//verify the data
+			peer.from_peer_.mark(l + 13);
 			byte[] toVerify = new byte[l + 13];
 			peer.from_peer_.readFully(toVerify);
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[p].array();
@@ -64,22 +64,22 @@ public class DownloadThread implements Runnable {
 
 			//cop dat data
 			peer.from_peer_.readFully(data);
-			
+
 			String name = "blocks/" + p + " " + b.getBlock();
 			RandomAccessFile file = new RandomAccessFile(name,"rws");
 			file.write(data);
 			file.close();
-      // System.arraycopy(data, 0, piece, b, l);
-      System.out.print("Got from " + peer.peer_id_);
-      b.print();
-    } catch (Exception e){
-      Manager.q.add(b);
-      System.out.println(peer.peer_id_ + " " + e);
-    }
-  }
-  
-  
-  /*
+			// System.arraycopy(data, 0, piece, b, l);
+			System.out.print("Got from " + peer.peer_id_);
+			b.print();
+		} catch (Exception e){
+			Manager.q.add(b);
+			System.out.println(peer.peer_id_ + " " + e);
+		}
+	}
+
+
+	/*
   public static void downloadPieces(Piece p){
 		int numPieces        = 0;
 		int numLeft          = 0;
@@ -140,5 +140,5 @@ public class DownloadThread implements Runnable {
 			System.out.println("Download failure for peer " + peer.peer_id_);
 		}
 	}*/
-	
+
 }

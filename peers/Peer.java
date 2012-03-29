@@ -28,6 +28,13 @@ public class Peer {
 	 * @param _ip		the ip of the peer
 	 * @param _port		the port to be used by the peer
 	 */
+	
+	public Peer(DataInputStream in, DataOutputStream out){
+		this.from_peer_=in;
+		this.to_peer_=out;
+	}
+	
+	
 	public Peer(String _peer_id, String _ip, int _port){
 		this.peer_id_ = _peer_id;
 		this.ip_ = _ip;
