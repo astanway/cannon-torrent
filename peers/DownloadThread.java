@@ -43,10 +43,12 @@ public class DownloadThread implements Runnable {
         //TODO: send start message once
         
         //loop as long as there are blocks on the queue
-        while(!Manager.q.isEmpty()){
+        while(!(Manager.have_piece.length() != Manager.numPieces)){
           Block b = Manager.q.poll();
-          // System.out.print("Trying ");
-          // b.print();
+          if(b == null){
+            return;
+          }
+
 
           //do they have what we want?
           if(bfb[b.getPiece()] == true){

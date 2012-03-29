@@ -23,6 +23,7 @@ public class Manager {
 	public static int numLeft                    = 0;
 	public static int blocksPerPiece		    	   = 0;
 	public static int blocksInLastPiece          = 0;
+  public static int leftoverBytes              = 0;
 	public static boolean ready                  = false;
 	public static boolean fileDone               = false;
   public static ReentrantLock fileLock 		     = new ReentrantLock();
@@ -41,7 +42,7 @@ public class Manager {
 	public Manager(String torrentFile, String fileName){
 		setInfo(torrentFile, fileName);
 
-    int leftoverBytes = torrent_info.file_length % block_length; 
+    leftoverBytes = torrent_info.file_length % block_length; 
 
     numPieces = leftoverBytes == 0 ?
                    torrent_info.file_length / torrent_info.piece_length :

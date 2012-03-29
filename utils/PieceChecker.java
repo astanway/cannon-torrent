@@ -20,9 +20,15 @@ public class PieceChecker extends TimerTask{
     
     for(int i = 0; i < pieces.length; i++){
       if(i == pieces.length - 1 && pieces[i] == Manager.blocksInLastPiece){
-        Manager.have_piece.set(i, 1);
+        if(verify(i, true)){
+          Manager.have_piece.set(i, 1);
+          System.out.println("Last piece verified.");
+        } else {
+          //TODO: add all the block in this piece back onto the junk.
+          System.exit(1);
+        }
       } else if (pieces[i] == Manager.blocksPerPiece && Manager.have_piece.get(i) == 0){
-        if(verify(i)){
+        if(verify(i, false)){
           Manager.have_piece.set(i, 1);
           System.out.println("Piece " + i + " verified");
         } else {
@@ -35,10 +41,17 @@ public class PieceChecker extends TimerTask{
     checkDone();
 	}
 	
-	public boolean verify(int i){
+	public boolean verify(int i, boolean last){
     byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
     byte[] piece = new byte[Manager.blocksPerPiece * Manager.block_length];
     byte[] block = new byte[Manager.block_length];
+
+    if(last){
+      int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
+      piece = new byte[lastPieceSize];
+    } else {
+      piece = new byte[Manager.blocksPerPiece * Manager.block_length];
+    }
     
     File dir = new File("blocks");
     for(File file : dir.listFiles()) {
@@ -46,6 +59,11 @@ public class PieceChecker extends TimerTask{
       int p = Integer.parseInt(st.nextToken());
       if(p == i){
         int b = Integer.parseInt(st.nextToken());
+        
+        if(last == true && b == Manager.blocksInLastPiece - 1){
+          block = new byte[Manager.leftoverBytes];
+        }
+        
         try{
           RandomAccessFile r = new RandomAccessFile("blocks/" + file.getName(), "r");
           FileChannel fc = r.getChannel();
@@ -72,6 +90,7 @@ public class PieceChecker extends TimerTask{
     }
 
     if(!Helpers.verifyHash(piece, pieceHash)){
+      //TODO: Add failed piece back onto q for re downloading.
       System.out.println("Verification failed at " + i);
       return false;
     }
