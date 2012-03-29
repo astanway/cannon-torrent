@@ -1,7 +1,9 @@
 package utils;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.StringTokenizer;
 import java.nio.channels.FileChannel;
@@ -123,20 +125,23 @@ public class PieceChecker extends TimerTask{
 
     //get rid of the spaces so we can make numbers out of the names
     File dir = new File("blocks");
+    ArrayList<String> names = new ArrayList<String>();
     for(File file : dir.listFiles()) {    
       StringTokenizer st = new StringTokenizer(file.getName());
-      file.renameTo(new File("blocks/" + st.nextToken() + st.nextToken()));
+      String newName = st.nextToken() + st.nextToken();
+      file.renameTo(new File("blocks/" + newName));
+      names.add(newName);
     }
     
     //sort the bastards
-    dir = new File("blocks");
-    File[] files = dir.listFiles();
-    Arrays.sort(files);
+    AlphanumComparator comparator = new AlphanumComparator();
+    Collections.sort(names, comparator);
 
     //write 'em in the correct order
-    for(File file : files) {
+    for(String name : names) {
+      File file = new File("blocks/" + name);
       int p = Integer.parseInt(file.getName());
-
+      System.out.println(p);
       try{
         byte[] fileBytes = Helpers.getBytesFromFile(file);
         out.write(fileBytes);
