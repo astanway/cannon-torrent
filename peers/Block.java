@@ -19,7 +19,7 @@ public class Block{
     this.isFilled = true;
   }
 	
-	public int getBlockIndex(){
+	public int getBlockOffset(){
 	  return this.block * Manager.block_length;
 	}
 	

@@ -230,7 +230,7 @@ public class Peer {
 	 */
 	public void requestBlock(Block b){
 	  int x = b.getPiece(); 
-	  int y = b.getBlockIndex();
+	  int y = b.getBlockOffset();
 	  int z = b.getLength();
 	  Message m = new RequestMessage(x, y, z);
     try {

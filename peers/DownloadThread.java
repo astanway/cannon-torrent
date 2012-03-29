@@ -37,7 +37,7 @@ public class DownloadThread implements Runnable {
 
         //TODO: send bitfield
         
-        //TODO: send start message
+        //TODO: send start message once
         
         //loop as long as there are blocks on the queue
         while(!Manager.q.isEmpty()){
@@ -92,12 +92,14 @@ public class DownloadThread implements Runnable {
       
       peer.closeSocket();
     }
+    
+    Manager.finish();
   }
   
   
   public boolean downloadBlock(Block b){
     int p = b.getPiece(); 
-	  int i = b.getBlockIndex();
+	  int i = b.getBlockOffset();
 	  int l = b.getLength();
 	  byte[] data = b.getData();
 
@@ -123,10 +125,12 @@ public class DownloadThread implements Runnable {
       } else if (m.getId() == Message.TYPE_PIECE){
         PieceMessage pm = (PieceMessage) m;
         byte[] piece_data = pm.getData();
-  			String name = "blocks/" + p + " " + b.getBlock();
-  			RandomAccessFile file = new RandomAccessFile(name,"rws");
-  			file.write(piece_data);
-  			file.close();
+        b.setData(piece_data);
+
+        String name = "blocks/" + p + " " + b.getBlock();
+        RandomAccessFile file = new RandomAccessFile(name,"rws");
+        file.write(piece_data);
+        file.close();
   			
   			//TODO: verify each PIECE, as opposed to each block -> Make have array, check if it's full, and check the hash. 
   			// If hash fails, reject entire piece, and put each block back on the queue. Possibly disconnect from peer, or at least
@@ -137,6 +141,8 @@ public class DownloadThread implements Runnable {
   			//TODO: put it all into one file.
 
         // System.arraycopy(data, 0, piece, b, l);
+        
+        
         System.out.print("Got from " + peer.peer_id_);
         b.print();
         return true;

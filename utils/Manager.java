@@ -21,9 +21,11 @@ public class Manager {
 	public static int interval                   = 0;
 	public static int numPieces   			         = 0;
 	public static int numLeft                    = 0;
-	public static int blocksPerPiece		    	         = 0;
+	public static int blocksPerPiece		    	   = 0;
+	public static int blocksInLastPiece          = 0;
 	public static boolean ready                  = false;
-	public static ReentrantLock fileLock 		= null;
+	public static boolean fileDone               = false;
+  public static ReentrantLock fileLock 		     = new ReentrantLock();
 
 	public static final int block_length = 16384;
 	public static final String STARTED   = "started";
@@ -37,7 +39,7 @@ public class Manager {
 	}
 
 	public Manager(String torrentFile, String fileName){
-		setInfo(torrentFile,fileName);
+		setInfo(torrentFile, fileName);
 
     int leftoverBytes = torrent_info.file_length % block_length; 
 
@@ -47,7 +49,6 @@ public class Manager {
     blocksPerPiece = torrent_info.piece_length / block_length;
     
     int numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
-    
 
 		have_piece = new AtomicIntegerArray(numPieces);
 
@@ -60,6 +61,7 @@ public class Manager {
 					data = new byte[leftoverBytes];
 					Block b = new Block(j, k, data);
 					q.add(b);
+					blocksInLastPiece = b.getBlock() + 1;
 					break;
 				} else{
 					data = new byte[block_length];
@@ -71,17 +73,36 @@ public class Manager {
 	}
 
 	public boolean download(){
-		byte[] response = null;
+		byte[] response = null;	  
+    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STARTED));
+
 		for(Peer peer : peerList_){
 			DownloadThread p = new DownloadThread(peer);
 			Thread a = new Thread(p);
       a.start();
 		}
+		
+		Timer t = new Timer();
+		PieceChecker checker = new PieceChecker();
+		t.schedule(checker, 3000, 3000);
 
-    System.out.println("File downloaded.");
-    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, COMPLETED));
-    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STOPPED));
 		return false;
+	}
+	
+	public static void finish(){
+	  if(fileDone == false){
+	    System.out.println("File ain't done yet. Major fuck up.");
+	    return;
+	  }
+
+    //verify each piece
+    
+    //write it to file
+    
+	  byte[] response = null;
+	  response = Helpers.getURL(constructQuery(port, 0, 0, torrent_info.file_length, COMPLETED));
+    response = Helpers.getURL(constructQuery(port, 0, 0, torrent_info.file_length, STOPPED));
+ 
 	}
 
 	public static void setInfo(String torrentFile, String savedFile){
