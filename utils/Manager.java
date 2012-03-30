@@ -78,11 +78,11 @@ public class Manager {
 		byte[] response = null;	  
     response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STARTED));
 
-    // for(Peer peer : peerList_){
-    //  DownloadThread p = new DownloadThread(peer);
-    //  Thread a = new Thread(p);
-    //       a.start();
-    // }
+    for(Peer peer : peerList_){
+     DownloadThread p = new DownloadThread(peer);
+     Thread a = new Thread(p);
+          a.start();
+    }
 		
 		Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();

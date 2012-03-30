@@ -12,26 +12,27 @@ import java.nio.channels.FileLock;
 
 public class PieceChecker extends TimerTask{
 
-	public void run(){
-	  int[] pieces = new int[Manager.numPieces];
-	  File dir = new File("blocks");
-    File files[] = dir.listFiles();
-    for (File f : files) {
-      StringTokenizer st = new StringTokenizer(f.getName());
-      int piece = Integer.parseInt(st.nextToken());
-      pieces[piece]++;
-    }
-    
-    for(int i = 0; i < pieces.length; i++){
+	public void run(){    
+    for(int i = 0; i < Manager.numPieces; i++){
+      //is it already verified?
+      if(Manager.have_piece.get(i) == 1){
+        continue;
+      }
+
+      //do we have the piece yet?
       byte[] piece = Helpers.getPiece(i);
+      if(piece == null){
+        continue;
+      }
+      
       byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
       if(Helpers.verifyHash(piece, pieceHash)){
         Manager.have_piece.set(i, 1);
         System.out.println("Piece " + i + " verified");
       } else {
-        deleteBlocks(i);
-        //TODO: add all the block in this piece back onto the junk.
-        System.exit(1);
+        System.out.println("Deleting piece " + i);
+        Manager.have_piece.set(i, 0);
+        Helpers.deletePiece(i);
       }
     }
 

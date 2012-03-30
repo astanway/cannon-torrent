@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 import peers.Peer;
+import peers.Block;
 
 public final class Helpers 
 {
@@ -31,7 +32,7 @@ public final class Helpers
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
 			if (!Arrays.equals(digest.digest(piece), pieceHash)){
-				throw new Exception ("Piece hash does not match. Exiting now, because we don't fucks around.");
+				throw new Exception ("Piece hash does not match.");
 			}
 		} catch (Exception e){
 		  return false;
@@ -142,12 +143,20 @@ public final class Helpers
 		return sb.toString();
 	}
 	
+	/**
+	 * Returns the piece in a byte array if we have it, returns null otherwise
+	 * @param i the zero based piece index
+	 * @return the piece, or null
+	 */
 	public static byte[] getPiece(int i){
     byte[] piece = new byte[Manager.blocksPerPiece * Manager.block_length];
     byte[] block = new byte[Manager.block_length];
+    int check = 0;
+    boolean last = false;
 	  
 	  //is it the last piece?
     if(i == Manager.numPieces - 1){
+      last = true;
       int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
       piece = new byte[lastPieceSize];
     } else {
@@ -160,6 +169,7 @@ public final class Helpers
       StringTokenizer st = new StringTokenizer(file.getName());
       int p = Integer.parseInt(st.nextToken());
       if(p == i){
+        check++;
         int b = Integer.parseInt(st.nextToken());
         
         if((i == Manager.numPieces - 1) && b == Manager.blocksInLastPiece - 1){
@@ -178,7 +188,40 @@ public final class Helpers
       }
     }
     
-    return piece;
+    if(last){
+      if(check == Manager.blocksInLastPiece){
+        return piece;
+      } else{
+        return null;
+      }
+    } else if(check == Manager.blocksPerPiece) {
+      return piece;
+    }
+    
+    return null;
+	}
+	
+	//adds deleted piece to manager as well
+	public static void deletePiece(int i){
+    File dir = new File("blocks");
+    byte[] data = null;
+    for(File file : dir.listFiles()) {
+      StringTokenizer st = new StringTokenizer(file.getName());
+      int p = Integer.parseInt(st.nextToken());
+      if(p == i){
+        file.delete();
+        int b = Integer.parseInt(st.nextToken());
+
+				if(i == Manager.numPieces - 1 && b == Manager.blocksInLastPiece){
+        	data = new byte[Manager.leftoverBytes];
+				} else{
+					data = new byte[Manager.block_length];
+				}
+				
+        Block block = new Block(p, b, data);
+        Manager.q.add(block);
+      }
+    }
 	}
 
 	/**
