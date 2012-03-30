@@ -180,6 +180,7 @@ public final class Helpers
           RandomAccessFile r = new RandomAccessFile("blocks/" + file.getName(), "r");
           r.read(block);
           System.arraycopy(block, 0, piece, Manager.block_length*b, block.length);
+          r.close();
         } catch (Exception e) {
           System.out.println("Couldn't read file. This should never happen.");
           e.printStackTrace();
@@ -198,6 +199,7 @@ public final class Helpers
       return piece;
     }
     
+    System.out.println(check);
     return null;
 	}
 	

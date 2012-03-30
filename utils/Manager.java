@@ -81,7 +81,7 @@ public class Manager {
     for(Peer peer : peerList_){
      DownloadThread p = new DownloadThread(peer);
      Thread a = new Thread(p);
-          a.start();
+     a.start();
     }
 		
 		Timer t = new Timer();

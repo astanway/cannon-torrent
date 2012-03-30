@@ -59,6 +59,7 @@ public class DownloadThread implements Runnable {
               if(peer.choked == false){
                 if(!downloadBlock(b)){
                   //restart connection if download fails
+                  System.out.println("restarting");
                   run();
                   return;
                 }
@@ -68,6 +69,7 @@ public class DownloadThread implements Runnable {
                     System.out.println("Peer " + peer.peer_id_ + " unchoked us");
                     if(!downloadBlock(b)){
                       //restart connection if download fails
+                      System.out.println("restarting");
                       run();
                       return;
                     }
@@ -95,6 +97,7 @@ public class DownloadThread implements Runnable {
         System.out.println("They want something from us.");
       }
       
+      System.out.println("Closing socket on peer " + peer.peer_id_);
       peer.closeSocket();
     }
   }
@@ -113,7 +116,6 @@ public class DownloadThread implements Runnable {
       if (m == null){
         //add it back onto the queue and restart the connection
         Manager.q.add(b);
-        System.out.println("restarting");
         return false;
       } else if(m.getId() == Message.TYPE_UNCHOKE){
         System.out.println("Peer " + peer.peer_id_ + " unchoked us");
@@ -145,8 +147,8 @@ public class DownloadThread implements Runnable {
         File rename = new File("temp/" + name);
         rename.renameTo(new File("blocks/" + name));
         
-        System.out.print(peer.peer_id_ + " ");
-        b.print();
+        // System.out.print(peer.peer_id_ + " ");
+        // b.print();
         return true;
       }
     } catch (Exception e){

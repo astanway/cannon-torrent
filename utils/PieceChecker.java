@@ -22,13 +22,14 @@ public class PieceChecker extends TimerTask{
       //do we have the piece yet?
       byte[] piece = Helpers.getPiece(i);
       if(piece == null){
-        continue;
+        System.out.println("Piece " + i + " is null");
+        break;
       }
       
       byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
       if(Helpers.verifyHash(piece, pieceHash)){
-        Manager.have_piece.set(i, 1);
         System.out.println("Piece " + i + " verified");
+        Manager.have_piece.set(i, 1);
       } else {
         System.out.println("Deleting piece " + i);
         Manager.have_piece.set(i, 0);
@@ -41,8 +42,9 @@ public class PieceChecker extends TimerTask{
 	
 	public static void finish(){	  
 	  for(int i = 0; i < Manager.have_piece.length(); i++){
-      if(!(Manager.have_piece.get(i) == 1)){
+      if(Manager.have_piece.get(i) != 1){
         System.out.println("Not finished yet.");
+        System.out.println(Manager.q.size());
         return;
       }
     }
