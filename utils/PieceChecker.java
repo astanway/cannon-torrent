@@ -10,6 +10,8 @@ import java.util.StringTokenizer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
+import peers.Block;
+
 public class PieceChecker extends TimerTask{
 
 	public void run(){    
@@ -22,8 +24,7 @@ public class PieceChecker extends TimerTask{
       //do we have the piece yet?
       byte[] piece = Helpers.getPiece(i);
       if(piece == null){
-        System.out.println("Piece " + i + " is null");
-        break;
+        continue;
       }
       
       byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
@@ -39,12 +40,48 @@ public class PieceChecker extends TimerTask{
 
     finish();
 	}
+
+	//adds missing blocks to queue if needed
+	public static void addMissingBlocks(){
+	  for(int total = 0, j = 0; j < Manager.numPieces; j++){
+	    for(int k = 0; k < Manager.blocksPerPiece; k++, total++){
+
+	      String name = "";
+        if(k < 10){
+          name = j + " 0" + k;
+        } else {
+          name = j + " " + k; 
+        }
+        
+	      File f = new File("blocks/" + name);
+        if (f.exists()) {
+           continue;
+        } else{
+   				byte[] data = null;
+   				System.out.println("Adding block " + j + " " + k);
+   				if(j == Manager.numPieces - 1 && total == Manager.numBlocks){
+   					data = new byte[Manager.leftoverBytes];
+   					Block b = new Block(j, k, data);
+   					Manager.q.add(b);
+   					break;
+   				} else{
+   					data = new byte[Manager.block_length];
+   				}
+           Block b = new Block(j, k, data);
+           Manager.q.add(b);
+        }
+	    }
+	  }	
+	}
 	
 	public static void finish(){	  
 	  for(int i = 0; i < Manager.have_piece.length(); i++){
       if(Manager.have_piece.get(i) != 1){
         System.out.println("Not finished yet.");
-        System.out.println(Manager.q.size());
+        if(Manager.q.size() == 0){
+          addMissingBlocks();
+          Manager.restart();
+        }
         return;
       }
     }
@@ -62,7 +99,7 @@ public class PieceChecker extends TimerTask{
 
     //get rid of the spaces so we can make numbers out of the names
     File dir = new File("blocks");
-     ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<String>();
      for(File file : dir.listFiles()) {    
        names.add(file.getName());
      }

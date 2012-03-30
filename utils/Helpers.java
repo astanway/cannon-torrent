@@ -199,7 +199,6 @@ public final class Helpers
       return piece;
     }
     
-    System.out.println(check);
     return null;
 	}
 	

@@ -58,7 +58,7 @@ public class Manager {
     q = new ConcurrentLinkedQueue<Block>();
 	  for(int total = 0, j = 0; j < numPieces; j++){
 	    for(int k = 0; k < blocksPerPiece; k++, total++){
-				byte[] data = null;        
+				byte[] data = null;
 				if(j == numPieces - 1 && total == numBlocks){
 					data = new byte[leftoverBytes];
 					Block b = new Block(j, k, data);
@@ -89,6 +89,14 @@ public class Manager {
 		t.schedule(checker, 3000, 3000);
 
 		return false;
+	}
+	
+	public static void restart(){
+    for(Peer peer : peerList_){
+     DownloadThread p = new DownloadThread(peer);
+     Thread a = new Thread(p);
+     a.start();
+    }	  
 	}
 
 	public static void setInfo(String torrentFile, String fileName){

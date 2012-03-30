@@ -43,9 +43,10 @@ public class DownloadThread implements Runnable {
         //TODO: send start message once
         
         //loop as long as there are blocks on the queue
-        while(!(Manager.have_piece.length() != Manager.numPieces)){
+        while(true){
           Block b = Manager.q.poll();
           if(b == null){
+            System.out.println("Closing socket on peer " + peer.peer_id_);
             peer.closeSocket();
             return;
           }
@@ -55,7 +56,14 @@ public class DownloadThread implements Runnable {
 
             //do we want what they have?
             if(Manager.have_piece.get(b.getPiece()) == 0){
-              peer.sendMessage(Peer.INTERESTED);
+
+              try {
+                peer.sendInterested();
+              } catch (Exception e) {
+                peer.closeSocket();
+                run();
+              }
+              
               if(peer.choked == false){
                 if(!downloadBlock(b)){
                   //restart connection if download fails
@@ -78,12 +86,12 @@ public class DownloadThread implements Runnable {
               }
             } else {
                 //we don't want it
-                peer.sendMessage(Peer.UNINTERESTED);
+                peer.sendUninterested();
                 Manager.q.add(b);
               }
             } else {
               //they don't have it
-              peer.sendMessage(Peer.UNINTERESTED);
+              peer.sendUninterested();
               Manager.q.add(b);
             } 
           }
@@ -96,9 +104,6 @@ public class DownloadThread implements Runnable {
         
         System.out.println("They want something from us.");
       }
-      
-      System.out.println("Closing socket on peer " + peer.peer_id_);
-      peer.closeSocket();
     }
   }
   
@@ -147,13 +152,16 @@ public class DownloadThread implements Runnable {
         File rename = new File("temp/" + name);
         rename.renameTo(new File("blocks/" + name));
         
-        // System.out.print(peer.peer_id_ + " ");
-        // b.print();
+        System.out.print(peer.peer_id_ + " ");
+        b.print();
         return true;
+      } else{
+        System.out.println("Other : " + m.getId());
+        Manager.q.add();
       }
     } catch (Exception e){
       Manager.q.add(b);
-      System.out.println(peer.peer_id_ + " " + e);
+      // System.out.println(peer.peer_id_ + " " + e);
       return true;
     }
     return true;

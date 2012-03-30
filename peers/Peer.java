@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.nio.ByteBuffer;
 
 import utils.*;
@@ -19,6 +20,8 @@ public class Peer {
 	public DataInputStream from_peer_ = null;
 	
 	public boolean choked = true;
+	
+	public long lastRequest = 0;
 	
 	public static final byte CHOKE         = 0x01;
 	public static final byte INTERESTED    = 0x02;
@@ -196,23 +199,24 @@ public class Peer {
 	 * sends a message with the specified byte
 	 * @param _byte byte to send
 	 */
-	public void sendMessage(byte _byte){
-		ByteBuffer out_bytes_ = ByteBuffer.allocate(5);
-    
-    //4-byte big endian?
-		if (_byte == this.HAVE){
-		  out_bytes_.putInt(5);
-		} else {
-		  out_bytes_.putInt(1);
-		}
-		
-		out_bytes_.put(_byte);
-		byte write_out_[] = out_bytes_.array();
-		try{
-			to_peer_.write(write_out_);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+	public void sendInterested(){
+	  Message m = new InterestedMessage();
+	  try {
+    	Message.encode(to_peer_, m);
+    } catch(Exception e){
+      System.out.println(e);
+      System.out.println("Error on sendInterested for peer " + peer_id_);
+    }		
+	}
+	
+	public void sendUninterested(){
+	  Message m = new UninterestedMessage();
+	  try {
+    	Message.encode(to_peer_, m);
+    } catch(Exception e){
+      System.out.println(e);
+      System.out.println("Error on uninterested for peer " + peer_id_);
+    }		
 	}
 	
 	public Message listen(){
@@ -236,11 +240,12 @@ public class Peer {
 	  int z = b.getLength();
 	  Message m = new RequestMessage(x, y, z);
     try {
-    	  Message.encode(to_peer_, m);
+    	Message.encode(to_peer_, m);
     } catch(Exception e){
+      System.out.println(e);
       System.out.println("Error on sendRequest for peer " + peer_id_);
     }
-    // System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);
+    System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);
 	}
 
 
