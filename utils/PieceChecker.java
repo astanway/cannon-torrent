@@ -23,37 +23,27 @@ public class PieceChecker extends TimerTask{
     }
     
     for(int i = 0; i < pieces.length; i++){
-      if(i == pieces.length - 1 && pieces[i] == Manager.blocksInLastPiece){
-        if(verify(i, true)){
-          Manager.have_piece.set(i, 1);
-          System.out.println("Piece " + i + " verified");
-        } else {
-          deleteBlocks(i);
-          //TODO: add all the block in this piece back onto the junk.
-          System.exit(1);
-        }
-      } else if (pieces[i] == Manager.blocksPerPiece && Manager.have_piece.get(i) == 0){
-        if(verify(i, false)){
-          Manager.have_piece.set(i, 1);
-          System.out.println("Piece " + i + " verified");
-        } else {
-          deleteBlocks(i);
-          //TODO: add all the block in this piece back onto the junk.
-          System.exit(1);
-        }
+      byte[] piece = getPiece(i);
+      byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
+      if(Helpers.verifyHash(piece, pieceHash)){
+        Manager.have_piece.set(i, 1);
+        System.out.println("Piece " + i + " verified");
+      } else {
+        deleteBlocks(i);
+        //TODO: add all the block in this piece back onto the junk.
+        System.exit(1);
       }
     }
 
     finish();
 	}
 	
-	public boolean verify(int i, boolean last){
-    byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
+	public byte[] getPiece(int i){
     byte[] piece = new byte[Manager.blocksPerPiece * Manager.block_length];
     byte[] block = new byte[Manager.block_length];
-
-    //is it the last piece?
-    if(last){
+	  
+	  //is it the last piece?
+    if(i == Manager.numPieces - 1){
       int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
       piece = new byte[lastPieceSize];
     } else {
@@ -68,7 +58,7 @@ public class PieceChecker extends TimerTask{
       if(p == i){
         int b = Integer.parseInt(st.nextToken());
         
-        if(last == true && b == Manager.blocksInLastPiece - 1){
+        if((i == Manager.numPieces - 1) && b == Manager.blocksInLastPiece - 1){
           block = new byte[Manager.leftoverBytes];
         }
 
@@ -83,13 +73,8 @@ public class PieceChecker extends TimerTask{
         }
       }
     }
-
-    if(!Helpers.verifyHash(piece, pieceHash)){
-      System.out.println("Verification failed at " + i);
-      return false;
-    }
     
-    return true;
+    return piece;
 	}
 	
 	public static void finish(){	  
