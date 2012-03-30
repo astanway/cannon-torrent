@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.StringTokenizer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -70,27 +71,14 @@ public class PieceChecker extends TimerTask{
         if(last == true && b == Manager.blocksInLastPiece - 1){
           block = new byte[Manager.leftoverBytes];
         }
-        
+
         try{
           RandomAccessFile r = new RandomAccessFile("blocks/" + file.getName(), "r");
-          FileChannel fc = r.getChannel();
-          FileLock fileLock = null;
-          
-          try{
-            fileLock = fc.tryLock(0L, Long.MAX_VALUE, true);
-          } catch (Exception e){
-            System.out.print(e);
-          }
-          
-          if (fileLock != null){
-            r.read(block);
-            System.arraycopy(block, 0, piece, Manager.block_length*b, block.length);
-          } else {
-           System.out.println("File is locked"); 
-          }
+          r.read(block);
+          System.arraycopy(block, 0, piece, Manager.block_length*b, block.length);
         } catch (Exception e) {
           System.out.println("Couldn't read file. This should never happen.");
-          System.out.print(e);
+          e.printStackTrace();
           System.exit(1);
         }
       }
@@ -125,21 +113,25 @@ public class PieceChecker extends TimerTask{
 
     //get rid of the spaces so we can make numbers out of the names
     File dir = new File("blocks");
-    ArrayList<String> names = new ArrayList<String>();
-    for(File file : dir.listFiles()) {    
+    Integer[] names = new Integer[Manager.numBlocks];
+    int x = 0;
+    for(File file : dir.listFiles()) {
       StringTokenizer st = new StringTokenizer(file.getName());
       String newName = st.nextToken() + st.nextToken();
-      file.renameTo(new File("blocks/" + newName));
-      names.add(newName);
+      int n = Integer.parseInt(newName);
+      System.out.println(n);
+      names[x++] = n;
     }
     
+    Arrays.sort(names);
     //sort the bastards
-    AlphanumComparator comparator = new AlphanumComparator();
-    Collections.sort(names, comparator);
+    // AlphanumComparator comparator = new AlphanumComparator();
+    // Collections.sort(names, comparator);
 
     //write 'em in the correct order
-    for(String name : names) {
-      File file = new File("blocks/" + name);
+    for(Integer name : names) {
+      String n = name.toString();
+      File file = new File("blocks/" + n);
       int p = Integer.parseInt(file.getName());
       System.out.println(p);
       try{

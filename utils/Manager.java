@@ -21,6 +21,7 @@ public class Manager {
 	public static int interval                   = 0;
 	public static int numPieces   			         = 0;
 	public static int numLeft                    = 0;
+	public static int numBlocks                  = 0;
 	public static int blocksPerPiece		    	   = 0;
 	public static int blocksInLastPiece          = 0;
   public static int leftoverBytes              = 0;
@@ -49,7 +50,7 @@ public class Manager {
                    torrent_info.file_length / torrent_info.piece_length + 1;
     blocksPerPiece = torrent_info.piece_length / block_length;
     
-    int numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
+    numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
 
 		have_piece = new AtomicIntegerArray(numPieces);
 

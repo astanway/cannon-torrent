@@ -130,19 +130,21 @@ public class DownloadThread implements Runnable {
         byte[] piece_data = pm.getData();
         b.setData(piece_data);
 
-        ByteBuffer buf = ByteBuffer.wrap(piece_data);
+        //make all single digits double, so that the sorting will work later on
         String name = "";
         if(b.getBlock() < 10){
-          name = "blocks/" + p + " 0" + b.getBlock();
+          name = p + " 0" + b.getBlock();
         } else {
-          name = "blocks/" + p + " " + b.getBlock(); 
+          name = p + " " + b.getBlock(); 
         }
-        RandomAccessFile file = new RandomAccessFile(name, "rw");
-        FileChannel ch = file.getChannel();
-        FileLock lock = ch.lock();
-        ch.write(buf);
-        lock.release();
-        ch.close();
+        
+        RandomAccessFile file = new RandomAccessFile("temp/" + name, "rw");
+        file.write(piece_data);
+        file.close();
+        
+        File rename = new File("temp/" + name);
+        rename.renameTo(new File("blocks/" + name));
+        
         
         System.out.print(peer.peer_id_ + " ");
         b.print();
