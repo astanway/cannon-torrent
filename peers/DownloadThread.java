@@ -145,7 +145,6 @@ public class DownloadThread implements Runnable {
         File rename = new File("temp/" + name);
         rename.renameTo(new File("blocks/" + name));
         
-        
         System.out.print(peer.peer_id_ + " ");
         b.print();
         return true;

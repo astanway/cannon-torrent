@@ -26,7 +26,7 @@ public class PieceChecker extends TimerTask{
       if(i == pieces.length - 1 && pieces[i] == Manager.blocksInLastPiece){
         if(verify(i, true)){
           Manager.have_piece.set(i, 1);
-          System.out.println("Last piece verified.");
+          System.out.println("Piece " + i + " verified");
         } else {
           deleteBlocks(i);
           //TODO: add all the block in this piece back onto the junk.
@@ -113,27 +113,18 @@ public class PieceChecker extends TimerTask{
 
     //get rid of the spaces so we can make numbers out of the names
     File dir = new File("blocks");
-    Integer[] names = new Integer[Manager.numBlocks];
-    int x = 0;
-    for(File file : dir.listFiles()) {
-      StringTokenizer st = new StringTokenizer(file.getName());
-      String newName = st.nextToken() + st.nextToken();
-      int n = Integer.parseInt(newName);
-      System.out.println(n);
-      names[x++] = n;
-    }
-    
-    Arrays.sort(names);
+     ArrayList<String> names = new ArrayList<String>();
+     for(File file : dir.listFiles()) {    
+       names.add(file.getName());
+     }
+
     //sort the bastards
-    // AlphanumComparator comparator = new AlphanumComparator();
-    // Collections.sort(names, comparator);
+    AlphanumComparator comparator = new AlphanumComparator();
+    Collections.sort(names, comparator);
 
     //write 'em in the correct order
-    for(Integer name : names) {
-      String n = name.toString();
-      File file = new File("blocks/" + n);
-      int p = Integer.parseInt(file.getName());
-      System.out.println(p);
+    for(String name : names) {
+      File file = new File("blocks/" + name);
       try{
         byte[] fileBytes = Helpers.getBytesFromFile(file);
         out.write(fileBytes);
