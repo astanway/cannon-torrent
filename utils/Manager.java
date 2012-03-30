@@ -93,10 +93,13 @@ public class Manager {
 	
 	public static void restart(){
     for(Peer peer : peerList_){
-     DownloadThread p = new DownloadThread(peer);
-     Thread a = new Thread(p);
-     a.start();
-    }	  
+      if(peer.socket_ == null){
+        System.out.println("Restarting peer " + peer.peer_id_);
+        DownloadThread p = new DownloadThread(peer);
+        Thread a = new Thread(p);
+        a.start();
+      }
+    }
 	}
 
 	public static void setInfo(String torrentFile, String fileName){

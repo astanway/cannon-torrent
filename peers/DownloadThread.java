@@ -18,12 +18,16 @@ public class DownloadThread implements Runnable {
   }
   
   public void run() {
+    peer.closeSocket();
     peer.createSocket(peer.ip_, peer.port_);
     peer.establishStreams();
     peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 
     if(peer.receiveHandshake(Manager.info_hash)){
       Message m = peer.listen();
+      if(m == null){
+        System.out.println("No message here.");
+      }
       byte[] bf = null;
       
       while(m.getId() == Message.TYPE_KEEP_ALIVE){
@@ -43,25 +47,24 @@ public class DownloadThread implements Runnable {
         //TODO: send start message once
         
         //loop as long as there are blocks on the queue
-        while(true){
+        while(!checkFull()){
           Block b = Manager.q.poll();
           if(b == null){
-            System.out.println("Closing socket on peer " + peer.peer_id_);
-            peer.closeSocket();
-            return;
+            continue;
           }
 
           //do they have what we want?
           if(bfb[b.getPiece()] == true){
 
-            //do we want what they have?
+            //do we actually want what we're asking for?
             if(Manager.have_piece.get(b.getPiece()) == 0){
 
               try {
                 peer.sendInterested();
               } catch (Exception e) {
-                peer.closeSocket();
+                Manager.q.add(b);
                 run();
+                return;
               }
               
               if(peer.choked == false){
@@ -86,13 +89,23 @@ public class DownloadThread implements Runnable {
               }
             } else {
                 //we don't want it
-                peer.sendUninterested();
-                Manager.q.add(b);
+                try {
+                  peer.sendUninterested();
+                } catch (Exception e) {
+                  Manager.q.add(b);
+                  run();
+                  return;
+                }
               }
             } else {
               //they don't have it
-              peer.sendUninterested();
-              Manager.q.add(b);
+              try {
+                peer.sendUninterested();
+              } catch (Exception e) {
+                Manager.q.add(b);
+                run();
+                return;
+              }
             } 
           }
 
@@ -104,9 +117,19 @@ public class DownloadThread implements Runnable {
         
         System.out.println("They want something from us.");
       }
+    } else {
+      System.out.println("No handshake?");
     }
   }
   
+  public boolean checkFull(){
+    for(int i = 0; i < Manager.have_piece.length(); i++){
+      if(Manager.have_piece.get(i) != 1){
+        return false;
+      }
+    }
+    return true;
+  }
   
   public boolean downloadBlock(Block b){
     int p = b.getPiece(); 
@@ -161,7 +184,6 @@ public class DownloadThread implements Runnable {
       }
     } catch (Exception e){
       Manager.q.add(b);
-      // System.out.println(peer.peer_id_ + " " + e);
       return true;
     }
     return true;

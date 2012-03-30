@@ -80,8 +80,8 @@ public class PieceChecker extends TimerTask{
         System.out.println("Not finished yet.");
         if(Manager.q.size() == 0){
           addMissingBlocks();
-          Manager.restart();
         }
+        System.out.println(Manager.q.size());
         return;
       }
     }
