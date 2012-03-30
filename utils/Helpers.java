@@ -141,6 +141,45 @@ public final class Helpers
 		}
 		return sb.toString();
 	}
+	
+	public static byte[] getPiece(int i){
+    byte[] piece = new byte[Manager.blocksPerPiece * Manager.block_length];
+    byte[] block = new byte[Manager.block_length];
+	  
+	  //is it the last piece?
+    if(i == Manager.numPieces - 1){
+      int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
+      piece = new byte[lastPieceSize];
+    } else {
+      piece = new byte[Manager.blocksPerPiece * Manager.block_length];
+    }
+    
+    //get only the blocks in piece i
+    File dir = new File("blocks");
+    for(File file : dir.listFiles()) {
+      StringTokenizer st = new StringTokenizer(file.getName());
+      int p = Integer.parseInt(st.nextToken());
+      if(p == i){
+        int b = Integer.parseInt(st.nextToken());
+        
+        if((i == Manager.numPieces - 1) && b == Manager.blocksInLastPiece - 1){
+          block = new byte[Manager.leftoverBytes];
+        }
+
+        try{
+          RandomAccessFile r = new RandomAccessFile("blocks/" + file.getName(), "r");
+          r.read(block);
+          System.arraycopy(block, 0, piece, Manager.block_length*b, block.length);
+        } catch (Exception e) {
+          System.out.println("Couldn't read file. This should never happen.");
+          e.printStackTrace();
+          System.exit(1);
+        }
+      }
+    }
+    
+    return piece;
+	}
 
 	/**
 	 * Read in bytes from a file
