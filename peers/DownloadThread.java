@@ -157,7 +157,7 @@ public class DownloadThread implements Runnable {
         return true;
       } else{
         System.out.println("Other : " + m.getId());
-        Manager.q.add();
+        Manager.q.add(b);
       }
     } catch (Exception e){
       Manager.q.add(b);
