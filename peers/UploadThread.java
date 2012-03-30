@@ -1,6 +1,8 @@
-
 package peers;
 
+import java.io.File;
+
+import utils.Helpers;
 import utils.Manager;
 import utils.Message;
 import utils.Message.*;
@@ -25,8 +27,12 @@ public class UploadThread implements Runnable {
 			}
 		}
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
-		// Message.encode(peer.to_peer_, new
-		// BitfieldMessage(Manager.getBitfield()));
+		try{
+			Message.encode(peer.to_peer_, new
+					BitfieldMessage(Manager.getBitfield()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		while (interest) {
 			Message temp = listen();
 			if (weChoked) {
@@ -70,15 +76,21 @@ public class UploadThread implements Runnable {
 				byte[] data = new byte[tempRequest.getBlockLength()];
 				int offset = Manager.torrent_info.piece_length
 						* tempRequest.getPieceIndex() + tempRequest.getBegin();
+				int blockNum = tempRequest.getBegin()/tempRequest.getBlockLength();
 				try {
-					Manager.file.read(data, offset, data.length);
+					File f = new File("blocks/" + tempRequest.getPieceIndex() + " " + blockNum);
+					data = Helpers.getBytesFromFile(f);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						data);
-				/* Upload handler will prototype I guess */
+				try{
+					Message.encode(peer.to_peer_, toSend);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 
 			case Message.TYPE_UNCHOKE:
 				System.out.println("We Are Unchoked");
