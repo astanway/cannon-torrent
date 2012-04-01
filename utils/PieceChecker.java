@@ -34,13 +34,14 @@ public class PieceChecker extends TimerTask {
 				if (Helpers.verifyHash(piece, pieceHash)) {
 					System.out.println("Piece " + i + " verified");
 					Manager.have_piece.set(i, 1);
-					for(Peer peer: Manager.activePeerList){
+					for (Peer peer : Manager.activePeerList) {
 						HaveMessage haveSend = new HaveMessage(i);
-						try{
-						Message.encode(peer.to_peer_,haveSend);
-						}catch(Exception e){
+						try {
+							Message.encode(peer.to_peer_, haveSend);
+						} catch (Exception e) {
 							e.printStackTrace();
-							System.out.println("Failed to send the have message");
+							System.out
+									.println("Failed to send the have message");
 						}
 					}
 				} else {
@@ -96,7 +97,7 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public static void finish() {
-		if (Manager.have_piece.toString().indexOf("0") != -1) {
+		if(Manager.have_piece.toString().indexOf("0") != -1) {
 			System.out.println("Not finished yet.");
 			if (Manager.q.size() == 0) {
 				addMissingBlocks();
@@ -124,7 +125,7 @@ public class PieceChecker extends TimerTask {
 		}
 
 		// sort the bastards
-		AlphanumComparator comparator = new AlphanumComparator();
+		StringComparator comparator = new StringComparator();
 		Collections.sort(names, comparator);
 
 		// write 'em in the correct order

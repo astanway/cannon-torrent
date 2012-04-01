@@ -118,8 +118,6 @@ public class DownloadThread implements Runnable {
 
 			} else if (m.getId() == Message.TYPE_HAVE) {
 				HaveMessage have = (HaveMessage)m;
-				// TODO: put in upload logic here.
-
 				System.out.println("They now have " + have.getPieceIndex());
 			}
 		} else {

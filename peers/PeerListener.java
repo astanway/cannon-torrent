@@ -27,6 +27,7 @@ public class PeerListener implements Runnable {
 	public void run(){
 		try{
 			dataSocket = listenSocket.accept();
+			System.out.println("Got a connection on the port");
 			from_peer_ = new DataInputStream(dataSocket.getInputStream());
 			to_peer_ = new DataOutputStream(dataSocket.getOutputStream());
 			Peer temp = new Peer(from_peer_,to_peer_);
