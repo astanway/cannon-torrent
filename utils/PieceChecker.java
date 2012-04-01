@@ -113,7 +113,7 @@ public class PieceChecker extends TimerTask{
      }
 
     //sort the bastards
-    AlphanumComparator comparator = new AlphanumComparator();
+    StringComparator comparator = new StringComparator();
     Collections.sort(names, comparator);
 
     //write 'em in the correct order
