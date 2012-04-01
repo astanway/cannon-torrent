@@ -6,7 +6,6 @@ public class Block{
   private int piece = 0;
   private int block = 0;
 	private byte[] data = null;
-	private boolean isFilled = false;
 	
 	public Block(int p, int b, byte[] d){
 	  this.piece = p;
@@ -16,7 +15,6 @@ public class Block{
 
   public void setData(byte[] d){
     this.data = d;
-    this.isFilled = true;
   }
 	
 	public int getBlockOffset(){
@@ -35,16 +33,26 @@ public class Block{
 	  return this.data;
 	}
 	
+	@Override public boolean equals(Object other) {
+     boolean result = false;
+     if (other instanceof Block) {
+         Block that = (Block) other;
+         result = (this.getPiece() == that.getPiece() && this.getBlock() == that.getBlock()
+          && this.getClass().equals(that.getClass()));
+     }
+     return result;
+ }
+ 
+  @Override public int hashCode() {
+    return (41 * (41 + getPiece()) + getBlock());
+  }
+	
 	//16384 or the remainder
 	public int getLength(){
 	  return this.data.length;
 	}
 	
-	public boolean isFilled(){
-	  return this.isFilled;
-	}
-	
 	public void print(){
-	  System.out.println("("+ this.piece + ", " + this.block*Manager.block_length + ", " + this.isFilled + ")");
+	  System.out.println("("+ this.piece + ", " + this.block + ")");
 	}
 }

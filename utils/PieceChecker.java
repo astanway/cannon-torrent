@@ -14,30 +14,37 @@ import peers.Block;
 
 public class PieceChecker extends TimerTask{
 
-	public void run(){    
-    for(int i = 0; i < Manager.numPieces; i++){
-      //is it already verified?
-      if(Manager.have_piece.get(i) == 1){
-        continue;
-      }
+	public void run(){
+	  while(Manager.have_piece.toString().indexOf("0") != -1){
+	    for(int i = 0; i < Manager.numPieces; i++){
+        //is it already verified?
+        if(Manager.have_piece.get(i) == 1){ 
+          continue;
+        }
 
-      //do we have the piece yet?
-      byte[] piece = Helpers.getPiece(i);
-      if(piece == null){
-        continue;
+        //do we have the piece yet?
+        byte[] piece = Helpers.getPiece(i);
+        if(piece == null){
+          continue;
+        }
+
+        byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
+        if(Helpers.verifyHash(piece, pieceHash)){
+          System.out.println("Piece " + i + " verified");
+          Manager.have_piece.set(i, 1);
+        } 
+        else {
+          System.out.println("Deleting piece " + i);
+          Manager.have_piece.set(i, 0);
+          Helpers.deletePiece(i);
+        }
       }
       
-      byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
-      if(Helpers.verifyHash(piece, pieceHash)){
-        System.out.println("Piece " + i + " verified");
-        Manager.have_piece.set(i, 1);
-      } else {
-        System.out.println("Deleting piece " + i);
-        Manager.have_piece.set(i, 0);
-        Helpers.deletePiece(i);
+      if(Manager.q.size() == 0){
+        addMissingBlocks();
       }
-    }
-
+	  }
+	  
     finish();
 	}
 
@@ -53,37 +60,38 @@ public class PieceChecker extends TimerTask{
           name = j + " " + k; 
         }
         
-	      File f = new File("blocks/" + name);
-        if (f.exists()) {
+        File f = new File("blocks/" + name);
+        if (f.exists() || total > Manager.numBlocks) {
            continue;
         } else{
-   				byte[] data = null;
-   				System.out.println("Adding block " + j + " " + k);
-   				if(j == Manager.numPieces - 1 && total == Manager.numBlocks){
-   					data = new byte[Manager.leftoverBytes];
-   					Block b = new Block(j, k, data);
-   					Manager.q.add(b);
-   					break;
-   				} else{
-   					data = new byte[Manager.block_length];
-   				}
-           Block b = new Block(j, k, data);
-           Manager.q.add(b);
+  				byte[] data = null;
+  				if(j == Manager.numPieces - 1 && total == Manager.numBlocks){
+  					data = new byte[Manager.leftoverBytes];
+  					Block b = new Block(j, k, data);
+  					Manager.q.add(b);
+  					System.out.println("Adding block " + j + " " + k);
+  					break;
+  				} else{
+  					data = new byte[Manager.block_length];
+  				}
+          Block b = new Block(j, k, data);
+          System.out.println("Adding block " + j + " " + k);
+          Manager.q.add(b);
         }
 	    }
-	  }	
+	  }
+	  
+	  System.out.println(Manager.q.size());	
 	}
 	
-	public static void finish(){	  
-	  for(int i = 0; i < Manager.have_piece.length(); i++){
-      if(Manager.have_piece.get(i) != 1){
-        System.out.println("Not finished yet.");
-        if(Manager.q.size() == 0){
-          addMissingBlocks();
-        }
-        System.out.println(Manager.q.size());
-        return;
+	public static void finish(){
+    if(Manager.have_piece.toString().indexOf("0") != -1){
+      System.out.println("Not finished yet.");
+      if(Manager.q.size() == 0){
+        addMissingBlocks();
       }
+      System.out.println(Manager.q.size());
+      return;
     }
 	  
 	  System.out.println("Commencing file write...");

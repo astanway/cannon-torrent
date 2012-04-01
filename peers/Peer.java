@@ -199,22 +199,22 @@ public class Peer {
 	 * sends a message with the specified byte
 	 * @param _byte byte to send
 	 */
-	public void sendInterested(){
+	public void sendInterested() throws Exception{
 	  Message m = new InterestedMessage();
 	  try {
     	Message.encode(to_peer_, m);
     } catch(Exception e){
-      System.out.println(e);
+      e.printStackTrace();
       System.out.println("Error on sendInterested for peer " + peer_id_);
     }		
 	}
 	
-	public void sendUninterested(){
+	public void sendUninterested() throws Exception{
 	  Message m = new UninterestedMessage();
 	  try {
     	Message.encode(to_peer_, m);
     } catch(Exception e){
-      System.out.println(e);
+      e.printStackTrace();
       System.out.println("Error on uninterested for peer " + peer_id_);
     }		
 	}
@@ -225,6 +225,7 @@ public class Peer {
       // System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
 	    return m;
 	  } catch (Exception e){
+      e.printStackTrace();
 		  System.out.println("Error on listen for peer " + peer_id_);
 	    return null;
 	  }
@@ -234,7 +235,7 @@ public class Peer {
 	 * Request piece call
 	 * @param b block we need
 	 */
-	public void requestBlock(Block b){
+	public void requestBlock(Block b) throws Exception{
 	  int x = b.getPiece(); 
 	  int y = b.getBlockOffset();
 	  int z = b.getLength();
@@ -242,10 +243,10 @@ public class Peer {
     try {
     	Message.encode(to_peer_, m);
     } catch(Exception e){
-      System.out.println(e);
+      e.printStackTrace();
       System.out.println("Error on sendRequest for peer " + peer_id_);
     }
-    System.out.println("Requested (" + x + ", " + y + ") from " + peer_id_);
+    System.out.println("Requested (" + x + ", " + b.getBlock() + ") from " + peer_id_);
 	}
 
 

@@ -25,14 +25,16 @@ public class DownloadThread implements Runnable {
 
     if(peer.receiveHandshake(Manager.info_hash)){
       Message m = peer.listen();
+
       if(m == null){
         System.out.println("No message here.");
       }
-      byte[] bf = null;
       
       while(m.getId() == Message.TYPE_KEEP_ALIVE){
         m = peer.listen();
       }
+      
+      byte[] bf = null;
       
       //only download if we get a bitfield
       if(m.getId() == Message.TYPE_BITFIELD){
@@ -62,7 +64,9 @@ public class DownloadThread implements Runnable {
               try {
                 peer.sendInterested();
               } catch (Exception e) {
+                e.printStackTrace();
                 Manager.q.add(b);
+                System.out.println("restarting");
                 run();
                 return;
               }
@@ -93,6 +97,8 @@ public class DownloadThread implements Runnable {
                   peer.sendUninterested();
                 } catch (Exception e) {
                   Manager.q.add(b);
+                  e.printStackTrace();
+                  System.out.println("restarting");
                   run();
                   return;
                 }
@@ -102,6 +108,8 @@ public class DownloadThread implements Runnable {
               try {
                 peer.sendUninterested();
               } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("restarting");
                 Manager.q.add(b);
                 run();
                 return;
@@ -183,6 +191,7 @@ public class DownloadThread implements Runnable {
         Manager.q.add(b);
       }
     } catch (Exception e){
+      e.printStackTrace();
       Manager.q.add(b);
       return true;
     }
