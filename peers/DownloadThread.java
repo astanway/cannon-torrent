@@ -181,7 +181,12 @@ public class DownloadThread implements Runnable {
         file.close();
         
         File rename = new File("temp/" + name);
-        rename.renameTo(new File("blocks/" + name));
+        File f = new File("blocks/" + name);
+        if(f.exists()){
+          return true;
+        } else {
+          rename.renameTo(new File("blocks/" + name));
+        }
         
         System.out.print(peer.peer_id_ + " ");
         b.print();
