@@ -152,7 +152,9 @@ public class Message {
 				BitfieldMessage tmp = (BitfieldMessage) message;
 				dout.writeInt(tmp.getLength());
 				dout.writeByte(tmp.getId());
-				dout.write(tmp.getData());
+				System.out.println("Sent bitfield of length" + tmp.getData().length);
+				Helpers.printBytes(tmp.getData());
+				dout.write(tmp.getData(),0,tmp.getData().length);
 				break;
 			}
 

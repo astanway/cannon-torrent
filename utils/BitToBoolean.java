@@ -5,22 +5,23 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Class to convert between bit-mapped {@code byte[]} and {@code boolean[]}.
+ * 
  * @author Robert Moore
  */
 public class BitToBoolean {
 
-  public static boolean[] convert(AtomicIntegerArray array){
-    boolean[] retVal = new boolean[array.length()];
-    for(int i = 0; i < array.length(); i++){
-      boolean val = false;
-      if(array.get(i) == 1){
-        val = true;
-      }
-      retVal[i] = val;
-    }
+	public static boolean[] convert(AtomicIntegerArray array) {
+		boolean[] retVal = new boolean[array.length()];
+		for (int i = 0; i < array.length(); i++) {
+			boolean val = false;
+			if (array.get(i) == 1) {
+				val = true;
+			}
+			retVal[i] = val;
+		}
 		return retVal;
-  }
-  
+	}
+
 	/**
 	 * Converts a {@code byte[]} to a {@code boolean[]}. It is assumed that the
 	 * values are in most-significant-bit first order. Meaning that most
@@ -44,7 +45,6 @@ public class BitToBoolean {
 					// Bad to return within a loop, but it's the easiest way
 					return retVal;
 				}
-
 				retVal[boolIndex++] = (bits[byteIndex] >> bitIndex & 0x01) == 1 ? true
 						: false;
 			}
@@ -81,7 +81,7 @@ public class BitToBoolean {
 	public static byte[] convert(boolean[] bools) {
 		int length = bools.length / 8;
 		int mod = bools.length % 8;
-		if(mod != 0){
+		if (mod != 0) {
 			++length;
 		}
 		byte[] retVal = new byte[length];
@@ -102,18 +102,22 @@ public class BitToBoolean {
 	}
 
 	/**
-	 * A method for testing the conversion between the {@code byte[]} and {@code boolean[]} representations.
-	 * @param args ignored.
+	 * A method for testing the conversion between the {@code byte[]} and
+	 * {@code boolean[]} representations.
+	 * 
+	 * @param args
+	 *            ignored.
 	 */
 	public static void main(String[] args) {
 		byte[] testBytes = new byte[] { (byte) 0xF8, 0x4A };
 
 		System.out.println(Arrays.toString(convert(testBytes, 3)));
-		
-		boolean[] testBools = new boolean[] {true, false, true, false, false, true, false,true,true};
+
+		boolean[] testBools = new boolean[] { true, false, true, false, false,
+				true, false, true, true };
 		byte[] convertedBools = convert(testBools);
-		for(byte b : convertedBools){
-			System.out.print(Integer.toHexString(b&0xFF) + ", ");
+		for (byte b : convertedBools) {
+			System.out.print(Integer.toHexString(b & 0xFF) + ", ");
 		}
 	}
 }

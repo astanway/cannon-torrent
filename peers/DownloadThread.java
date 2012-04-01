@@ -43,7 +43,7 @@ public class DownloadThread implements Runnable {
 				BitfieldMessage bfm = (BitfieldMessage) m;
 				bf = bfm.getData();
 				boolean[] bfb = BitToBoolean.convert(bf);
-
+				peer.bfb = bfb;
 				// loop as long as there are blocks on the queue
 				while (!checkFull()) {
 					Block b = Manager.q.poll();
@@ -52,7 +52,7 @@ public class DownloadThread implements Runnable {
 					}
 
 					// do they have what we want?
-					if (bfb[b.getPiece()] == true) {
+					if (peer.bfb[b.getPiece()] == true) {
 
 						// do we actually want what we're asking for?
 						if (Manager.have_piece.get(b.getPiece()) == 0) {
@@ -117,8 +117,27 @@ public class DownloadThread implements Runnable {
 				// TODO: if we have a full piece, broadcast to tracker.
 
 			} else if (m.getId() == Message.TYPE_HAVE) {
-				HaveMessage have = (HaveMessage)m;
+				HaveMessage have = (HaveMessage) m;
+				peer.bfb[have.getPieceIndex()] = true;
 				System.out.println("They now have " + have.getPieceIndex());
+			} else if (m.getId() == Message.TYPE_REQUEST) {
+				RequestMessage tempRequest = (RequestMessage) m;
+				byte[] sendData = new byte[tempRequest.getBlockLength()];
+				byte[] tempbytes = Helpers
+						.getPiece(tempRequest.getPieceIndex());
+				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
+						0, tempRequest.getBlockLength());
+				System.out.println("Sending block " + tempRequest.getBegin());
+				System.out.println("of piece " + tempRequest.getPieceIndex());
+				PieceMessage toSend = new PieceMessage(
+						tempRequest.getPieceIndex(), tempRequest.getBegin(),
+						sendData);
+				Manager.addUploaded(tempRequest.getBlockLength());
+				try {
+					Message.encode(peer.to_peer_, toSend);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		} else {
 			System.out.println("No handshake?");
@@ -176,7 +195,7 @@ public class DownloadThread implements Runnable {
 						"rw");
 				file.write(piece_data);
 				file.close();
-
+				Manager.addDownloaded(b.getLength());
 				File rename = new File("temp/" + name);
 				File f = new File("blocks/" + name);
 				if (f.exists()) {
@@ -185,8 +204,8 @@ public class DownloadThread implements Runnable {
 					rename.renameTo(new File("blocks/" + name));
 				}
 
-				//System.out.print(peer.peer_id_ + " ");
-				//b.print();
+				System.out.print(peer.peer_id_ + " ");
+				b.print();
 				return true;
 			} else if (m.getId() == Message.TYPE_REQUEST) {
 				RequestMessage tempRequest = (RequestMessage) m;
@@ -200,16 +219,21 @@ public class DownloadThread implements Runnable {
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
+				Manager.addUploaded(tempRequest.getBlockLength());
 				try {
 					Message.encode(peer.to_peer_, toSend);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} else {
+			} else if (m.getId()==Message.TYPE_HAVE){
+				HaveMessage havee = (HaveMessage)m;
+				peer.bfb[havee.getPieceIndex()]=true;
+			}
+			else {
 				System.out.println("Other : " + m.getId());
 				Manager.q.add(b);
 			}
-		} catch(EOFException eofE){
+		} catch (EOFException eofE) {
 			eofE.printStackTrace();
 			System.out.println("They Stopped Sending Data?");
 		} catch (Exception e) {

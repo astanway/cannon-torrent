@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import utils.Message.HaveMessage;
+import utils.StringComparator;
 
 import peers.Block;
 import peers.Peer;
@@ -17,6 +18,9 @@ import peers.Peer;
 public class PieceChecker extends TimerTask {
 
 	public void run() {
+		if(Manager.fileDone){
+			this.cancel();
+		}
 		while (Manager.have_piece.toString().indexOf("0") != -1) {
 			for (int i = 0; i < Manager.numPieces; i++) {
 				// is it already verified?
@@ -47,6 +51,7 @@ public class PieceChecker extends TimerTask {
 				} else {
 					System.out.println("Deleting piece " + i);
 					Manager.have_piece.set(i, 0);
+					Manager.addDownloaded(-1*Helpers.getPiece(i).length);
 					Helpers.deletePiece(i);
 				}
 			}
@@ -97,7 +102,7 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public static void finish() {
-		if(Manager.have_piece.toString().indexOf("0") != -1) {
+		if (Manager.have_piece.toString().indexOf("0") != -1) {
 			System.out.println("Not finished yet.");
 			if (Manager.q.size() == 0) {
 				addMissingBlocks();
@@ -152,7 +157,11 @@ public class PieceChecker extends TimerTask {
 		response = Helpers.getURL(Manager.constructQuery(Manager.port, 0, 0,
 				Manager.torrent_info.file_length, Manager.STOPPED));
 		System.out.println("Bye!");
-		System.exit(1);
+		Thread t = new Thread(new TrackerContact(1));
+		t.start();
+		Manager.fileDone=true;
+		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+		//System.exit(1);
 	}
 
 	public static void deleteBlocks(int i) {

@@ -19,6 +19,7 @@ public class Manager {
 	public static File file = null;
 	public static int port = 0;
 	public static int interval = 0;
+	public static int minInterval =0;
 	public static int numPieces = 0;
 	public static int numLeft = 0;
 	public static int numBlocks = 0;
@@ -29,6 +30,8 @@ public class Manager {
 	public static boolean fileDone = false;
 	public static ReentrantLock fileLock = new ReentrantLock();
 	public static ArrayList<Peer> activePeerList = null;
+	public static int downloaded = 0;
+	public static int uploaded = 0;
 
 	public static final int block_length = 16384;
 	public static final String STARTED = "started";
@@ -88,10 +91,14 @@ public class Manager {
 			Thread a = new Thread(p);
 			a.start();
 		}
-
+		System.out.println("min interval = " + minInterval);
+		System.out.println("interval =" + interval);
 		Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();
+		TrackerContact contact = new TrackerContact(0);
 		t.schedule(checker, 3000, 3000);
+		t.schedule(contact,interval*1000,interval*1000);
+		
 		boolean running = true;
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String lineIn = null;
@@ -105,7 +112,6 @@ public class Manager {
 				running = false;
 			}
 		}
-		Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
 		return false;
 	}
 
@@ -257,7 +263,6 @@ public class Manager {
 				continue;
 			}
 		}
-
 		setPeerList(response);
 	}
 
@@ -278,6 +283,7 @@ public class Manager {
 	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[] { 'p',
 			'o', 'r', 't' });
 
+	
 	/**
 	 * Gets the peer list from a response from the tracker
 	 * 
@@ -293,6 +299,7 @@ public class Manager {
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>) decodedResponse;
 			interval = (Integer) responseMap.get(intervalKey);
+			minInterval= (Integer) responseMap.get(minIntervalKey);
 
 			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap
 					.get(peersKey);
@@ -318,7 +325,7 @@ public class Manager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		peerList_ = peerList;
 
 		// ready to start! THIS IS TERRIBLE CODE
@@ -331,5 +338,12 @@ public class Manager {
 
 	public static void registerPeer(Peer p) {
 		activePeerList.add(p);
+	}
+	
+	public static void addDownloaded(int added){
+		downloaded = downloaded + added;
+	}
+	public static void addUploaded(int added){
+		uploaded+=added;
 	}
 }

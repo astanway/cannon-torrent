@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import utils.*;
+import utils.Shutdown;
 import utils.Message.BitfieldMessage;
 
 import peers.Peer;
@@ -36,6 +37,8 @@ public class RUBTClient {
 
 		// start the manager
 		
+		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+
 		//check if a local temp directory exists
 		File tempFile = new File("temp/");
 		if(tempFile.exists()){
@@ -56,21 +59,7 @@ public class RUBTClient {
 
 		// This executes right after the above command, not after we're finished
 		// downloading.
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		boolean running = true;
-		String lineIn = null;
-		while(running){
-			try{
-				lineIn = br.readLine();
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-			if(lineIn.compareToIgnoreCase("Exit")==0){
-				Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
-				running = false;
-			}
-		}
-		Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
 	}
 
 	// query the tracker and get the initial list of peers
@@ -90,6 +79,7 @@ public class RUBTClient {
 			}
 		}
 		manager.queryTracker();
+		
 		return response;
 		// wait for the manager to be ready
 		/*

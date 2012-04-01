@@ -18,6 +18,7 @@ public class Peer {
 	public Socket socket_ = null;
 	public DataOutputStream to_peer_ = null;
 	public DataInputStream from_peer_ = null;
+	public boolean[] bfb;
 
 	public boolean choked = true;
 
@@ -42,12 +43,14 @@ public class Peer {
 	public Peer(DataInputStream in, DataOutputStream out) {
 		this.from_peer_ = in;
 		this.to_peer_ = out;
+		this.bfb = new boolean[Manager.numPieces];
 	}
 
 	public Peer(String _peer_id, String _ip, int _port) {
 		this.peer_id_ = _peer_id;
 		this.ip_ = _ip;
 		this.port_ = _port;
+		this.bfb = new boolean[Manager.numPieces];
 	}
 
 	/**
@@ -154,7 +157,9 @@ public class Peer {
 
 	public void sendBitField() {
 		boolean[] obf = BitToBoolean.convert(Manager.have_piece);
+		System.out.println("out boolean length = " + obf.length);
 		byte[] bobf = BitToBoolean.convert(obf);
+		System.out.println("out byte length = " + bobf.length);
 		Message outfield = new BitfieldMessage(bobf);
 		try {
 			Message.encode(to_peer_, outfield);
@@ -273,8 +278,8 @@ public class Peer {
 			e.printStackTrace();
 			System.out.println("Error on sendRequest for peer " + peer_id_);
 		}
-		//System.out.println("Requested (" + x + ", " + b.getBlock() + ") from "
-		//		+ peer_id_);
+		System.out.println("Requested (" + x + ", " + b.getBlock() + ") from "
+				+ peer_id_);
 	}
 
 	/**
