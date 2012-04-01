@@ -58,6 +58,11 @@ public class UploadThread implements Runnable {
 
 			case Message.TYPE_INTERESTED:
 				System.out.println("They are interested in our Junk");
+				try {
+					Message.encode(peer.to_peer_, Message.UNCHOKE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 			case Message.TYPE_KEEP_ALIVE:
 				System.out.println("Keep the connection Alive!!");

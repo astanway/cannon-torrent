@@ -293,4 +293,12 @@ public final class Helpers {
 		}
 		System.out.print("] " + prog * 100 + "%");
 	}
+	
+	public static String converToHex(byte[] data){
+		StringBuffer sb = new StringBuffer();
+		for(byte b: data){
+			sb.append(Integer.toHexString(b & 0xFF));
+		}
+		return sb.toString();
+	}
 }

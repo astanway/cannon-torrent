@@ -79,6 +79,20 @@ public class Manager {
 			}
 		}
 	}
+	
+	public static void checkPieces(){
+		for(int i =0;i<numPieces;i++){
+			byte[] piece = Helpers.getPiece(i);
+			byte[] pieceHash = torrent_info.piece_hashes[i].array();
+			if(Helpers.verifyHash(piece, pieceHash)){
+				System.out.println("Verified piece "  + i + " before");
+				have_piece.set(i, 1);
+			}
+			else{
+				System.out.println("That shouldn't happen");
+			}
+		}
+	}
 
 	public boolean download() {
 		byte[] response = null;

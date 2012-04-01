@@ -51,7 +51,7 @@ public class RUBTClient {
 		
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
-
+		//manager.checkPieces();
 		manager.setPeerList(getPeers());
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
