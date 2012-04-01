@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import utils.Manager;
+
 
 public class PeerListener implements Runnable {
 	
@@ -28,6 +30,7 @@ public class PeerListener implements Runnable {
 			from_peer_ = new DataInputStream(dataSocket.getInputStream());
 			to_peer_ = new DataOutputStream(dataSocket.getOutputStream());
 			Peer temp = new Peer(from_peer_,to_peer_);
+			Manager.registerPeer(temp);
 			Thread t = new Thread(new UploadThread(temp));
 			t.start();
 			Thread t2 = new Thread(new PeerListener(this.port));

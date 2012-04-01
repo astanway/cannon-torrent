@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -8,6 +12,7 @@ import utils.*;
 import utils.Message.BitfieldMessage;
 
 import peers.Peer;
+import peers.PeerListener;
 
 public class RUBTClient {
 
@@ -26,19 +31,46 @@ public class RUBTClient {
 			System.out.println("USAGE: RUBTClient [torrent-file] [file-name]");
 			System.exit(1);
 		}
-
 		String torrentFile = args[0];
 		String savedFile = args[1];
 
 		// start the manager
+		
+		//check if a local temp directory exists
+		File tempFile = new File("temp/");
+		if(tempFile.exists()){
+			if(tempFile.isDirectory()){
+				System.out.println("yay its a directory");
+			}
+		}else{
+			tempFile.mkdir();
+		}
+		
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
 
 		manager.setPeerList(getPeers());
-    manager.download();
-		
-		//This executes right after the above command, not after we're finished downloading.
-		Runtime.getRuntime().addShutdownHook(null);
+		Thread t = new Thread(new PeerListener(Manager.getPort()));
+		t.start();
+		manager.download();
+
+		// This executes right after the above command, not after we're finished
+		// downloading.
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		boolean running = true;
+		String lineIn = null;
+		while(running){
+			try{
+				lineIn = br.readLine();
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			if(lineIn.compareToIgnoreCase("Exit")==0){
+				Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+				running = false;
+			}
+		}
+		Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
 	}
 
 	// query the tracker and get the initial list of peers
@@ -60,11 +92,10 @@ public class RUBTClient {
 		manager.queryTracker();
 		return response;
 		// wait for the manager to be ready
-		/*while (!manager.ready) {
-		}
-		System.out.println("All systems go.");
-		System.out.println(manager.q.size());
-		manager.download();*/
+		/*
+		 * while (!manager.ready) { } System.out.println("All systems go.");
+		 * System.out.println(manager.q.size()); manager.download();
+		 */
 	}
 
 }

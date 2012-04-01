@@ -11,103 +11,121 @@ import peers.*;
 
 public class Manager {
 
-	public static byte[] peer_id                 = new byte[20];
-	public static byte[] info_hash		    	     = new byte[20];
-	public static TorrentInfo torrent_info	     = null;
+	public static byte[] peer_id = new byte[20];
+	public static byte[] info_hash = new byte[20];
+	public static TorrentInfo torrent_info = null;
 	public static ConcurrentLinkedQueue<Block> q = null;
-	public static AtomicIntegerArray have_piece  = null;
-	public static File file             	       = null;
-	public static int port			        		     = 0;
-	public static int interval                   = 0;
-	public static int numPieces   			         = 0;
-	public static int numLeft                    = 0;
-	public static int numBlocks                  = 0;
-	public static int blocksPerPiece		    	   = 0;
-	public static int blocksInLastPiece          = 0;
-  public static int leftoverBytes              = 0;
-	public static boolean ready                  = false;
-	public static boolean fileDone               = false;
-  public static ReentrantLock fileLock 		     = new ReentrantLock();
+	public static AtomicIntegerArray have_piece = null;
+	public static File file = null;
+	public static int port = 0;
+	public static int interval = 0;
+	public static int numPieces = 0;
+	public static int numLeft = 0;
+	public static int numBlocks = 0;
+	public static int blocksPerPiece = 0;
+	public static int blocksInLastPiece = 0;
+	public static int leftoverBytes = 0;
+	public static boolean ready = false;
+	public static boolean fileDone = false;
+	public static ReentrantLock fileLock = new ReentrantLock();
+	public static ArrayList<Peer> activePeerList = null;
 
 	public static final int block_length = 16384;
-	public static final String STARTED   = "started";
+	public static final String STARTED = "started";
 	public static final String COMPLETED = "completed";
-	public static final String STOPPED   = "stopped";
-	public static final String EMPTY     = "";
+	public static final String STOPPED = "stopped";
+	public static final String EMPTY = "";
 
-	public static ArrayList<Peer> peerList_  = null;
-	
-	public Manager(){
+	public static ArrayList<Peer> peerList_ = null;
+
+	public Manager() {
 	}
 
-	public Manager(String torrentFile, String fileName){
+	public Manager(String torrentFile, String fileName) {
 		setInfo(torrentFile, fileName);
 
-    leftoverBytes = torrent_info.file_length % block_length; 
+		leftoverBytes = torrent_info.file_length % block_length;
 
-    numPieces = leftoverBytes == 0 ?
-                   torrent_info.file_length / torrent_info.piece_length :
-                   torrent_info.file_length / torrent_info.piece_length + 1;
-    blocksPerPiece = torrent_info.piece_length / block_length;
-    
-    numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
+		numPieces = leftoverBytes == 0 ? torrent_info.file_length
+				/ torrent_info.piece_length : torrent_info.file_length
+				/ torrent_info.piece_length + 1;
+		blocksPerPiece = torrent_info.piece_length / block_length;
+
+		numBlocks = (int) Math.ceil(torrent_info.file_length / block_length);
 
 		have_piece = new AtomicIntegerArray(numPieces);
 
-    //set up the reference queue
-    q = new ConcurrentLinkedQueue<Block>();
-	  for(int total = 0, j = 0; j < numPieces; j++){
-	    for(int k = 0; k < blocksPerPiece; k++, total++){
+		activePeerList = new ArrayList<Peer>();
+
+		// set up the reference queue
+		q = new ConcurrentLinkedQueue<Block>();
+		for (int total = 0, j = 0; j < numPieces; j++) {
+			for (int k = 0; k < blocksPerPiece; k++, total++) {
 				byte[] data = null;
-				if(j == numPieces - 1 && total == numBlocks){
+				if (j == numPieces - 1 && total == numBlocks) {
 					data = new byte[leftoverBytes];
 					Block b = new Block(j, k, data);
 					q.add(b);
 					blocksInLastPiece = b.getBlock() + 1;
 					break;
-				} else{
+				} else {
 					data = new byte[block_length];
 				}
-        Block b = new Block(j, k, data);
-        q.add(b);
-	    }
-	  }
+				Block b = new Block(j, k, data);
+				q.add(b);
+			}
+		}
 	}
 
-	public boolean download(){
-		byte[] response = null;	  
-    response = Helpers.getURL(constructQuery(port, 0, torrent_info.file_length, 0, STARTED));
+	public boolean download() {
+		byte[] response = null;
+		response = Helpers.getURL(constructQuery(port, 0,
+				torrent_info.file_length, 0, STARTED));
 
-    for(Peer peer : peerList_){
-     DownloadThread p = new DownloadThread(peer);
-     Thread a = new Thread(p);
-     a.start();
-    }
-		
+		for (Peer peer : peerList_) {
+			registerPeer(peer);
+			DownloadThread p = new DownloadThread(peer);
+			Thread a = new Thread(p);
+			a.start();
+		}
+
 		Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();
 		t.schedule(checker, 3000, 3000);
-
+		boolean running = true;
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String lineIn = null;
+		while (running) {
+			try {
+				lineIn = br.readLine();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (lineIn.compareToIgnoreCase("exit") == 0) {
+				running = false;
+			}
+		}
+		Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
 		return false;
 	}
-	
-	public static void restart(){
-    for(Peer peer : peerList_){
-      if(peer.socket_ == null){
-        System.out.println("Restarting peer " + peer.peer_id_);
-        DownloadThread p = new DownloadThread(peer);
-        Thread a = new Thread(p);
-        a.start();
-      }
-    }
+
+	public static void restart() {
+		for (Peer peer : peerList_) {
+			if (peer.socket_ == null) {
+				System.out.println("Restarting peer " + peer.peer_id_);
+				DownloadThread p = new DownloadThread(peer);
+				Thread a = new Thread(p);
+				a.start();
+			}
+		}
 	}
 
-	public static void setInfo(String torrentFile, String fileName){
-		try{
+	public static void setInfo(String torrentFile, String fileName) {
+		try {
 			torrent_info = new TorrentInfo(Helpers.readTorrent(torrentFile));
 			torrent_info.info_hash.get(info_hash, 0, info_hash.length);
 			file = new File(fileName);
-		} catch (Exception e){
+		} catch (Exception e) {
 			System.out.println(e);
 			System.out.println("Torrent file could not be loaded.");
 			System.exit(1);
@@ -153,13 +171,13 @@ public class Manager {
 	public static void setPort(int port) {
 		Manager.port = port;
 	}
-	
-	public static void setPeerList (ArrayList<Peer> _peerList){
+
+	public static void setPeerList(ArrayList<Peer> _peerList) {
 		Manager.peerList_ = _peerList;
 		Manager.ready = true;
 	}
 
-	public static ArrayList<Peer> getPeerList(){
+	public static ArrayList<Peer> getPeerList() {
 		return peerList_;
 	}
 
@@ -171,63 +189,69 @@ public class Manager {
 		Manager.numPieces = numPieces;
 	}
 
-	/**	
-	 * Downloads the pieces from the peer and stores them in the appropriate file
-	 * @param peer the peer object to be downloading from
+	/**
+	 * Downloads the pieces from the peer and stores them in the appropriate
+	 * file
+	 * 
+	 * @param peer
+	 *            the peer object to be downloading from
 	 */
 
-  /**
-   * Generates our random PeerID
-   */
-  public static void setPeerId(){
-  	Random ran = new Random();
-  	int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
-  	String peer_id_string = "GROUP4AREL33t" + rand_id;
-  	peer_id = peer_id_string.getBytes();
-  }
+	/**
+	 * Generates our random PeerID
+	 */
+	public static void setPeerId() {
+		Random ran = new Random();
+		int rand_id = ran.nextInt(5555555 - 1000000 + 1) + 1000000;
+		String peer_id_string = "GROUP4AREL33t" + rand_id;
+		peer_id = peer_id_string.getBytes();
+	}
 
 	/**
 	 * Construct the url for tracker querying
-	 * @param port  port to be used
-	 * @param uploaded  amount uploaded
-	 * @param downloaded  amount downloaded
-	 * @param left amount left
-	 * @param event event type
+	 * 
+	 * @param port
+	 *            port to be used
+	 * @param uploaded
+	 *            amount uploaded
+	 * @param downloaded
+	 *            amount downloaded
+	 * @param left
+	 *            amount left
+	 * @param event
+	 *            event type
 	 * @return String to be sent as query
 	 */
-	public static String constructQuery(int port, int uploaded, int downloaded, int left, String event){
+	public static String constructQuery(int port, int uploaded, int downloaded,
+			int left, String event) {
 		String url_string = "";
-		try{
+		try {
 			String escaped_hash = Helpers.toURLHex(info_hash);
 			String escaped_id = Helpers.toURLHex(peer_id);
 			String ip = "128.6.5.130";
-			url_string =  torrent_info.announce_url.toString()
-			+ "?port=" + port
-			+ "&peer_id=" + escaped_id
-			+ "&info_hash=" + escaped_hash 
-			+ "&uploaded=" + uploaded
-			+ "&downloaded=" + downloaded
-			+ "&left=" + left
-			+ "&ip=" +  ip
-			+ "&event=" + event;
+			url_string = torrent_info.announce_url.toString() + "?port=" + port
+					+ "&peer_id=" + escaped_id + "&info_hash=" + escaped_hash
+					+ "&uploaded=" + uploaded + "&downloaded=" + downloaded
+					+ "&left=" + left + "&ip=" + ip + "&event=" + event;
 
-		} catch (Exception e){
+		} catch (Exception e) {
 			System.out.println(e);
 		}
 
 		return url_string;
 	}
-	
-	//query the tracker and get the initial list of peers
-	public static void queryTracker(){
+
+	// query the tracker and get the initial list of peers
+	public static void queryTracker() {
 		byte[] response = null;
 		int i = 0;
-		for (i=6881; i<=6889;){
-			try{
-				response = Helpers.getURL(constructQuery(i, 0, 0, torrent_info.file_length, ""));
+		for (i = 6881; i <= 6889;) {
+			try {
+				response = Helpers.getURL(constructQuery(i, 0, 0,
+						torrent_info.file_length, ""));
 				setPort(i);
 				break;
-			} catch (Exception e){
+			} catch (Exception e) {
 				System.out.println("Port " + i + " failed");
 				i++;
 				continue;
@@ -236,61 +260,76 @@ public class Manager {
 
 		setPeerList(response);
 	}
-	
-	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[]{'i','n','t','e','r','v','a','l'});
-	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[]{'p','e','e','r','s'});
-	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[]{'m','i','n',' ','i','n','t','e','r','v','a','l'});
-	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[]{'d','o','w','n','l','o','a','d','e','d'});
-	public static final ByteBuffer completeKey = ByteBuffer.wrap(new byte[]{'c','o','m','p','l','e','t','e'});
-	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[]{'i','p'});
-	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[]{'p','e','e','r',' ','i','d'});
-	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[]{'p','o','r','t'});
+
+	public static final ByteBuffer intervalKey = ByteBuffer.wrap(new byte[] {
+			'i', 'n', 't', 'e', 'r', 'v', 'a', 'l' });
+	public static final ByteBuffer peersKey = ByteBuffer.wrap(new byte[] { 'p',
+			'e', 'e', 'r', 's' });
+	public static final ByteBuffer minIntervalKey = ByteBuffer.wrap(new byte[] {
+			'm', 'i', 'n', ' ', 'i', 'n', 't', 'e', 'r', 'v', 'a', 'l' });
+	public static final ByteBuffer downloadedKey = ByteBuffer.wrap(new byte[] {
+			'd', 'o', 'w', 'n', 'l', 'o', 'a', 'd', 'e', 'd' });
+	public static final ByteBuffer completeKey = ByteBuffer.wrap(new byte[] {
+			'c', 'o', 'm', 'p', 'l', 'e', 't', 'e' });
+	public static final ByteBuffer ipKey = ByteBuffer.wrap(new byte[] { 'i',
+			'p' });
+	public static final ByteBuffer peerIdKey = ByteBuffer.wrap(new byte[] {
+			'p', 'e', 'e', 'r', ' ', 'i', 'd' });
+	public static final ByteBuffer portKey = ByteBuffer.wrap(new byte[] { 'p',
+			'o', 'r', 't' });
 
 	/**
 	 * Gets the peer list from a response from the tracker
-	 * @param response	byte array response from 
-	 * @return			    returns the array list of peers
+	 * 
+	 * @param response
+	 *            byte array response from
+	 * @return returns the array list of peers
 	 */
-	public static void setPeerList(byte[] response){	  
+	public static void setPeerList(byte[] response) {
 		ArrayList<Peer> peerList = new ArrayList<Peer>();
-		try{
+		try {
 			Object decodedResponse = Bencoder2.decode(response);
-      // ToolKit.print(decodedResponse, 1);
+			// ToolKit.print(decodedResponse, 1);
 
-			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>)decodedResponse;
-			interval = (Integer)responseMap.get(intervalKey);
+			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>) decodedResponse;
+			interval = (Integer) responseMap.get(intervalKey);
 
-			ArrayList<Object> peerArray = (ArrayList<Object>)responseMap.get(peersKey);
+			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap
+					.get(peersKey);
 
-			for (int i = 0;i<peerArray.size();i++){
+			for (int i = 0; i < peerArray.size(); i++) {
 				Object peer = peerArray.get(i);
 				String ip_ = "";
 				String peer_id_ = "";
 				int port_ = 0;
 
-				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>)peer;
-				ip_ = Helpers.bufferToString((ByteBuffer)peerMap.get(ipKey));
-				peer_id_ = Helpers.bufferToString((ByteBuffer)peerMap.get(peerIdKey));
-				port_ = (Integer)peerMap.get(portKey);
-				// System.out.println(ip_ +" " +  peer_id_ +" " +  port_);
+				Map<ByteBuffer, Object> peerMap = (Map<ByteBuffer, Object>) peer;
+				ip_ = Helpers.bufferToString((ByteBuffer) peerMap.get(ipKey));
+				peer_id_ = Helpers.bufferToString((ByteBuffer) peerMap
+						.get(peerIdKey));
+				port_ = (Integer) peerMap.get(portKey);
+				// System.out.println(ip_ +" " + peer_id_ +" " + port_);
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 
-				if(newPeer.isValid()){
+				if (newPeer.isValid()) {
 					peerList.add(newPeer);
 				}
 			}
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		peerList_ = peerList;
-		
-		//ready to start! THIS IS TERRIBLE CODE
+
+		// ready to start! THIS IS TERRIBLE CODE
 		ready = true;
 	}
-	
-	public static byte[] getBitfield(){
+
+	public static byte[] getBitfield() {
 		return BitToBoolean.convert(BitToBoolean.convert(have_piece));
 	}
-}
 
+	public static void registerPeer(Peer p) {
+		activePeerList.add(p);
+	}
+}

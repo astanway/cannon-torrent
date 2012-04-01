@@ -27,10 +27,10 @@ public class UploadThread implements Runnable {
 			}
 		}
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
-		try{
-			Message.encode(peer.to_peer_, new
-					BitfieldMessage(Manager.getBitfield()));
-		}catch(Exception e){
+		try {
+			Message.encode(peer.to_peer_,
+					new BitfieldMessage(Manager.getBitfield()));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		while (interest) {
@@ -50,6 +50,7 @@ public class UploadThread implements Runnable {
 
 			case Message.TYPE_HAVE:
 				HaveMessage tempHave = (HaveMessage) temp;
+
 				/*
 				 * Update the array when I get all of abe's code that he wants
 				 * to use
@@ -74,21 +75,18 @@ public class UploadThread implements Runnable {
 			case Message.TYPE_REQUEST:
 				RequestMessage tempRequest = (RequestMessage) temp;
 				byte[] data = new byte[tempRequest.getBlockLength()];
-				int offset = Manager.torrent_info.piece_length
-						* tempRequest.getPieceIndex() + tempRequest.getBegin();
-				int blockNum = tempRequest.getBegin()/tempRequest.getBlockLength();
-				try {
-					File f = new File("blocks/" + tempRequest.getPieceIndex() + " " + blockNum);
-					data = Helpers.getBytesFromFile(f);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				byte[] tempbytes = Helpers
+						.getPiece(tempRequest.getPieceIndex());
+				System.arraycopy(tempbytes, tempRequest.getBegin(), data, 0,
+						tempRequest.getBlockLength());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						data);
-				try{
+				System.out.println("Sending block " + tempRequest.getBegin());
+				System.out.println("of piece " + tempRequest.getPieceIndex());
+				try {
 					Message.encode(peer.to_peer_, toSend);
-				}catch(Exception e){
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
