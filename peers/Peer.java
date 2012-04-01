@@ -142,6 +142,16 @@ public class Peer {
 		}
 	}
 
+  public void sendBitField(){
+    boolean[] obf = BitToBoolean.convert(Manager.have_piece);
+    byte[] bobf = BitToBoolean.convert(obf);
+    Message outfield = new BitfieldMessage(bobf);
+    try{
+      Message.encode(to_peer_, outfield);
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+  }
 
 	/** 
 	 * receives the peers handshake message and verifies it
@@ -270,13 +280,6 @@ public class Peer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Not needed yet, will be implemented later
-	 */
-	public void sendBitfield(){
-    
 	}
 
 	/** 

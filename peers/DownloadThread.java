@@ -24,6 +24,8 @@ public class DownloadThread implements Runnable {
     peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 
     if(peer.receiveHandshake(Manager.info_hash)){
+      peer.sendBitField();
+      
       Message m = peer.listen();
 
       if(m == null){
@@ -41,12 +43,6 @@ public class DownloadThread implements Runnable {
         BitfieldMessage bfm = (BitfieldMessage) m;
         bf = bfm.getData();
         boolean[] bfb = BitToBoolean.convert(bf);
-        
-        //TODO: need have array
-
-        //TODO: send bitfield
-        
-        //TODO: send start message once
         
         //loop as long as there are blocks on the queue
         while(!checkFull()){
