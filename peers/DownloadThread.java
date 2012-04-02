@@ -61,7 +61,6 @@ public class DownloadThread implements Runnable {
 					interpret(m);
 				}
 			}
-			//
 			while (peerInterested) {
 				m = peer.listen();
 				interpret(m);
@@ -132,7 +131,7 @@ public class DownloadThread implements Runnable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Manager.addDownloaded(b.getLength());
+
 			File rename = new File("temp/" + name);
 			File f = new File("blocks/" + name);
 			if (f.exists()) {

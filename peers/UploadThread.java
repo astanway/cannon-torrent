@@ -108,7 +108,7 @@ public class UploadThread implements Runnable {
 					Manager.q.add(b);
 					e.printStackTrace();
 				}
-				Manager.addDownloaded(b.getLength());
+
 				File rename = new File("temp/" + name);
 				File f = new File("blocks/" + name);
 				if (f.exists()) {
