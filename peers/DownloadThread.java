@@ -47,12 +47,8 @@ public class DownloadThread implements Runnable {
 						m = peer.listen();
 						interpret(m);
 					}
-					RequestMessage rqm = new RequestMessage(b.getPiece(),
-							b.getBlockOffset(), b.getLength());
-					System.out.println("Requested " + peer.peer_id_ + " "
-							+ b.getPiece() + " " + b.getBlockOffset());
 					try {
-						Message.encode(peer.to_peer_, rqm);
+						peer.requestBlock(b);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						e.printStackTrace();
