@@ -249,7 +249,7 @@ public class Peer {
 		}
 	}
 
-	public Message listen() {
+	public Message listen() throws Exception{
 		try {
 			Message m = Message.decode(from_peer_);
 			// System.out.println("Got type " + m.getId() + " from peer " +

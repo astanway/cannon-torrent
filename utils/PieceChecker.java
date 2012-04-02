@@ -18,9 +18,11 @@ import peers.Peer;
 public class PieceChecker extends TimerTask {
 
 	public void run() {
+	  System.out.println("Starting checker");
 		if (Manager.fileDone) {
 			this.cancel();
 		}
+
 		while (Manager.have_piece.toString().indexOf("0") != -1) {
 			for (int i = 0; i < Manager.numPieces; i++) {
 				// is it already verified?
@@ -63,6 +65,7 @@ public class PieceChecker extends TimerTask {
 
 			if (Manager.q.size() == 0) {
 				addMissingBlocks();
+				return;
 			}
 		}
 

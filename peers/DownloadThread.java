@@ -30,64 +30,103 @@ public class DownloadThread implements Runnable {
 			return;
 		} else {
 			peer.sendBitField();
-			Message m = peer.listen();
+			Message m = null;
+			try{
+			  m = peer.listen();
+			} catch (Exception e){
+			  run();
+			  return;
+			}
 			interpret(m);
+
 			Block b = null;
+
 			while (!checkFull()) {
-				do {
-					b = Manager.q.poll();
-				} while (b == null);
-				if (checkInterest(b)) {
+				b = Manager.q.poll();
+				
+				if(b == null){
+				  //wait for the piece checker to fill it up again
+				  try{
+  			    Thread.sleep(3000L);
+  			  } catch (Exception e){
+  		    }
+				  continue;
+				}
+				
+				if (peer.bfb[b.getPiece()]) {
 					try {
 						peer.sendInterested();
 					} catch (Exception e) {
-						e.printStackTrace();
+						Manager.q.add(b);
+						run();
+						return;
 					}
 					while (peer.choked == true) {
-						m = peer.listen();
+					  try{
+  					  m = peer.listen();
+  					} catch (Exception e){
+  					  Manager.q.add(b);
+  					  run();
+    				  return;
+    				}
 						interpret(m);
 					}
 					try {
 						peer.requestBlock(b);
 					} catch (Exception e) {
-						Manager.q.add(b);
-						e.printStackTrace();
+					  Manager.q.add(b);
+						run();
+						return;
 					}
-					m = peer.listen();
+					try{
+					  m = peer.listen();
+					} catch (Exception e){
+					  Manager.q.add(b);
+					  run();
+  				  return;
+  				}
 					interpret(m);
 				}
+
+				//this is to avoid hammering any one peer
+				try{
+			    Thread.sleep(400L);
+			  } catch (Exception e){
+		    }
 			}
+
 			while (peerInterested) {
-				m = peer.listen();
+				try{
+				  m = peer.listen();
+				} catch (Exception e){
+				  run();
+				  return;
+				}
 				interpret(m);
 			}
-
 		}
 	}
 
-	public boolean checkInterest(Block b) {
-		if (peer.bfb[b.getPiece()] == true) {
-			System.out.println("We are interested in their stuff");
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean interpret(Message m) {
+	public void interpret(Message m) {
+	  //we have no message and we need to restart the connection
+	  if (m == null){
+	    run();
+	    return;
+	  }
+	  
 		switch (m.getId()) {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
 			peer.bfb = BitToBoolean.convert(bfm.getData());
-			return true;
+			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
 			System.out.println("We have been choked by " + peer.peer_id_);
-			return true;
+			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;
 			peer.bfb[hvm.getPieceIndex()] = true;
-			return true;
+			return;
 		case Message.TYPE_INTERESTED:
 			try {
 				Message.encode(peer.to_peer_, Message.UNCHOKE);
@@ -96,13 +135,13 @@ public class DownloadThread implements Runnable {
 			}
 			peerChoked = false;
 			peerInterested = true;
-			return true;
+			return;
 		case Message.TYPE_KEEP_ALIVE:
 			// do nothing would reset timer, should loop again;
-			return true;
+			return;
 		case Message.TYPE_NOT_INTERESTED:
 			// do nothing, not keeping interested state atm
-			return true;
+			return;
 		case Message.TYPE_PIECE:
 			PieceMessage pm = (PieceMessage) m;
 			byte[] piece_data = pm.getData();
@@ -138,7 +177,7 @@ public class DownloadThread implements Runnable {
 
 			System.out.print(peer.peer_id_ + " ");
 			b.print();
-			return true;
+			return;
 		case Message.TYPE_REQUEST:
 			if (!peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
@@ -158,14 +197,14 @@ public class DownloadThread implements Runnable {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				return true;
+				return;
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
 			System.out.println("Peer " + peer.peer_id_ + " Unchoked us");
-			return true;
+			return;
 		}
-		return false;
+		return;
 	}
 	
 	public boolean checkFull() {
