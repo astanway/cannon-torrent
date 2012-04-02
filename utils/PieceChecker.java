@@ -38,6 +38,7 @@ public class PieceChecker extends TimerTask {
 				if (Helpers.verifyHash(piece, pieceHash)) {
 					System.out.println("Piece " + i + " verified");
 					Manager.have_piece.set(i, 1);
+					Manager.addDownloaded(Helpers.getPiece(i).length);
 					for (Peer peer : Manager.activePeerList) {
 						HaveMessage haveSend = new HaveMessage(i);
 						try {
