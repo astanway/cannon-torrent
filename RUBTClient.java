@@ -60,8 +60,13 @@ public class RUBTClient {
 		manager.setPeerList(getPeers());
 		manager.setTimers();
 		
-		while(manager.ready == false){
-		  continue;
+		while(!manager.ready){
+		  try{
+		    Thread.sleep(1000L);
+  		  continue;
+		  } catch(Exception e){
+		    
+		  }
 		}
 
 		manager.download();

@@ -17,12 +17,6 @@ import peers.Peer;
 
 public class PieceChecker extends TimerTask {
 
-  boolean first = false;
-
-  public PieceChecker(boolean first){
-    this.first = first;
-  }
-
 	public void run() {
 		if (Manager.fileDone) {
 			this.cancel();
@@ -70,7 +64,7 @@ public class PieceChecker extends TimerTask {
 			}
 			
 			// ready to start! THIS IS TERRIBLE CODE
-			if(this.first){
+			if(!Manager.ready){
 			  Manager.ready = true;
 			  return;
 			}

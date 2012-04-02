@@ -83,16 +83,7 @@ public class Manager {
 	
 	public static void setTimers(){
     Timer t = new Timer();
-		PieceChecker checker = new PieceChecker(true);
-		t.schedule(checker, 0);
-		
-		try{
-		  Thread.sleep(4000L);
-		} catch (Exception e){}
-		t.cancel();
-		
-		t = new Timer();
-		checker = new PieceChecker(false);
+		PieceChecker checker = new PieceChecker();
 		TrackerContact contact = new TrackerContact(0);
 		t.schedule(checker, 0, 3000);
 		t.schedule(contact,interval*1000,interval*1000);
