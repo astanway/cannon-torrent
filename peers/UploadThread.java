@@ -82,7 +82,9 @@ public class UploadThread implements Runnable {
 				interest = false;
 				break;
 			case Message.TYPE_PIECE:
-				System.out.println("Piece Message");
+				System.out.println("WHY DID WE GET A PIECE MESSAGE");
+				break;
+				/*System.out.println("Piece Message");
 				PieceMessage pm = (PieceMessage) temp;
 				byte[] piece_data = pm.getData();
 				Block b = new Block(pm.getPieceIndex(), pm.getBegin(),
@@ -117,7 +119,7 @@ public class UploadThread implements Runnable {
 
 				System.out.print(peer.peer_id_ + " ");
 				b.print();
-				break;
+				break;*/
 			case Message.TYPE_REQUEST:
 				System.out.println("We got a request message");
 				RequestMessage tempRequest = (RequestMessage) temp;

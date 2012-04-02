@@ -10,5 +10,6 @@ public class Shutdown implements Runnable{
 			Manager.activePeerList.get(i).closeSocket();
 		}
 		Manager.activePeerList.clear();
+		System.exit(1);
 	}
 }

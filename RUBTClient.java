@@ -55,6 +55,7 @@ public class RUBTClient {
 		manager.setPeerList(getPeers());
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
+		new Thread(new Input()).start();
 		manager.download();
 
 		// This executes right after the above command, not after we're finished
