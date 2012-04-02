@@ -44,6 +44,7 @@ public class UploadThread implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		
 		while (interest) {
 			Message temp = listen();
 			if (weChoked) {
@@ -81,43 +82,6 @@ public class UploadThread implements Runnable {
 				System.out.println("Not Interested In Our Junk");
 				interest = false;
 				break;
-			case Message.TYPE_PIECE:
-				System.out.println("Piece Message");
-				PieceMessage pm = (PieceMessage) temp;
-				byte[] piece_data = pm.getData();
-				Block b = new Block(pm.getPieceIndex(), pm.getBegin(),
-						pm.getData());
-				int p = b.getPiece();
-
-				// make all single digits double, so that the sorting will work
-				// later on
-				String name = "";
-				if (b.getBlock() < 10) {
-					name = p + " 0" + b.getBlock();
-				} else {
-					name = p + " " + b.getBlock();
-				}
-				try {
-					RandomAccessFile file = new RandomAccessFile(
-							"temp/" + name, "rw");
-					file.write(piece_data);
-					file.close();
-				} catch (Exception e) {
-					Manager.q.add(b);
-					e.printStackTrace();
-				}
-
-				File rename = new File("temp/" + name);
-				File f = new File("blocks/" + name);
-				if (f.exists()) {
-					break;
-				} else {
-					rename.renameTo(new File("blocks/" + name));
-				}
-
-				System.out.print(peer.peer_id_ + " ");
-				b.print();
-				break;
 			case Message.TYPE_REQUEST:
 				System.out.println("We got a request message");
 				RequestMessage tempRequest = (RequestMessage) temp;
@@ -133,6 +97,7 @@ public class UploadThread implements Runnable {
 				System.out.println("of piece " + tempRequest.getPieceIndex());
 				try {
 					Message.encode(peer.to_peer_, toSend);
+					Manager.addUploaded(toSend.getBlockLength());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

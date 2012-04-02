@@ -221,7 +221,10 @@ public class Message {
 		public byte[] getData() {
 			return data;
 		}
-
+		
+		public int getBlockLength() {
+			return data.length;
+		}
 	}
 
 	public static final class RequestMessage extends Message {

@@ -158,9 +158,9 @@ public class DownloadThread implements Runnable {
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
-				Manager.addUploaded(tempRequest.getBlockLength());
 				try {
 					Message.encode(peer.to_peer_, toSend);
+					Manager.addUploaded(tempRequest.getBlockLength());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
