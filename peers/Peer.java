@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.nio.ByteBuffer;
 
@@ -274,7 +275,11 @@ public class Peer {
 		Message m = new RequestMessage(x, y, z);
 		try {
 			Message.encode(to_peer_, m);
-		} catch (Exception e) {
+		} catch(SocketException se){
+			this.establishStreams();
+			se.printStackTrace();
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Error on sendRequest for peer " + peer_id_);
 		}

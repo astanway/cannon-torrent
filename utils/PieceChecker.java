@@ -18,7 +18,7 @@ import peers.Peer;
 public class PieceChecker extends TimerTask {
 
 	public void run() {
-		if(Manager.fileDone){
+		if (Manager.fileDone) {
 			this.cancel();
 		}
 		while (Manager.have_piece.toString().indexOf("0") != -1) {
@@ -45,13 +45,17 @@ public class PieceChecker extends TimerTask {
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out
-									.println("Failed to send the have message");
+									.println("Failed to send the have message to "
+											+ peer.peer_id_);
+							peer.closeSocket();
+							peer.createSocket(peer.ip_,peer.port_);
+							peer.establishStreams();
 						}
 					}
 				} else {
 					System.out.println("Deleting piece " + i);
 					Manager.have_piece.set(i, 0);
-					Manager.addDownloaded(-1*Helpers.getPiece(i).length);
+					Manager.addDownloaded(-1 * Helpers.getPiece(i).length);
 					Helpers.deletePiece(i);
 				}
 			}
@@ -159,9 +163,9 @@ public class PieceChecker extends TimerTask {
 		System.out.println("Bye!");
 		Thread t = new Thread(new TrackerContact(1));
 		t.start();
-		Manager.fileDone=true;
-		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
-		//System.exit(1);
+		Manager.fileDone = true;
+		// Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+		// System.exit(1);
 	}
 
 	public static void deleteBlocks(int i) {

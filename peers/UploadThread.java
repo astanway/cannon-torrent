@@ -1,7 +1,9 @@
 package peers;
 
 import java.io.File;
+import java.io.RandomAccessFile;
 
+import utils.BitToBoolean;
 import utils.Helpers;
 import utils.Manager;
 import utils.Message;
@@ -13,25 +15,34 @@ public class UploadThread implements Runnable {
 	public boolean peerChoked = false;
 	public boolean weChoked = false;
 	private boolean interest = true;
+	boolean doHandshake = true;
 
 	public UploadThread(Peer p) {
 		peer = p;
 	}
 
+	public UploadThread(Peer p, boolean handshake) {
+		peer = p;
+		doHandshake = handshake;
+	}
+
 	public void run() {
-		if (!peer.receiveHandshake(Manager.info_hash)) {
+		if (doHandshake) {
+			if (!peer.receiveHandshake(Manager.info_hash)) {
+				try {
+					peer.to_peer_
+							.write(new String("DIAF YOU WHORE").getBytes());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 			try {
-				peer.to_peer_.write(new String("DIAF YOU WHORE").getBytes());
+				Message.encode(peer.to_peer_,
+						new BitfieldMessage(Manager.getBitfield()));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
-		try {
-			Message.encode(peer.to_peer_,
-					new BitfieldMessage(Manager.getBitfield()));
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		while (interest) {
 			Message temp = listen();
@@ -42,42 +53,73 @@ public class UploadThread implements Runnable {
 			}
 			switch (temp.getId()) {
 			case Message.TYPE_BITFIELD:
-				/* Interpret their bitfield? I guess? */
-
+				BitfieldMessage bfm = (BitfieldMessage) temp;
+				peer.bfb=BitToBoolean.convert(bfm.getData());
+				break;
 			case Message.TYPE_CHOKE:
 				System.out.println("We are Choked");
 				weChoked = true;
-
+				break;
 			case Message.TYPE_HAVE:
+				System.out.println("Have Message");
 				HaveMessage tempHave = (HaveMessage) temp;
-
-				/*
-				 * Update the array when I get all of abe's code that he wants
-				 * to use
-				 */
-
+				peer.bfb[tempHave.getPieceIndex()]=true;
+				break;
 			case Message.TYPE_INTERESTED:
 				System.out.println("They are interested in our Junk");
 				try {
 					Message.encode(peer.to_peer_, Message.UNCHOKE);
+					System.out.println("UNCHOKED PEER");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
+				break;
 			case Message.TYPE_KEEP_ALIVE:
 				System.out.println("Keep the connection Alive!!");
-
+				break;
 			case Message.TYPE_NOT_INTERESTED:
 				System.out.println("Not Interested In Our Junk");
 				interest = false;
 				break;
 			case Message.TYPE_PIECE:
-				PieceMessage tempPiece = (PieceMessage) temp;
-				/*
-				 * Need to make a write handler that handles the writing with
-				 * the locks and crap
-				 */
+				System.out.println("Piece Message");
+				PieceMessage pm = (PieceMessage) temp;
+				byte[] piece_data = pm.getData();
+				Block b = new Block(pm.getPieceIndex(), pm.getBegin(),
+						pm.getData());
+				int p = b.getPiece();
+
+				// make all single digits double, so that the sorting will work
+				// later on
+				String name = "";
+				if (b.getBlock() < 10) {
+					name = p + " 0" + b.getBlock();
+				} else {
+					name = p + " " + b.getBlock();
+				}
+				try {
+					RandomAccessFile file = new RandomAccessFile(
+							"temp/" + name, "rw");
+					file.write(piece_data);
+					file.close();
+				} catch (Exception e) {
+					Manager.q.add(b);
+					e.printStackTrace();
+				}
+				Manager.addDownloaded(b.getLength());
+				File rename = new File("temp/" + name);
+				File f = new File("blocks/" + name);
+				if (f.exists()) {
+					break;
+				} else {
+					rename.renameTo(new File("blocks/" + name));
+				}
+
+				System.out.print(peer.peer_id_ + " ");
+				b.print();
+				break;
 			case Message.TYPE_REQUEST:
+				System.out.println("We got a request message");
 				RequestMessage tempRequest = (RequestMessage) temp;
 				byte[] data = new byte[tempRequest.getBlockLength()];
 				byte[] tempbytes = Helpers
@@ -94,10 +136,10 @@ public class UploadThread implements Runnable {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
+				break;
 			case Message.TYPE_UNCHOKE:
 				System.out.println("We Are Unchoked");
-				weChoked = false;
+				peer.choked = false;
 				break;
 			}
 		}
