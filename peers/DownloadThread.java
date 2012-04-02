@@ -43,11 +43,10 @@ public class DownloadThread implements Runnable {
 
 			while (!checkFull()) {
 				b = Manager.q.poll();
-				
 				if(b == null){
 				  //wait for the piece checker to fill it up again
 				  try{
-  			    Thread.sleep(3000L);
+  			    Thread.sleep(3000L + (long)(Math.random() * 10));
   			  } catch (Exception e){
   		    }
 				  continue;
@@ -100,7 +99,7 @@ public class DownloadThread implements Runnable {
 
 				//this is to avoid hammering any one peer
 				try{
-			    Thread.sleep(400L);
+			    Thread.sleep(20L + (long)(Math.random() * 10));
 			  } catch (Exception e){
 		    }
 			}
@@ -120,6 +119,7 @@ public class DownloadThread implements Runnable {
 	public void interpret(Message m) {
 	  //we have no message and we need to restart the connection
 	  if (m == null){
+	    Thread.sleep(500L + (long)(Math.random() * 10));
 	    run();
 	    return;
 	  }
@@ -197,7 +197,7 @@ public class DownloadThread implements Runnable {
 						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
-				System.out.println("Sending block " + tempRequest.getBegin());
+				System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
 				System.out.println("of piece " + tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
