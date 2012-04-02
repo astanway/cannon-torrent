@@ -1,6 +1,7 @@
 package utils;
 
 import java.nio.ByteBuffer;
+import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -248,11 +249,11 @@ public class Manager {
 		try {
 			String escaped_hash = Helpers.toURLHex(info_hash);
 			String escaped_id = Helpers.toURLHex(peer_id);
-			String ip = "128.6.5.130";
+			InetAddress thisIp = InetAddress.getLocalHost();
 			url_string = torrent_info.announce_url.toString() + "?port=" + port
 					+ "&peer_id=" + escaped_id + "&info_hash=" + escaped_hash
 					+ "&uploaded=" + uploaded + "&downloaded=" + downloaded
-					+ "&left=" + left + "&ip=" + ip + "&event=" + event;
+					+ "&left=" + left + "&event=" + event;
 
 		} catch (Exception e) {
 			System.out.println(e);
