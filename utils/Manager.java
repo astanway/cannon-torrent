@@ -27,7 +27,8 @@ public class Manager {
 	public static int blocksPerPiece = 0;
 	public static int blocksInLastPiece = 0;
 	public static int leftoverBytes = 0;
-	public static boolean ready = false;
+	public static boolean peersReady = false;
+	public static boolean piecesReady = true;
 	public static boolean fileDone = false;
 	public static ReentrantLock fileLock = new ReentrantLock();
 	public static ArrayList<Peer> activePeerList = null;
@@ -166,11 +167,6 @@ public class Manager {
 
 	public static void setPort(int port) {
 		Manager.port = port;
-	}
-
-	public static void setPeerList(ArrayList<Peer> _peerList) {
-		Manager.peerList_ = _peerList;
-		Manager.ready = true;
 	}
 
 	public static ArrayList<Peer> getPeerList() {
@@ -317,6 +313,7 @@ public class Manager {
 		}
 		
 		peerList_ = peerList;
+		Manager.peersReady = true;
 	}
 
 	public static byte[] getBitfield() {

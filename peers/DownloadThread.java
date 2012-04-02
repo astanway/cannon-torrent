@@ -22,6 +22,7 @@ public class DownloadThread implements Runnable {
 	}
 
 	public void run() {
+	  peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
 		peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
@@ -30,14 +31,18 @@ public class DownloadThread implements Runnable {
 			return;
 		} else {
 			peer.sendBitField();
-      Message m = null;
-      try{
-        m = peer.listen();
-      } catch (Exception e){
-        run();
-        return;
-      }
-      interpret(m);
+			
+			//get their bitfield
+  	  Message m = null;
+			while(peer.bfb == null){
+        try{
+          m = peer.listen();
+        } catch (Exception e){
+          run();
+          return;
+        }
+        interpret(m);        
+			}
 
 			Block b = null;
 
@@ -51,7 +56,7 @@ public class DownloadThread implements Runnable {
   		    }
 				  continue;
 				}
-				
+
 				String name = "";
   			if (b.getBlock() < 10) {
   				name = b.getPiece() + " 0" + b.getBlock();
@@ -63,7 +68,7 @@ public class DownloadThread implements Runnable {
   			if (f.exists()) {
   				continue;
   			}
-				
+
 				if (peer.bfb[b.getPiece()]) {
 					try {
 						peer.sendInterested();
@@ -77,8 +82,8 @@ public class DownloadThread implements Runnable {
   					  m = peer.listen();
   					} catch (Exception e){
   					  Manager.q.add(b);
-  					  run();
-    				  return;
+              run();
+              return;
     				}
 						interpret(m);
 					}
@@ -146,6 +151,7 @@ public class DownloadThread implements Runnable {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
 			peer.bfb = BitToBoolean.convert(bfm.getData());
+			System.out.println("Got a bitfield from " + peer.peer_id_);
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
@@ -215,8 +221,8 @@ public class DownloadThread implements Runnable {
 						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
-        // System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
-        // System.out.println("of piece " + tempRequest.getPieceIndex());
+        System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
+        System.out.println("of piece " + tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
