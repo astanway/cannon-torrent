@@ -59,10 +59,6 @@ public class RUBTClient {
 		manager.setPeerId();
 		manager.setPeerList(getPeers());
 		manager.setTimers();
-
-    Thread t = new Thread(new PeerListener(Manager.getPort()));
-    t.start();
-    new Thread(new Input()).start();
 		
 		while(manager.ready == false){
 		  continue;
@@ -70,6 +66,9 @@ public class RUBTClient {
 
 		manager.download();
 
+    Thread t = new Thread(new PeerListener(Manager.getPort()));
+    t.start();
+    new Thread(new Input()).start();
 	}
 
 	// query the tracker and get the initial list of peers
