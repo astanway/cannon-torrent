@@ -119,7 +119,11 @@ public class DownloadThread implements Runnable {
 	public void interpret(Message m) {
 	  //we have no message and we need to restart the connection
 	  if (m == null){
-	    Thread.sleep(500L + (long)(Math.random() * 10));
+	    try{
+	      Thread.sleep(500L + (long)(Math.random() * 10));
+	    } catch (Exception e){
+	     e.printStackTrace(); 
+	    }
 	    run();
 	    return;
 	  }
