@@ -33,7 +33,7 @@ public class DownloadThread implements Runnable {
 			Message m = peer.listen();
 			interpret(m);
 			Block b = null;
-			while (!Manager.q.isEmpty()) {
+			while (!checkFull()) {
 				do {
 					b = Manager.q.poll();
 				} while (b == null);
@@ -61,8 +61,6 @@ public class DownloadThread implements Runnable {
 					interpret(m);
 				}
 			}
-
-      //
 			while (peerInterested) {
 				m = peer.listen();
 				interpret(m);
@@ -172,5 +170,14 @@ public class DownloadThread implements Runnable {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean checkFull() {
+		for (int i = 0; i < Manager.have_piece.length(); i++) {
+			if (Manager.have_piece.get(i) != 1) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
