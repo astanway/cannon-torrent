@@ -18,7 +18,6 @@ import peers.Peer;
 public class PieceChecker extends TimerTask {
 
 	public void run() {
-	  System.out.println("Starting checker");
 		if (Manager.fileDone) {
 			this.cancel();
 		}
@@ -47,12 +46,8 @@ public class PieceChecker extends TimerTask {
 							Message.encode(peer.to_peer_, haveSend);
 						} catch (Exception e) {
 							e.printStackTrace();
-							System.out
-									.println("Failed to send the have message to "
-											+ peer.peer_id_);
-							peer.closeSocket();
-							peer.createSocket(peer.ip_,peer.port_);
-							peer.establishStreams();
+							System.out.println("Failed to send the have message to " 
+							                    + peer.peer_id_);
 						}
 					}
 				} else {

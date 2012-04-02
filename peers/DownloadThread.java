@@ -86,6 +86,16 @@ public class DownloadThread implements Runnable {
   				  return;
   				}
 					interpret(m);
+				} else {
+				  //they don't have what we want, but we should listen to them
+				  //to see if they want anything we've got
+				  try{
+  				  m = peer.listen();
+  				} catch (Exception e){
+  				  run();
+  				  return;
+  				}
+  				interpret(m);
 				}
 
 				//this is to avoid hammering any one peer
@@ -141,6 +151,7 @@ public class DownloadThread implements Runnable {
 			return;
 		case Message.TYPE_NOT_INTERESTED:
 			// do nothing, not keeping interested state atm
+			peerInterested = false;
 			return;
 		case Message.TYPE_PIECE:
 			PieceMessage pm = (PieceMessage) m;
