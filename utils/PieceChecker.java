@@ -17,6 +17,12 @@ import peers.Peer;
 
 public class PieceChecker extends TimerTask {
 
+  boolean first = false;
+
+  public PieceChecker(boolean first){
+    this.first = first;
+  }
+
 	public void run() {
 		if (Manager.fileDone) {
 			this.cancel();
@@ -62,6 +68,12 @@ public class PieceChecker extends TimerTask {
 				addMissingBlocks();
 				return;
 			}
+			
+			// ready to start! THIS IS TERRIBLE CODE
+			if(this.first){
+			  Manager.ready = true;
+			  return;
+			}
 		}
 
 		finish();
@@ -89,19 +101,19 @@ public class PieceChecker extends TimerTask {
 						data = new byte[Manager.leftoverBytes];
 						Block b = new Block(j, k, data);
 						Manager.q.add(b);
-						System.out.println("Adding block " + j + " " + k);
+            // System.out.println("Adding block " + j + " " + k);
 						break;
 					} else {
 						data = new byte[Manager.block_length];
 					}
 					Block b = new Block(j, k, data);
-					System.out.println("Adding block " + j + " " + k);
+          // System.out.println("Adding block " + j + " " + k);
 					Manager.q.add(b);
 				}
 			}
 		}
 
-		System.out.println(Manager.q.size());
+    // System.out.println(Manager.q.size());
 	}
 
 	public static void finish() {

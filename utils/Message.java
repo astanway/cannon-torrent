@@ -152,8 +152,6 @@ public class Message {
 				BitfieldMessage tmp = (BitfieldMessage) message;
 				dout.writeInt(tmp.getLength());
 				dout.writeByte(tmp.getId());
-				System.out.println("Sent bitfield of length " + tmp.getData().length);
-				System.out.println(Helpers.converToHex(tmp.getData()));
 				dout.write(tmp.getData(),0,tmp.getData().length);
 				break;
 			}

@@ -35,15 +35,21 @@ public class RUBTClient {
 		String torrentFile = args[0];
 		String savedFile = args[1];
 
-		// start the manager
-		
-		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
-
 		//check if a local temp directory exists
 		File tempFile = new File("temp/");
 		if(tempFile.exists()){
 			if(tempFile.isDirectory()){
-				System.out.println("yay its a directory");
+				System.out.println("Temp/ exists");
+			}
+		}else{
+			tempFile.mkdir();
+		}
+		
+		//check if a local temp directory exists
+		tempFile = new File("blocks/");
+		if(tempFile.exists()){
+			if(tempFile.isDirectory()){
+				System.out.println("Blocks/ exists");
 			}
 		}else{
 			tempFile.mkdir();
@@ -51,16 +57,19 @@ public class RUBTClient {
 		
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
-		//manager.checkPieces();
 		manager.setPeerList(getPeers());
-		Thread t = new Thread(new PeerListener(Manager.getPort()));
-		t.start();
-		new Thread(new Input()).start();
+		manager.setTimers();
+
+    Thread t = new Thread(new PeerListener(Manager.getPort()));
+    t.start();
+    new Thread(new Input()).start();
+		
+		while(manager.ready == false){
+		  continue;
+		}
+
 		manager.download();
 
-		// This executes right after the above command, not after we're finished
-		// downloading.
-		//Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
 	}
 
 	// query the tracker and get the initial list of peers
@@ -82,11 +91,6 @@ public class RUBTClient {
 		manager.queryTracker();
 		
 		return response;
-		// wait for the manager to be ready
-		/*
-		 * while (!manager.ready) { } System.out.println("All systems go.");
-		 * System.out.println(manager.q.size()); manager.download();
-		 */
 	}
 
 }

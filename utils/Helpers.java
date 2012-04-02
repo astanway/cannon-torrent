@@ -167,8 +167,7 @@ public final class Helpers {
 		// is it the last piece?
 		if (i == Manager.numPieces - 1) {
 			last = true;
-			int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length)
-					+ Manager.leftoverBytes;
+			int lastPieceSize = ((Manager.blocksInLastPiece - 1) * Manager.block_length) + Manager.leftoverBytes;
 			piece = new byte[lastPieceSize];
 		} else {
 			piece = new byte[Manager.blocksPerPiece * Manager.block_length];
@@ -228,8 +227,7 @@ public final class Helpers {
 				file.delete();
 				int b = Integer.parseInt(st.nextToken());
 
-				if (i == Manager.numPieces - 1
-						&& b == Manager.blocksInLastPiece) {
+				if (i == Manager.numPieces - 1 && b == Manager.blocksInLastPiece) {
 					data = new byte[Manager.leftoverBytes];
 				} else {
 					data = new byte[Manager.block_length];

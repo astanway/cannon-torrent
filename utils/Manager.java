@@ -81,51 +81,35 @@ public class Manager {
 		}
 	}
 	
-	public static void checkPieces(){
-		for(int i =0;i<numPieces;i++){
-			byte[] piece = Helpers.getPiece(i);
-			byte[] pieceHash = torrent_info.piece_hashes[i].array();
-			if(Helpers.verifyHash(piece, pieceHash)){
-				System.out.println("Verified piece "  + i + " before");
-				have_piece.set(i, 1);
-			}
-			else{
-				System.out.println("That shouldn't happen");
-			}
-		}
+	public static void setTimers(){
+    Timer t = new Timer();
+		PieceChecker checker = new PieceChecker(true);
+		t.schedule(checker, 0);
+		
+		try{
+		  Thread.sleep(4000L);
+		} catch (Exception e){}
+		t.cancel();
+		
+		t = new Timer();
+		checker = new PieceChecker(false);
+		TrackerContact contact = new TrackerContact(0);
+		t.schedule(checker, 0, 3000);
+		t.schedule(contact,interval*1000,interval*1000);
+    
+		return;
 	}
 
 	public boolean download() {
 		byte[] response = null;
 		response = Helpers.getURL(constructQuery(port, 0,
 				torrent_info.file_length, 0, STARTED));
-
+    
 		for (Peer peer : peerList_) {
 			registerPeer(peer);
 			DownloadThread p = new DownloadThread(peer);
 			Thread a = new Thread(p);
 			a.start();
-		}
-		System.out.println("min interval = " + minInterval);
-		System.out.println("interval =" + interval);
-		Timer t = new Timer();
-		PieceChecker checker = new PieceChecker();
-		TrackerContact contact = new TrackerContact(0);
-		t.schedule(checker, 3000, 3000);
-		t.schedule(contact,interval*1000,interval*1000);
-		
-		boolean running = true;
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		String lineIn = null;
-		while (running) {
-			try {
-				lineIn = br.readLine();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (lineIn.compareToIgnoreCase("exit") == 0) {
-				running = false;
-			}
 		}
 		return false;
 	}
@@ -342,9 +326,6 @@ public class Manager {
 		}
 		
 		peerList_ = peerList;
-
-		// ready to start! THIS IS TERRIBLE CODE
-		ready = true;
 	}
 
 	public static byte[] getBitfield() {

@@ -11,7 +11,8 @@ public class Input implements Runnable{
 		String input = "";
 		while(!input.equalsIgnoreCase("exit")){
 			try {
-				in.readLine();
+				input = in.readLine();
+				System.out.println(input);
 			} catch (IOException e) {
 				System.out.println("Wtf IO exception");
 				e.printStackTrace();
@@ -19,7 +20,7 @@ public class Input implements Runnable{
 				return;
 			}
 		}
-		Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
-		System.exit(1);
+    // Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
+		Runtime.getRuntime().exit(1);
 	}
 }

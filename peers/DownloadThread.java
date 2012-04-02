@@ -30,14 +30,14 @@ public class DownloadThread implements Runnable {
 			return;
 		} else {
 			peer.sendBitField();
-			Message m = null;
-			try{
-			  m = peer.listen();
-			} catch (Exception e){
-			  run();
-			  return;
-			}
-			interpret(m);
+      Message m = null;
+      try{
+        m = peer.listen();
+      } catch (Exception e){
+        run();
+        return;
+      }
+      interpret(m);
 
 			Block b = null;
 
@@ -51,6 +51,18 @@ public class DownloadThread implements Runnable {
   		    }
 				  continue;
 				}
+				
+				String name = "";
+  			if (b.getBlock() < 10) {
+  				name = b.getPiece() + " 0" + b.getBlock();
+  			} else {
+  				name = b.getPiece() + " " + b.getBlock();
+  			}
+				
+				File f = new File("blocks/" + name);
+  			if (f.exists()) {
+  				continue;
+  			}
 				
 				if (peer.bfb[b.getPiece()]) {
 					try {
@@ -72,6 +84,8 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
+            System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from "
+                           + peer.peer_id_);
 					} catch (Exception e) {
 					  Manager.q.add(b);
 						run();
@@ -190,8 +204,8 @@ public class DownloadThread implements Runnable {
 				rename.renameTo(new File("blocks/" + name));
 			}
 
-			System.out.print(peer.peer_id_ + " ");
-			b.print();
+      System.out.print(peer.peer_id_ + " ");
+      b.print();
 			return;
 		case Message.TYPE_REQUEST:
 			if (!peerChoked) {
@@ -201,8 +215,8 @@ public class DownloadThread implements Runnable {
 						.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
-				System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
-				System.out.println("of piece " + tempRequest.getPieceIndex());
+        // System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
+        // System.out.println("of piece " + tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						sendData);
@@ -216,7 +230,7 @@ public class DownloadThread implements Runnable {
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
-			System.out.println("Peer " + peer.peer_id_ + " Unchoked us");
+      System.out.println("Peer " + peer.peer_id_ + " unchoked us");
 			return;
 		}
 		return;
