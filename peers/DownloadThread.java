@@ -217,8 +217,7 @@ public class DownloadThread implements Runnable {
 			if (!peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
 				byte[] sendData = new byte[tempRequest.getBlockLength()];
-				byte[] tempbytes = Helpers
-						.getPiece(tempRequest.getPieceIndex());
+				byte[] tempbytes = Helpers.getPiece(tempRequest.getPieceIndex());
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
         System.out.println(peer.peer_id_ + " sending block " + tempRequest.getBegin());
