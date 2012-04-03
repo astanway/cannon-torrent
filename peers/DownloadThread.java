@@ -151,11 +151,11 @@ public class DownloadThread implements Runnable {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
 			peer.bfb = BitToBoolean.convert(bfm.getData());
-			System.out.println("Got a bitfield from " + peer.peer_id_);
+      // System.out.println("Got a bitfield from " + peer.peer_id_);
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
-			System.out.println("We have been choked by " + peer.peer_id_);
+      // System.out.println("We have been choked by " + peer.peer_id_);
 			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;

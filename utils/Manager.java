@@ -86,7 +86,7 @@ public class Manager {
     Timer t = new Timer();
 		PieceChecker checker = new PieceChecker();
 		TrackerContact contact = new TrackerContact(0);
-		t.schedule(checker, 0, 3000);
+		t.schedule(checker, 0, 5000);
 		t.schedule(contact,interval*1000,interval*1000);
     
 		return;
