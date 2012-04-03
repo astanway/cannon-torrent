@@ -20,6 +20,9 @@ public class RUBTClient {
 			System.out.println("USAGE: RUBTClient [torrent-file] [file-name]");
 			System.exit(1);
 		}
+		
+		printIntro();
+		
 		String torrentFile = args[0];
 		String savedFile = args[1];
 
@@ -27,7 +30,7 @@ public class RUBTClient {
 		File tempFile = new File("temp/");
 		if (tempFile.exists()) {
 			if (tempFile.isDirectory()) {
-				System.out.println("Temp/ exists");
+				// System.out.println("Temp/ exists");
 			}
 		} else {
 			tempFile.mkdir();
@@ -37,7 +40,7 @@ public class RUBTClient {
 		tempFile = new File("blocks/");
 		if (tempFile.exists()) {
 			if (tempFile.isDirectory()) {
-				System.out.println("Blocks/ exists");
+        // System.out.println("Blocks/ exists");
 			}
 		} else {
 			tempFile.mkdir();
@@ -82,6 +85,14 @@ public class RUBTClient {
 		manager.queryTracker();
 
 		return response;
+	}
+	
+	public static void printIntro(){
+	  System.out.println(" /¯¯¯¯\\     /¯¯¯¯¯||¯¯¯\\|¯¯¯| |¯¯¯\\|¯¯¯| /¯¯¯¯¯\\ |¯¯¯\\|¯¯¯|");
+    System.out.println("|  (\\__/| /   !  | |        '|||       '|||  x |'|       '||");
+    System.out.println(" \\____\\ /___/¯|__'||___|\\___| |___|\\___| \\_____/ |___|\\___|");
+    
+    System.out.println("                                            Is this legal?\n                                      This better be legal.\n                                              -Oscar Wilde\n");
 	}
 
 }
