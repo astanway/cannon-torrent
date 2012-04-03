@@ -19,7 +19,7 @@ public class TrackerContact extends TimerTask {
 					Manager.downloaded, Manager.torrent_info.file_length
 							- Manager.downloaded, "");
 		} else if (choice == 1) {
-      System.out.println("\nUpdating tracker.");
+      System.out.println("Updating tracker.");
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, 0, Manager.COMPLETED);
 		} else {

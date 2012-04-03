@@ -26,6 +26,8 @@ public class DownloadThread implements Runnable {
 	}
 
 	public void run() {
+	  //sleep to avoid calling over and over
+	  try { Thread.sleep(50); } catch(InterruptedException e){}
 		peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
 		peer.establishStreams();

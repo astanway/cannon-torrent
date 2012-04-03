@@ -83,11 +83,13 @@ public class Manager {
 	}
 
 	public static void setTimers() {
-		Timer t = new Timer();
+		Timer t1 = new Timer();
 		PieceChecker checker = new PieceChecker();
+		t1.scheduleAtFixedRate(checker, 0, 3000);
+		
+		Timer t2 = new Timer();
 		TrackerContact contact = new TrackerContact(0);
-		t.schedule(checker, 0, 3000);
-		t.schedule(contact, interval * 1000, interval * 1000);
+		t2.schedule(contact, interval * 1000, interval * 1000);
 		return;
 	}
 
