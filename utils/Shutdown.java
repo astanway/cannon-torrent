@@ -3,13 +3,23 @@ package utils;
 public class Shutdown implements Runnable{
 	
 	public void run(){
-		System.out.println("Shutting Down");
-		System.out.println("SHUTTING DOWN");
-		for(int i = 0;i <Manager.activePeerList.size();i++){
-			System.out.println(i);
+		System.out.println("Closing sockets...");
+		for(int i = 0; i <Manager.activePeerList.size(); i++){
 			Manager.activePeerList.get(i).closeSocket();
 		}
 		Manager.activePeerList.clear();
-		System.exit(1);
+		
+		System.out.println("Notifying tracker...");
+		byte[] response = null;
+    response = Helpers.getURL(Manager.constructQuery(Manager.port, Manager.uploaded, Manager.downloaded,
+				Manager.torrent_info.file_length, Manager.STOPPED));
+				
+		while(response == null){
+		  continue;
+		}
+		
+		System.out.println("Shutting down...");
+		
+		Runtime.getRuntime().exit(1);
 	}
 }
