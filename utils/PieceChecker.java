@@ -39,7 +39,6 @@ public class PieceChecker extends TimerTask {
 				// System.out.println("Piece " + i + " verified");
 				Manager.have_piece.set(i, 1);
 				Manager.addDownloaded(Helpers.getPiece(i).length);
-        // setProgress();
 
 				// don't send the have message if this is a resumed download
         for (Peer peer : Manager.activePeerList) {
@@ -70,9 +69,14 @@ public class PieceChecker extends TimerTask {
 	 * @param completed	completed value
 	 * @param total	  	total value
 	 */
-	public static void setProgress() {
+	public synchronized void setProgress() {
     double completed = (double) Manager.downloaded;
     double total = (double) Manager.torrent_info.file_length;
+    
+    double blockTotal = (double) Manager.numBlocks;
+    double blockComp = (double) new File("blocks/").listFiles().length;
+    double blockProg = blockComp/blockTotal;
+    
     int width = 50;
     double prog = completed/total;
     System.out.print("\r[");
@@ -81,6 +85,9 @@ public class PieceChecker extends TimerTask {
      System.out.print("=");
     }
     System.out.print(">");
+    for (; i < (blockProg*width - 1); i++) {
+     System.out.print(".");
+    }
     for (; i < width; i++) {
      System.out.print(" ");
     }
@@ -125,13 +132,15 @@ public class PieceChecker extends TimerTask {
 		// System.out.println(Manager.q.size());
 	}
 
-	public static void finish() {
+	public void finish() {
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
-			System.out.println("File already exists.");
+      // System.out.println("File already exists.");
 			Manager.fileDone = true;
 			return;
 		}
+		
+    setProgress();
 
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
 			if (Manager.q.size() == 0) {
