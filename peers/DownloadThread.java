@@ -95,7 +95,7 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-            // System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
+            System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -221,7 +221,7 @@ public class DownloadThread implements Runnable {
 				rename.renameTo(new File("blocks/" + name));
 			}
 
-      // setProgress();
+      setProgress();
       // System.out.print(peer.peer_id_ + " ");
       // b.print(); 
 			return;
@@ -262,9 +262,14 @@ public class DownloadThread implements Runnable {
 	 * @param completed	completed value
 	 * @param total	  	total value
 	 */
-	public static void setProgress() {
-    double total = (double) Manager.numBlocks;
-    double completed = (double) Manager.numBlocks - Manager.q.size();
+	public synchronized void setProgress() {
+    double completed = (double) Manager.downloaded;
+    double total = (double) Manager.torrent_info.file_length;
+    
+    double blockTotal = (double) Manager.numBlocks;
+    double blockComp = (double) new File("blocks/").listFiles().length;
+    double blockProg = blockComp/blockTotal;
+    
     int width = 50;
     double prog = completed/total;
     System.out.print("\r[");
@@ -273,6 +278,9 @@ public class DownloadThread implements Runnable {
      System.out.print("=");
     }
     System.out.print(">");
+    for (; i < (blockProg*width); i++) {
+     System.out.print(".");
+    }
     for (; i < width; i++) {
      System.out.print(" ");
     }

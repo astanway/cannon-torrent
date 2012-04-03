@@ -39,7 +39,7 @@ public class PieceChecker extends TimerTask {
 				// System.out.println("Piece " + i + " verified");
 				Manager.have_piece.set(i, 1);
 				Manager.addDownloaded(Helpers.getPiece(i).length);
-				setProgress();
+        // setProgress();
 
 				// don't send the have message if this is a resumed download
         for (Peer peer : Manager.activePeerList) {
