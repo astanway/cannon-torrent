@@ -24,6 +24,7 @@ public class Peer {
 	public boolean choked = true;
 
 	public long lastRequest = 0;
+	public boolean ready = false;
 
 	public static final byte CHOKE = 0x01;
 	public static final byte INTERESTED = 0x02;
@@ -185,6 +186,7 @@ public class Peer {
 					return false;
 				}
 			}
+			ready = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -254,8 +256,8 @@ public class Peer {
 			// peer_id_);
 			return m;
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error on listen for peer " + peer_id_);
+      // e.printStackTrace();
+      // System.out.println("Error on listen for peer " + peer_id_);
 			return null;
 		}
 	}

@@ -58,13 +58,14 @@ public class RUBTClient {
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
 		manager.setPeerList(getPeers());
+		while(!manager.peersReady){
+		  continue;
+		}
+		
 		manager.setTimers();
 		
-		while(!(manager.piecesReady && manager.peersReady)){
-		  try{
-		    Thread.sleep(4000L);
-  		  continue;
-		  } catch(Exception e){}
+		while(!manager.piecesReady){
+		  continue;
 		}
 
 		manager.download();

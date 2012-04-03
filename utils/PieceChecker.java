@@ -42,18 +42,18 @@ public class PieceChecker extends TimerTask {
 					Manager.addDownloaded(Helpers.getPiece(i).length);
           
           //don't send the have message if this is a resumed download
-					if(Manager.peersReady && Manager.piecesReady){
-					 	for (Peer peer : Manager.activePeerList) {
-  						HaveMessage haveSend = new HaveMessage(i);
+					for (Peer peer : Manager.activePeerList) {
+			 	    if(peer.ready){
+				 	    HaveMessage haveSend = new HaveMessage(i);
   						try {
   							Message.encode(peer.to_peer_, haveSend);
   						} catch (Exception e) {
   							e.printStackTrace();
   							System.out.println("Failed to send the have message to " 
   							                    + peer.peer_id_);
-  						}
-  					} 
-					}
+					 	  }
+					  } 
+				  }
 				} else {
 					System.out.println("Deleting piece " + i);
 					Manager.have_piece.set(i, 0);
@@ -106,7 +106,7 @@ public class PieceChecker extends TimerTask {
 			}
 		}
 
-    // System.out.println(Manager.q.size());
+    System.out.println(Manager.q.size());
 	}
 
 	public static void finish() {
