@@ -23,6 +23,7 @@ public class PieceChecker extends TimerTask {
 		}
 
 		while (Manager.have_piece.toString().indexOf("0") != -1) {
+  	  try { Thread.sleep(50); } catch(InterruptedException e){}
 			for (int i = 0; i < Manager.numPieces; i++) {
 				// is it already verified?
 				if (Manager.have_piece.get(i) == 1) {
@@ -43,17 +44,17 @@ public class PieceChecker extends TimerTask {
 					setProgress();
 
 					// don't send the have message if this is a resumed download
-					for (Peer peer : Manager.activePeerList) {
-						if (peer.ready) {
-							HaveMessage haveSend = new HaveMessage(i);
-							try {
-								Message.encode(peer.to_peer_, haveSend);
-							} catch (Exception e) {
-                // e.printStackTrace();
-                // System.out.println("Failed to send the have message to " + peer.peer_id_);
-							}
-						}
-					}
+          for (Peer peer : Manager.activePeerList) {
+           if (peer.ready) {
+             HaveMessage haveSend = new HaveMessage(i);
+             try {
+               Message.encode(peer.to_peer_, haveSend);
+             } catch (Exception e) {
+                          // e.printStackTrace();
+                          // System.out.println("Failed to send the have message to " + peer.peer_id_);
+             }
+           }
+          }
 				} else {
 					System.out.println("Deleting piece " + i);
 					Manager.have_piece.set(i, 0);
@@ -66,11 +67,12 @@ public class PieceChecker extends TimerTask {
 				addMissingBlocks();
 				return;
 			}
-
 		}
 
 		if (!Manager.fileDone)
 			finish();
+			
+		return;
 	}
 	
 	/**
