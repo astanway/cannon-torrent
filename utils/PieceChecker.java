@@ -111,7 +111,7 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public static void finish() {
-	  File f = new File(Manager.torrent_info.file_name);
+	  File f = new File(Manager.file.getName());
 	  if(f.exists()){
 	    System.out.println("File already exists.");
 	    Manager.fileDone = true;
