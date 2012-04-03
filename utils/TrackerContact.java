@@ -12,14 +12,14 @@ public class TrackerContact extends TimerTask {
 
 	public void run() {
 		if (choice == 0) {
-			System.out.println("UPDATING TRACKER");
+			System.out.println("\nUpdating tracker.");
 			System.out.println("Uploaded = " + Manager.uploaded);
 			System.out.println("Downloaded = " + Manager.downloaded);
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, Manager.torrent_info.file_length
 							- Manager.downloaded, "");
 		} else if (choice == 1) {
-      System.out.println("UPDATING TRACKER WITH COMPLETE");
+      System.out.println("\nUpdating tracker.");
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, 0, Manager.COMPLETED);
 		} else {

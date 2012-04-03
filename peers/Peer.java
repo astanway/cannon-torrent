@@ -256,8 +256,7 @@ public class Peer {
 	public Message listen() throws Exception {
 		try {
 			Message m = Message.decode(from_peer_);
-      System.out.println("Got type " + m.getId() + " from peer " +
-      peer_id_);
+      // System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
 			return m;
 		} catch (Exception e) {
       // e.printStackTrace();

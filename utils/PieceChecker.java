@@ -40,6 +40,7 @@ public class PieceChecker extends TimerTask {
 					// System.out.println("Piece " + i + " verified");
 					Manager.have_piece.set(i, 1);
 					Manager.addDownloaded(Helpers.getPiece(i).length);
+					setProgress();
 
 					// don't send the have message if this is a resumed download
 					for (Peer peer : Manager.activePeerList) {
@@ -48,10 +49,8 @@ public class PieceChecker extends TimerTask {
 							try {
 								Message.encode(peer.to_peer_, haveSend);
 							} catch (Exception e) {
-								e.printStackTrace();
-								System.out
-										.println("Failed to send the have message to "
-												+ peer.peer_id_);
+                // e.printStackTrace();
+                // System.out.println("Failed to send the have message to " + peer.peer_id_);
 							}
 						}
 					}
@@ -73,6 +72,29 @@ public class PieceChecker extends TimerTask {
 		if (!Manager.fileDone)
 			finish();
 	}
+	
+	/**
+	 * Used for the progress bar
+	 * @param completed	completed value
+	 * @param total	  	total value
+	 */
+	public static void setProgress() {
+    double completed = (double) Manager.downloaded;
+    double total = (double) Manager.torrent_info.file_length;
+    int width = 50;
+    double prog = completed/total;
+    System.out.print("\r[");
+    int i = 0;
+    for (; i < prog*width; i++) {
+     System.out.print("=");
+    }
+    System.out.print(">");
+    for (; i < width; i++) {
+     System.out.print(" ");
+    }
+    System.out.print("] " + Math.ceil(prog*100) + "%");
+	}
+	
 
 	// adds missing blocks to queue if needed
 	public static void addMissingBlocks() {
@@ -128,7 +150,7 @@ public class PieceChecker extends TimerTask {
 			return;
 		}
 
-		System.out.println("Commencing file write...");
+		System.out.println("\nCommencing file write...");
 		byte[] piece = null;
 		byte[] block = null;
 
@@ -178,6 +200,8 @@ public class PieceChecker extends TimerTask {
 			t.start();
 			Manager.fileDone = true;
 		}
+		
+		System.out.println("I'll seed until you tell me to stop.");
 	}
 
 	public static void deleteBlocks(int i) {

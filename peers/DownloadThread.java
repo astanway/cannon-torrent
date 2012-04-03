@@ -93,8 +93,7 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-						System.out.println("Requested (" + b.getPiece() + ", "
-								+ b.getBlock() + ") from " + peer.peer_id_);
+            // System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -220,8 +219,9 @@ public class DownloadThread implements Runnable {
 				rename.renameTo(new File("blocks/" + name));
 			}
 
-			System.out.print(peer.peer_id_ + " ");
-			b.print();
+      // setProgress();
+      // System.out.print(peer.peer_id_ + " ");
+      // b.print(); 
 			return;
 		case Message.TYPE_REQUEST:
 			if (!peerChoked) {
@@ -249,10 +249,32 @@ public class DownloadThread implements Runnable {
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
-			System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+      // System.out.println("Peer " + peer.peer_id_ + " unchoked us");
 			return;
 		}
 		return;
+	}
+	
+	/**
+	 * Used for the progress bar
+	 * @param completed	completed value
+	 * @param total	  	total value
+	 */
+	public static void setProgress() {
+    double total = (double) Manager.numBlocks;
+    double completed = (double) Manager.numBlocks - Manager.q.size();
+    int width = 50;
+    double prog = completed/total;
+    System.out.print("\r[");
+    int i = 0;
+    for (; i < prog*width; i++) {
+     System.out.print("=");
+    }
+    System.out.print(">");
+    for (; i < width; i++) {
+     System.out.print(" ");
+    }
+    System.out.print("] " + Math.ceil(prog*100) + "%");
 	}
 
 	/**
