@@ -48,8 +48,8 @@ public class PieceChecker extends TimerTask {
            try {
              Message.encode(peer.to_peer_, haveSend);
            } catch (Exception e) {
-                        // e.printStackTrace();
-                        // System.out.println("Failed to send the have message to " + peer.peer_id_);
+              // e.printStackTrace();
+              // System.out.println("Failed to send the have message to " + peer.peer_id_);
            }
          }
         }
@@ -61,14 +61,7 @@ public class PieceChecker extends TimerTask {
 			}
 		}
 
-		if (Manager.q.size() == 0) {
-			addMissingBlocks();
-			return;
-		}
-
-		if (!Manager.fileDone)
-			finish();
-			
+		finish();
 		return;
 	}
 	
@@ -141,11 +134,9 @@ public class PieceChecker extends TimerTask {
 		}
 
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
-      // System.out.println("Not finished yet.");
 			if (Manager.q.size() == 0) {
 				addMissingBlocks();
 			}
-      // System.out.println(Manager.q.size());
 			return;
 		}
 
