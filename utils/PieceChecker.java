@@ -117,13 +117,13 @@ public class PieceChecker extends TimerTask {
 						data = new byte[Manager.leftoverBytes];
 						Block b = new Block(j, k, data);
 						Manager.q.add(b);
-						// //System.out.println("Adding block " + j + " " + k);
+            // System.out.println("Adding block " + j + " " + k);
 						break;
 					} else {
 						data = new byte[Manager.block_length];
 					}
 					Block b = new Block(j, k, data);
-					// //System.out.println("Adding block " + j + " " + k);
+          // System.out.println("Adding block " + j + " " + k);
 					Manager.q.add(b);
 				}
 			}

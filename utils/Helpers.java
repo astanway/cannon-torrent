@@ -178,7 +178,13 @@ public final class Helpers {
 		File dir = new File("blocks");
 		for (File file : dir.listFiles()) {
 			StringTokenizer st = new StringTokenizer(file.getName());
-			int p = Integer.parseInt(st.nextToken());
+			int p = 0;
+			try{
+			  p = Integer.parseInt(st.nextToken());
+			} catch (Exception e){
+			  continue;
+			}
+			
 			if (p == i) {
 				check++;
 				int b = Integer.parseInt(st.nextToken());
@@ -196,10 +202,10 @@ public final class Helpers {
 							block.length);
 					r.close();
 				} catch (Exception e) {
-					System.out
-							.println("Couldn't read file. This should never happen.");
+          // System.out
+              // .println("Couldn't read file. This should never happen.");
 					//e.printStackTrace();
-					System.exit(1);
+          // System.exit(1);
 				}
 			}
 		}
