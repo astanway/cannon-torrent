@@ -192,10 +192,6 @@ public class PieceChecker extends TimerTask {
 		// tell the tracker we're done
 		if (!Manager.fileDone) {
 			byte[] response = null;
-			response = Helpers.getURL(Manager.constructQuery(Manager.port, 0,
-					0, Manager.torrent_info.file_length, Manager.COMPLETED));
-			response = Helpers.getURL(Manager.constructQuery(Manager.port, 0,
-					0, Manager.torrent_info.file_length, Manager.STOPPED));
 			Thread t = new Thread(new TrackerContact(1));
 			t.start();
 			Manager.fileDone = true;

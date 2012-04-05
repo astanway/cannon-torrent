@@ -68,7 +68,8 @@ will take care of all the socket I/O after the accept()
 <br><br>
 Helpers - We use this to call convenience methods like byteToString or something like that. We 
 also use it to house a verifyHash method for verifying the piece hashes and the info hash
-Shutdown - this is our shutdown hook that closes all of our socket connections on a shutdown 
+<br><br>
+Input - this listens for inputs and closes all of our socket connections on a shutdown 
 (so we shutdown gracefully)
 <br><br>
 StringComparator - a comparator class for when we take filenames and convert them to string so 
