@@ -47,6 +47,9 @@ public class UploadThread implements Runnable {
 
 		while (interest) {
 			Message temp = listen();
+			if(temp == null){
+			  continue;
+			}
 			if (weChoked) {
 				if (temp.getId() == Message.TYPE_UNCHOKE) {
 					continue;

@@ -233,8 +233,8 @@ public class DownloadThread implements Runnable {
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
 
-				// //System.out.println(peer.peer_id_ + " sending block " +
-				// tempRequest.getBegin());
+        // System.out.println(peer.peer_id_ + " sending block " +
+        // tempRequest.getBegin());
 				// //System.out.println("of piece " +
 				// tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
