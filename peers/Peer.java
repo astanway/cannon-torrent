@@ -59,10 +59,10 @@ public class Peer {
 	 * Helper method to print out peer class
 	 */
 	public void print() {
-		System.out.println(this.peer_id_);
-		System.out.println(this.ip_);
-		System.out.println(this.port_);
-		System.out.println("");
+		//System.out.println(this.peer_id_);
+		//System.out.println(this.ip_);
+		//System.out.println(this.port_);
+		//System.out.println("");
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class Peer {
 		try {
 			socket_ = new Socket(_ip, _port);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return socket_ != null ? true : false;
 	}
@@ -103,7 +103,7 @@ public class Peer {
 				socket_.close();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -118,7 +118,7 @@ public class Peer {
 			from_peer_ = new DataInputStream(new BufferedInputStream(
 					socket_.getInputStream()));
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		if (to_peer_ == null || from_peer_ == null) {
 			return false;
@@ -153,7 +153,7 @@ public class Peer {
 		try {
 			to_peer_.write(out_);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -164,7 +164,7 @@ public class Peer {
 		try {
 			Message.encode(to_peer_, outfield);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -188,9 +188,9 @@ public class Peer {
 			}
 			ready = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
-		// System.out.println(peer_id_ + " handshake");
+		// //System.out.println(peer_id_ + " handshake");
 		return true;
 	}
 
@@ -202,11 +202,11 @@ public class Peer {
 	public boolean listenForUnchoke() {
 		try {
 			if (from_peer_.read() == 1 && from_peer_.read() == 1) {
-				System.out.println(peer_id_ + " unchoked");
+				//System.out.println(peer_id_ + " unchoked");
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return false;
 	}
@@ -219,7 +219,7 @@ public class Peer {
 		try {
 			to_peer_.write(out_bytes_);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -234,8 +234,8 @@ public class Peer {
 		try {
 			Message.encode(to_peer_, m);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error on sendInterested for peer " + peer_id_);
+			//e.printStackTrace();
+			//System.out.println("Error on sendInterested for peer " + peer_id_);
 		}
 	}
 
@@ -244,8 +244,8 @@ public class Peer {
 		try {
 			Message.encode(to_peer_, m);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error on uninterested for peer " + peer_id_);
+			//e.printStackTrace();
+			//System.out.println("Error on uninterested for peer " + peer_id_);
 		}
 	}
 
@@ -256,11 +256,11 @@ public class Peer {
 	public Message listen() throws Exception {
 		try {
 			Message m = Message.decode(from_peer_);
-      // System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
+      // //System.out.println("Got type " + m.getId() + " from peer " + peer_id_);
 			return m;
 		} catch (Exception e) {
-      // e.printStackTrace();
-      // System.out.println("Error on listen for peer " + peer_id_);
+      // //e.printStackTrace();
+      // //System.out.println("Error on listen for peer " + peer_id_);
 			return null;
 		}
 	}
@@ -280,10 +280,10 @@ public class Peer {
 			Message.encode(to_peer_, m);
 		} catch (SocketException se) {
 			this.establishStreams();
-			se.printStackTrace();
+			//e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error on sendRequest for peer " + peer_id_);
+			//e.printStackTrace();
+			//System.out.println("Error on sendRequest for peer " + peer_id_);
 		}
 	}
 
@@ -309,7 +309,7 @@ public class Peer {
 		try {
 			to_peer_.write(write_out_);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

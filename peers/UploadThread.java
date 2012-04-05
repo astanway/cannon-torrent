@@ -33,7 +33,7 @@ public class UploadThread implements Runnable {
 					peer.to_peer_
 							.write(new String("DIAF YOU WHORE").getBytes());
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 			peer.sendHandshake(Manager.peer_id, Manager.info_hash);
@@ -41,7 +41,7 @@ public class UploadThread implements Runnable {
 				Message.encode(peer.to_peer_,
 						new BitfieldMessage(Manager.getBitfield()));
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 
@@ -58,35 +58,35 @@ public class UploadThread implements Runnable {
 				peer.bfb = BitToBoolean.convert(bfm.getData());
 				break;
 			case Message.TYPE_CHOKE:
-				System.out.println("We are Choked");
+				//System.out.println("We are Choked");
 				weChoked = true;
 				break;
 			case Message.TYPE_HAVE:
-				System.out.println("Have Message");
+				//System.out.println("Have Message");
 				HaveMessage tempHave = (HaveMessage) temp;
 				peer.bfb[tempHave.getPieceIndex()] = true;
 				break;
 			case Message.TYPE_INTERESTED:
-				System.out.println("They are interested in our Junk");
+				//System.out.println("They are interested in our Junk");
 				try {
 					Message.encode(peer.to_peer_, Message.UNCHOKE);
-					System.out.println("UNCHOKED PEER");
+					//System.out.println("UNCHOKED PEER");
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				break;
 			case Message.TYPE_KEEP_ALIVE:
-				System.out.println("Keep the connection Alive!!");
+				//System.out.println("Keep the connection Alive!!");
 				break;
 			case Message.TYPE_NOT_INTERESTED:
-				System.out.println("Not Interested In Our Junk");
+				//System.out.println("Not Interested In Our Junk");
 				interest = false;
 				break;
 			case Message.TYPE_PIECE:
-				System.out.println("WHY DID WE GET A PIECE MESSAGE");
+				//System.out.println("WHY DID WE GET A PIECE MESSAGE");
 				break;
 			case Message.TYPE_REQUEST:
-				System.out.println("We got a request message");
+				//System.out.println("We got a request message");
 				RequestMessage tempRequest = (RequestMessage) temp;
 				byte[] data = new byte[tempRequest.getBlockLength()];
 				byte[] tempbytes = Helpers
@@ -96,18 +96,17 @@ public class UploadThread implements Runnable {
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
 						data);
-				System.out.println("Sending upload block "
-						+ tempRequest.getBegin());
-				System.out.println("of piece " + tempRequest.getPieceIndex());
+				//System.out.println("Sending upload block " + tempRequest.getBegin());
+				//System.out.println("of piece " + tempRequest.getPieceIndex());
 				try {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(toSend.getBlockLength());
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				break;
 			case Message.TYPE_UNCHOKE:
-				System.out.println("We Are Unchoked");
+				//System.out.println("We Are Unchoked");
 				peer.choked = false;
 				break;
 			}
@@ -121,7 +120,7 @@ public class UploadThread implements Runnable {
 		try {
 			return Message.decode(peer.from_peer_);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 

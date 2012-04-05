@@ -30,24 +30,93 @@
 <br>
 <br>
 <div id="quote">
-"I've had a torrent of time here tonight!"
+"So a torrent, a tracker, and a bitfield walk into a bar..."
 <br>
 -Oscar Wilde
 </div>
 <br>
 <br>
 <br>
-Our BitTorrent client works by first reading the torrent file and contacting the tracker and then taking the peerlist and finding the correct peer to connect to. After we have the correct peer we then perform the handshaking between our client and the peer. We verify the hash and proceed to see if we want what the peer has. Once we send the interested message we wait to be unchoked and then we begin the downloading process. We loop through what pieces, requesting each piece as multiple 16KB blocks. We adjust our logic for the last block which is less than 16KB. We store the incomplete piece in a buffer and wait for it to finish before writing it to the file in order to perform the piece hash check. Once all the pieces are complete, we finish the download, tell the tracker we are done and close our sockets.
+Our downloads are based off a Concurrent Linked Queue that is calculated upon initialization using 
+the torrent data. The queue is made up of Block objects. After we have initialized the queue we then
+set up the peer list we get from the tracker and make a thread for each peer on the list (that is part 
+of the set of correct peers). This thread will take care of all messages to and from the peer 
+and maintain state for each peer. When we want to get a block we dequeue it, and send a request 
+for it. When we get that piece we write it to a random access file. This is done in a temporary 
+folder in order to prevent our piece checker from seeing it until it is fully written. Once the 
+block is fully written we move it to the blocks folder. Once a block is in the blocks folder, 
+we have a thread check to see if all the blocks in a piece are written and then it will verify 
+the piece. If the piece is not verified properly the blocks will be deleted and re-added the 
+queue. This takes care of a piece not passing the hash or if some data gets corrupted when we 
+are writing the files. Once we get all the pieces verified, we then write the file to the proper 
+place. We check for previous downloads by scanning the blocks folder upon initialization for 
+existing blocks, and creating our block request queue accordingly.
 <br><br>
-We use three proprietary classes - RUBTClient, Peer and Helper. 
+Oh! To quit, type "exit" at any time.
 <br><br>
-Helper class is a miscellaneous class with various methods we use for printing out byte arrays or verifying hashes against one another.
+<h1>Small Classes</h1>
 <br><br>
-Peer is what we use to define a peer we might want to connect to. It consists of the peer id, the ip and port, and the input/output streams we are going to be working with. It interacts directly with the client class in that it is used to separate the preparation we need to do when we create a peer and when we open sockets and establish the streams from the socket. It also hold methods for sending messages to the defined peer such as requests or pieces.
+RUBTCLient - our main class that will run the program, initialize and resume from previous 
+starts and allows us to call methods from a bunch of other places in order to run properly.
 <br><br>
-The RUBTClient is our main class. It runs the entire thing and takes care of most of the work. It interacts with the peer class in that it calls the methods from the peer class in order to execute the download. It also uses the provided streams from the peer class in order to access data from the specific peer and get the blocks of pieces we are waiting for. It also calls the methods from Helpers in order to help with the verification of hashes.
+Block - class that we use to denote a block of a piece in order to help us
+keep track of what we have downloaded and what needs to be downloaded
 <br><br>
-This wasn't too hard. Our progress bar is badass.
+PeerListener - listens for incoming connections and sets up a new peer object in order to allow 
+for data transfer and message interpretation. It passes off the peer to an UploadThread which
+will take care of all the socket I/O after the accept()
+<br><br>
+Helpers - We use this to call convenience methods like byteToString or something like that. We 
+also use it to house a verifyHash method for verifying the piece hashes and the info hash
+Shutdown - this is our shutdown hook that closes all of our socket connections on a shutdown 
+(so we shutdown gracefully)
+<br><br>
+StringComparator - a comparator class for when we take filenames and convert them to string so 
+we can call a sort on them, rather than having to cast them to ints and back
+Input - worker thread that takes input from stdin and will exit when "exit" is typed (or any 
+capitalization of it is typed)
+<br><br>
+BitToBoolean - used to help with bitfield messages. Since we used an atomicintarray to help 
+with concurrency we had to write another method that converts from atomicintarrays to a boolean 
+array, this class also is used to take a byte[] and convert it to a boolean[] from a bitfield 
+message
+<br><br>
+Message - a filled in class that we recieved from the resources. Takes care of the encoding and 
+decoding of messages from a datastream and saves us from a lot of headaches in seeing what a 
+message is and what fields are in them
+<h1>Large Classes</h1>
+<br><br>
+DownloadThread - This worker class is a runnable class which will take a peer from our initial 
+peer list and trying to download/upload all data that we want from it. It's a bit of a misnomer,
+because it takes care of requesting data AND sending data to and from the peer in order for us
+to take care of both downloading our file and sending the pieces we have of our file to the other 
+peers.
+<br><br>
+UploadThread - This worker class is a runnable class which only handles leechers. When a peer 
+is in this class, we will only be answering requests from the peer, and not trying to download 
+data from them. This thread is created when we get a peer connecting from our peer listener. A 
+full peer object is never made, as we only create the streams necessary for the encoding and 
+decoding of messages
+<br><br>
+Peer - This class is an abstraction of a peer that we want to either get data from, or send 
+data to. It houses all the relevant information and some relevant methods such as 
+sendInterested message, so we don't have to call methods from Message, rather just call them 
+from the peer itself
+<br><br>
+Manager - This class is our base class which houses most of the relevant data we need in order 
+to operate. It has the initial peer list we use and an active peer list of peers we are 
+connected to (so when we shutdown we know which connections to close). It also takes care of 
+the initial set up of contacting the tracker and setting up the queue of what blocks we need to 
+download. It will then set up a download thread for each peer that is on the initial peers list 
+and it will start to try and get blocks based on what the peers bitfield says.
+<br><br>
+PieceChecker - This is a worker thread that will see if all the blocks of a piece are 
+downloaded and if so, it will try and verify the hash of the piece. If the piece fails the hash 
+the piece checker then takes the blocks, deletes them and enqueues the blocks to be 
+redownloaded. It also will take care of the file writing at the end.
+<br><br>
+This wasn't too hard. Threading wasn't really a problem because our queue is totally threadsafe. 
+In addition, our progress bar is now EXTRA badass.
 </div>
 </body>
 </html>

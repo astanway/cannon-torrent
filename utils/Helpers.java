@@ -13,12 +13,12 @@ public final class Helpers {
 	public static void printBoolArray(boolean[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i] == false) {
-				System.out.print("0");
+				//System.out.print("0");
 			} else {
-				System.out.print("1");
+				//System.out.print("1");
 			}
 		}
-		System.out.println("");
+		//System.out.println("");
 	}
 
 	/**
@@ -56,7 +56,7 @@ public final class Helpers {
 			rFile.read(fileBytes);
 			return fileBytes;
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}
@@ -83,7 +83,7 @@ public final class Helpers {
 
 			is.close();
 		} catch (IOException e) {
-			System.out.println("URL failure with: " + string_url);
+			//System.out.println("URL failure with: " + string_url);
 		}
 
 		return baos.toByteArray();
@@ -129,7 +129,7 @@ public final class Helpers {
 	 */
 	public static void printBytes(byte[] bytes) {
 		String value = new String(bytes);
-		System.out.print(value);
+		//System.out.print(value);
 	}
 
 	public static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6',
@@ -198,7 +198,7 @@ public final class Helpers {
 				} catch (Exception e) {
 					System.out
 							.println("Couldn't read file. This should never happen.");
-					e.printStackTrace();
+					//e.printStackTrace();
 					System.exit(1);
 				}
 			}
@@ -271,28 +271,6 @@ public final class Helpers {
 		return bytes;
 	}
 
-	/**
-	 * Used for the progress bar
-	 * 
-	 * @param completed
-	 *            completed value
-	 * @param total
-	 *            total value
-	 */
-	public static void setProgress(double completed, double total) {
-		int width = 50;
-		double prog = completed / total;
-		System.out.print("\r[");
-		int i = 0;
-		for (; i < prog * width; i++) {
-			System.out.print("=");
-		}
-		System.out.print(">");
-		for (; i < width; i++) {
-			System.out.print(" ");
-		}
-		System.out.print("] " + prog * 100 + "%");
-	}
 
 	/**
 	 * @param data byte[] to be turned into a hex string

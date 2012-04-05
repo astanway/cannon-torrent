@@ -21,13 +21,13 @@ public class PeerListener implements Runnable {
 		try{
 			listenSocket = new ServerSocket(port);
 		}catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	public void run(){
 		try{
 			dataSocket = listenSocket.accept();
-			System.out.println("Got a connection on the port");
+			//System.out.println("Got a connection on the port");
 			from_peer_ = new DataInputStream(dataSocket.getInputStream());
 			to_peer_ = new DataOutputStream(dataSocket.getOutputStream());
 			Peer temp = new Peer(from_peer_,to_peer_);
@@ -37,7 +37,7 @@ public class PeerListener implements Runnable {
 			Thread t2 = new Thread(new PeerListener(this.port));
 			t2.start();
 		}catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 	}

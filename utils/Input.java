@@ -13,20 +13,20 @@ public class Input implements Runnable{
 			try {
 				input = in.readLine();
 			} catch (IOException e) {
-				System.out.println("Wtf IO exception");
-				e.printStackTrace();
+				//System.out.println("Wtf IO exception");
+				//e.printStackTrace();
 				new Thread(new Input()).start();
 				return;
 			}
 		}
 		
-		System.out.println("Closing sockets...");
+		//System.out.println("Closing sockets...");
 		for(int i = 0; i <Manager.activePeerList.size(); i++){
 			Manager.activePeerList.get(i).closeSocket();
 		}
 		Manager.activePeerList.clear();
 		
-		System.out.println("Notifying tracker...");
+		//System.out.println("Notifying tracker...");
 		byte[] response = null;
     response = Helpers.getURL(Manager.constructQuery(Manager.port, Manager.uploaded, Manager.downloaded,
 				Manager.torrent_info.file_length, Manager.STOPPED));
@@ -35,7 +35,7 @@ public class Input implements Runnable{
 		  continue;
 		}
 		
-		System.out.println("Shutting down...");
+		//System.out.println("Shutting down...");
 				
 		Runtime.getRuntime().exit(1);
 	}

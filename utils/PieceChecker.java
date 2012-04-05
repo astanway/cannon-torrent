@@ -36,7 +36,7 @@ public class PieceChecker extends TimerTask {
 
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
 			if (Helpers.verifyHash(piece, pieceHash)) {
-				// System.out.println("Piece " + i + " verified");
+				// //System.out.println("Piece " + i + " verified");
 				Manager.have_piece.set(i, 1);
 				Manager.addDownloaded(Helpers.getPiece(i).length);
 
@@ -47,13 +47,13 @@ public class PieceChecker extends TimerTask {
            try {
              Message.encode(peer.to_peer_, haveSend);
            } catch (Exception e) {
-              // e.printStackTrace();
-              // System.out.println("Failed to send the have message to " + peer.peer_id_);
+              // //e.printStackTrace();
+              // //System.out.println("Failed to send the have message to " + peer.peer_id_);
            }
          }
         }
 			} else {
-				System.out.println("Deleting piece " + i);
+				//System.out.println("Deleting piece " + i);
 				Manager.have_piece.set(i, 0);
 				Manager.addDownloaded(-1 * Helpers.getPiece(i).length);
 				Helpers.deletePiece(i);
@@ -117,29 +117,29 @@ public class PieceChecker extends TimerTask {
 						data = new byte[Manager.leftoverBytes];
 						Block b = new Block(j, k, data);
 						Manager.q.add(b);
-						// System.out.println("Adding block " + j + " " + k);
+						// //System.out.println("Adding block " + j + " " + k);
 						break;
 					} else {
 						data = new byte[Manager.block_length];
 					}
 					Block b = new Block(j, k, data);
-					// System.out.println("Adding block " + j + " " + k);
+					// //System.out.println("Adding block " + j + " " + k);
 					Manager.q.add(b);
 				}
 			}
 		}
 
-		// System.out.println(Manager.q.size());
+		// //System.out.println(Manager.q.size());
 	}
 
 	public void finish() {
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
-      // System.out.println("File already exists.");
+      System.out.println("File already exists.");
 			Manager.fileDone = true;
 			return;
 		}
-		
+				
     setProgress();
 
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
@@ -148,8 +148,9 @@ public class PieceChecker extends TimerTask {
 			}
 			return;
 		}
-
+		
 		System.out.println("\nCommencing file write...");
+    
 		byte[] piece = null;
 		byte[] block = null;
 
@@ -157,7 +158,7 @@ public class PieceChecker extends TimerTask {
 		try {
 			out = new FileOutputStream(Manager.file);
 		} catch (Exception e) {
-			System.out.print(e);
+			//System.out.print(e);
 		}
 
 		// get rid of the spaces so we can make numbers out of the names
@@ -178,14 +179,14 @@ public class PieceChecker extends TimerTask {
 				byte[] fileBytes = Helpers.getBytesFromFile(file);
 				out.write(fileBytes);
 			} catch (Exception e) {
-				System.out.print(e);
+				//System.out.print(e);
 			}
 		}
 
 		try {
 			out.close();
 		} catch (Exception e) {
-			System.out.print(e);
+			//System.out.print(e);
 		}
 
 		// tell the tracker we're done
@@ -200,7 +201,7 @@ public class PieceChecker extends TimerTask {
 			Manager.fileDone = true;
 		}
 		
-		System.out.println("I'll seed until you tell me to stop.");
+    System.out.println("I'll seed until you tell me to stop.");
 	}
 
 	public static void deleteBlocks(int i) {

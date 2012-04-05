@@ -33,7 +33,7 @@ public class DownloadThread implements Runnable {
 		peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 		if (!peer.receiveHandshake(Manager.info_hash)) {
-			System.out.println("Handshake Failed");
+			//System.out.println("Handshake Failed");
 			return;
 		} else {
 			peer.sendBitField();
@@ -95,7 +95,7 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-            // System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
+            // //System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -152,7 +152,7 @@ public class DownloadThread implements Runnable {
 			try {
 				Thread.sleep(500L + (long) (Math.random() * 10));
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			run();
 			return;
@@ -162,11 +162,11 @@ public class DownloadThread implements Runnable {
 		case Message.TYPE_BITFIELD:
 			BitfieldMessage bfm = (BitfieldMessage) m;
 			peer.bfb = BitToBoolean.convert(bfm.getData());
-			// System.out.println("Got a bitfield from " + peer.peer_id_);
+			// //System.out.println("Got a bitfield from " + peer.peer_id_);
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
-			// System.out.println("We have been choked by " + peer.peer_id_);
+			// //System.out.println("We have been choked by " + peer.peer_id_);
 			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;
@@ -176,7 +176,7 @@ public class DownloadThread implements Runnable {
 			try {
 				Message.encode(peer.to_peer_, Message.UNCHOKE);
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			peerChoked = false;
 			peerInterested = true;
@@ -210,7 +210,7 @@ public class DownloadThread implements Runnable {
 				file.write(piece_data);
 				file.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 
 			File rename = new File("temp/" + name);
@@ -221,7 +221,7 @@ public class DownloadThread implements Runnable {
 				rename.renameTo(new File("blocks/" + name));
 			}
 
-      // System.out.print(peer.peer_id_ + " ");
+      // //System.out.print(peer.peer_id_ + " ");
       // b.print(); 
 			return;
 		case Message.TYPE_REQUEST:
@@ -233,9 +233,9 @@ public class DownloadThread implements Runnable {
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
 
-				// System.out.println(peer.peer_id_ + " sending block " +
+				// //System.out.println(peer.peer_id_ + " sending block " +
 				// tempRequest.getBegin());
-				// System.out.println("of piece " +
+				// //System.out.println("of piece " +
 				// tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
 						tempRequest.getPieceIndex(), tempRequest.getBegin(),
@@ -244,13 +244,13 @@ public class DownloadThread implements Runnable {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(tempRequest.getBlockLength());
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				return;
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
-      // System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+      // //System.out.println("Peer " + peer.peer_id_ + " unchoked us");
 			return;
 		}
 		return;

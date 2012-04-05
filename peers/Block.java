@@ -60,6 +60,6 @@ public class Block {
 	}
 
 	public void print() {
-		System.out.println("(" + this.piece + ", " + this.block + ")");
+		//System.out.println("(" + this.piece + ", " + this.block + ")");
 	}
 }

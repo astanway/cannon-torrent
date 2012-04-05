@@ -87,14 +87,14 @@ public class ToolKit
     public static void printString(byte[] bytes, boolean as_text, int depth)
     {
         for (int k = 0; k < depth; k++)
-            System.out.print("  ");
-        System.out.print("String: ");
+            //System.out.print("  ");
+        //System.out.print("String: ");
         for (int i = 0; i < bytes.length; i++)
         {
             System.out
                     .print(as_text ? (char) bytes[i] : (int) bytes[i] + " ");
         }
-        System.out.println();
+        //System.out.println();
     }
 
     /**
@@ -108,15 +108,15 @@ public class ToolKit
             int depth)
     {
         for (int k = 0; k < depth; k++)
-            System.out.print("  ");
-        System.out.print("String: ");
+            //System.out.print("  ");
+        //System.out.print("String: ");
         byte[] bytes = byte_string.array();
         for (int i = 0; i < bytes.length; i++)
         {
             System.out
                     .print(as_text ? (char) bytes[i] : (int) bytes[i] + " ");
         }
-        System.out.println();
+        //System.out.println();
     }
 
     /**
@@ -127,8 +127,8 @@ public class ToolKit
     public static void printInteger(Integer i, int depth)
     {
         for (int k = 0; k < depth; k++)
-            System.out.print("  ");
-        System.out.println("Integer: " + i);
+            //System.out.print("  ");
+        //System.out.println("Integer: " + i);
     }
 
     /**
@@ -142,13 +142,13 @@ public class ToolKit
         final Iterator i = list.iterator();
         Object o = null;
         for (int k = 0; k < depth; k++)
-            System.out.print("  ");
-        System.out.println("List: ");
+            //System.out.print("  ");
+        //System.out.println("List: ");
         while (i.hasNext() && (o = i.next()) != null)
         {
             for (int k = 0; k < depth; k++)
-                System.out.print("  ");
-            System.out.print(" +");
+                //System.out.print("  ");
+            //System.out.print(" +");
             print(o, depth);
         }
     }
@@ -164,18 +164,18 @@ public class ToolKit
         final Iterator i = map.keySet().iterator();
         Object key = null;
         for (int k = 0; k < depth; k++)
-            System.out.print("  ");
-        System.out.println("Dictionary:");
+            //System.out.print("  ");
+        //System.out.println("Dictionary:");
         while (i.hasNext() && (key = i.next()) != null)
         {
             for (int k = 0; k < depth; k++)
-                System.out.print("  ");
-            System.out.print("(K) ");
+                //System.out.print("  ");
+            //System.out.print("(K) ");
             print(key, depth);
             Object val = map.get(key);
             for (int k = 0; k < depth; k++)
-                System.out.print("  ");
-            System.out.print("(V) ");
+                //System.out.print("  ");
+            //System.out.print("(V) ");
             print(val, depth);
         }
     }

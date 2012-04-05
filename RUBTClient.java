@@ -17,7 +17,7 @@ public class RUBTClient {
 	public static void main(String[] args) {
 
 		if (args.length < 2) {
-			System.out.println("USAGE: RUBTClient [torrent-file] [file-name]");
+      System.out.println("USAGE: RUBTClient [torrent-file] [file-name]");
 			System.exit(1);
 		}
 		
@@ -30,7 +30,7 @@ public class RUBTClient {
 		File tempFile = new File("temp/");
 		if (tempFile.exists()) {
 			if (tempFile.isDirectory()) {
-				// System.out.println("Temp/ exists");
+				// //System.out.println("Temp/ exists");
 			}
 		} else {
 			tempFile.mkdir();
@@ -40,7 +40,7 @@ public class RUBTClient {
 		tempFile = new File("blocks/");
 		if (tempFile.exists()) {
 			if (tempFile.isDirectory()) {
-        // System.out.println("Blocks/ exists");
+        // //System.out.println("Blocks/ exists");
 			}
 		} else {
 			tempFile.mkdir();
@@ -73,11 +73,11 @@ public class RUBTClient {
 		for (i = 6881; i <= 6889;) {
 			try {
 				response = Helpers.getURL(manager.constructQuery(i, 0, 0,
-						manager.getTorrentInfo().file_length, ""));
+				manager.getTorrentInfo().file_length, ""));
 				manager.setPort(i);
 				break;
 			} catch (Exception e) {
-				System.out.println("Port " + i + " failed");
+				//System.out.println("Port " + i + " failed");
 				i++;
 				continue;
 			}
@@ -88,11 +88,11 @@ public class RUBTClient {
 	}
 	
 	public static void printIntro(){
-	  System.out.println(" /¯¯¯¯\\     /¯¯¯¯¯||¯¯¯\\|¯¯¯| |¯¯¯\\|¯¯¯| /¯¯¯¯¯\\ |¯¯¯\\|¯¯¯|");
+    System.out.println(" /¯¯¯¯\\     /¯¯¯¯¯||¯¯¯\\|¯¯¯| |¯¯¯\\|¯¯¯| /¯¯¯¯¯\\ |¯¯¯\\|¯¯¯|");
     System.out.println("|  (\\__/| /   !  | |        '|||       '|||  x |'|       '||");
     System.out.println(" \\____\\ /___/¯|__'||___|\\___| |___|\\___| \\_____/ |___|\\___|");
-    
     System.out.println("                                            Is this legal?\n                                      This better be legal.\n                                              -Oscar Wilde\n");
+    System.out.println("Type 'exit' to quit at any time.");
 	}
 
 }

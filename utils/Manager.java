@@ -110,7 +110,7 @@ public class Manager {
 	public static void restart() {
 		for (Peer peer : peerList_) {
 			if (peer.socket_ == null) {
-				System.out.println("Restarting peer " + peer.peer_id_);
+				//System.out.println("Restarting peer " + peer.peer_id_);
 				DownloadThread p = new DownloadThread(peer);
 				Thread a = new Thread(p);
 				a.start();
@@ -124,8 +124,8 @@ public class Manager {
 			torrent_info.info_hash.get(info_hash, 0, info_hash.length);
 			file = new File(fileName);
 		} catch (Exception e) {
-			System.out.println(e);
-			System.out.println("Torrent file could not be loaded.");
+			//System.out.println(e);
+			//System.out.println("Torrent file could not be loaded.");
 			System.exit(1);
 		}
 	}
@@ -228,7 +228,7 @@ public class Manager {
 					+ "&left=" + left + "&event=" + event;
 
 		} catch (Exception e) {
-			System.out.println(e);
+			//System.out.println(e);
 		}
 
 		return url_string;
@@ -245,7 +245,7 @@ public class Manager {
 				setPort(i);
 				break;
 			} catch (Exception e) {
-				System.out.println("Port " + i + " failed");
+				//System.out.println("Port " + i + " failed");
 				i++;
 				continue;
 			}
@@ -301,7 +301,7 @@ public class Manager {
 				peer_id_ = Helpers.bufferToString((ByteBuffer) peerMap
 						.get(peerIdKey));
 				port_ = (Integer) peerMap.get(portKey);
-				// System.out.println(ip_ +" " + peer_id_ +" " + port_);
+				// //System.out.println(ip_ +" " + peer_id_ +" " + port_);
 				Peer newPeer = new Peer(peer_id_, ip_, port_);
 
 				if (newPeer.isValid()) {
@@ -309,7 +309,7 @@ public class Manager {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		peerList_ = peerList;
