@@ -48,7 +48,8 @@ public class RUBTClient {
 
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
-		manager.setPeerList(getPeers());
+		manager.queryTracker();
+
 		while(!manager.peersReady){
 		  continue;
 		}
@@ -64,27 +65,6 @@ public class RUBTClient {
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
 		new Thread(new Input()).start();
-	}
-
-	// query the tracker and get the initial list of peers
-	public static byte[] getPeers() {
-		byte[] response = null;
-		int i = 0;
-		for (i = 6881; i <= 6889;) {
-			try {
-				response = Helpers.getURL(manager.constructQuery(i, 0, 0,
-				manager.getTorrentInfo().file_length, ""));
-				manager.setPort(i);
-				break;
-			} catch (Exception e) {
-				//System.out.println("Port " + i + " failed");
-				i++;
-				continue;
-			}
-		}
-		manager.queryTracker();
-
-		return response;
 	}
 	
 	public static void printIntro(){

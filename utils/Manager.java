@@ -94,10 +94,6 @@ public class Manager {
 	}
 
 	public boolean download() {
-		byte[] response = null;
-		response = Helpers.getURL(constructQuery(port, 0,
-				torrent_info.file_length, 0, STARTED));
-
 		for (Peer peer : peerList_) {
 			registerPeer(peer);
 			DownloadThread p = new DownloadThread(peer);
@@ -225,7 +221,11 @@ public class Manager {
 			url_string = torrent_info.announce_url.toString() + "?port=" + port
 					+ "&peer_id=" + escaped_id + "&info_hash=" + escaped_hash
 					+ "&uploaded=" + uploaded + "&downloaded=" + downloaded
-					+ "&left=" + left + "&event=" + event;
+					+ "&left=" + left;
+
+		    if(event.length() != 0){
+		    url_string += "&event=" + event;
+		  }
 
 		} catch (Exception e) {
 			//System.out.println(e);
@@ -241,7 +241,7 @@ public class Manager {
 		for (i = 6881; i <= 6889;) {
 			try {
 				response = Helpers.getURL(constructQuery(i, 0, 0,
-						torrent_info.file_length, ""));
+						torrent_info.file_length, "started"));
 				setPort(i);
 				break;
 			} catch (Exception e) {

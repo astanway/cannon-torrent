@@ -25,9 +25,9 @@ public class TrackerContact extends TimerTask {
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, 0, Manager.COMPLETED);
 		} else {
-			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
-					Manager.downloaded, Manager.torrent_info.file_length
-							- Manager.downloaded, "");
+      Manager.constructQuery(Manager.getPort(), Manager.uploaded,
+         Manager.downloaded, Manager.torrent_info.file_length
+             - Manager.downloaded, "");
 		}
 	}
 }
