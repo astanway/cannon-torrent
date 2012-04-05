@@ -255,7 +255,7 @@ public class Message {
 		private final byte[] data;
 
 		public BitfieldMessage(final byte[] data) {
-			super(TYPE_BITFIELD, 5);
+			super(TYPE_BITFIELD, 1 + data.length);
 			this.data = data;
 		}
 
