@@ -11,6 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import utils.Message.HaveMessage;
 import utils.StringComparator;
+import utils.Gooey;
 
 import peers.Block;
 import peers.Peer;
@@ -63,37 +64,7 @@ public class PieceChecker extends TimerTask {
 		finish();
 		return;
 	}
-	
-	/**
-	 * Used for the progress bar
-	 * @param completed	completed value
-	 * @param total	  	total value
-	 */
-	public synchronized void setProgress() {
-    double completed = (double) Manager.downloaded;
-    double total = (double) Manager.torrent_info.file_length;
-    
-    double blockTotal = (double) Manager.numBlocks;
-    double blockComp = (double) new File("blocks/").listFiles().length;
-    double blockProg = blockComp/blockTotal;
-    
-    int width = 50;
-    double prog = completed/total;
-    System.out.print("\r[");
-    int i = 0;
-    for (; i < prog*width; i++) {
-     System.out.print("=");
-    }
-    System.out.print(">");
-    for (; i < (blockProg*width - 1); i++) {
-     System.out.print(".");
-    }
-    for (; i < width; i++) {
-     System.out.print(" ");
-    }
-    System.out.print("] " + Math.ceil(prog*100) + "%");
-	}
-	
+		
 
 	// adds missing blocks to queue if needed
 	public static void addMissingBlocks() {
@@ -133,14 +104,15 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public void finish() {
+	  Gooey.updateGui();
+	  
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
       System.out.println("File already exists.");
 			Manager.fileDone = true;
 			return;
 		}
-				
-    setProgress();
+
 
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
 			if (Manager.q.size() == 0) {

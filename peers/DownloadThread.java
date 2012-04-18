@@ -220,7 +220,8 @@ public class DownloadThread implements Runnable {
 			} else {
 				rename.renameTo(new File("blocks/" + name));
 			}
-
+      
+      peer.downloaded.set(peer.downloaded.get() + piece_data.length);
       // //System.out.print(peer.peer_id_ + " ");
       // b.print(); 
 			return;
@@ -243,6 +244,7 @@ public class DownloadThread implements Runnable {
 				try {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(tempRequest.getBlockLength());
+		      peer.uploaded.set(peer.uploaded.get() + sendData.length);
 				} catch (Exception e) {
 					//e.printStackTrace();
 				}

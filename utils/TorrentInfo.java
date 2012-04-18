@@ -133,7 +133,7 @@ public class TorrentInfo
 	 */
 	@SuppressWarnings("unchecked")
 	public TorrentInfo(byte[] torrent_file_bytes) throws BencodingException
-	{ 	
+	{
 		// Make sure the input is valid
 		if(torrent_file_bytes == null || torrent_file_bytes.length == 0)
 			throw new IllegalArgumentException("Torrent file bytes must be non-null and have at least 1 byte.");

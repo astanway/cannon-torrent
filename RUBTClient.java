@@ -2,6 +2,8 @@ import java.io.File;
 import java.util.concurrent.locks.ReentrantLock;
 import utils.*;
 import peers.PeerListener;
+import java.awt.*;
+import javax.swing.*; 
 
 public class RUBTClient {
 
@@ -45,7 +47,7 @@ public class RUBTClient {
 		} else {
 			tempFile.mkdir();
 		}
-
+    
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
 		manager.queryTracker();
@@ -65,7 +67,60 @@ public class RUBTClient {
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
 		new Thread(new Input()).start();
+		
+		
+	  javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    createAndShowGUI(manager);
+                }
+            });
 	}
+	
+	private static void createAndShowGUI(Manager manager) {
+      JFrame frame = new JFrame("Cannon");
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      Container pane = frame.getContentPane();
+      JTabbedPane tabbedPane = new JTabbedPane();
+      
+      //General Tab
+      JPanel panel = new JPanel();
+      JLabel name = new JLabel("File Name: " + manager.torrent_info.file_name);
+      panel.add(name);
+      
+      JLabel size = new JLabel("File Size: " + Gooey.humanReadableByteCount(manager.torrent_info.file_length));
+      panel.add(size);
+            
+      manager.downloadedLabel = new JLabel("");
+      panel.add(manager.downloadedLabel);
+      
+      manager.uploadedLabel = new JLabel("");
+      panel.add(manager.uploadedLabel);
+      
+      manager.progress = new JProgressBar();
+      manager.progress.setStringPainted(true);
+      panel.add(manager.progress, BorderLayout.PAGE_END);
+      tabbedPane.addTab("General", panel);
+
+      //Peers Tab
+      JPanel peers = new JPanel();
+      String[] columnNames = {"Id",
+                              "IP",
+                              "Port",
+                              "Downloaded",
+                              "Uploaded"};
+                              
+      Object[][] data = Manager.getPeerList();
+      manager.peerTable = new JTable(data, columnNames);
+      JScrollPane scrollPane = new JScrollPane(manager.peerTable);
+      peers.add(scrollPane);
+      tabbedPane.addTab("Peers", peers);
+
+      pane.add(tabbedPane);
+      frame.setPreferredSize(new Dimension(800, 300));
+      frame.setResizable(true);
+      frame.pack();
+      frame.setVisible(true);
+  }
 	
 	public static void printIntro(){
     System.out.println(" /¯¯¯¯\\     /¯¯¯¯¯||¯¯¯\\|¯¯¯| |¯¯¯\\|¯¯¯| /¯¯¯¯¯\\ |¯¯¯\\|¯¯¯|");

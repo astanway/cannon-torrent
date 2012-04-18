@@ -20,6 +20,8 @@ public class Peer {
 	public DataOutputStream to_peer_ = null;
 	public DataInputStream from_peer_ = null;
 	public boolean[] bfb;
+	public AtomicInteger downloaded = new AtomicInteger(0);
+	public AtomicInteger uploaded = new AtomicInteger(0);
 
 	public boolean choked = true;
 
@@ -53,6 +55,7 @@ public class Peer {
 		this.ip_ = _ip;
 		this.port_ = _port;
 		this.bfb = new boolean[Manager.numPieces];
+		System.out.println("Connected to " + _peer_id);
 	}
 
 	/**
