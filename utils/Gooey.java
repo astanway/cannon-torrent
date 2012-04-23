@@ -27,7 +27,7 @@ public class Gooey{
   public static void updateLabels(){
     try{
       Manager.downloadedLabel.setText("Downloaded: " + humanReadableByteCount(Manager.downloaded));
-      Manager.uploadedLabel.setText(humanReadableByteCount(Manager.uploaded));
+      Manager.uploadedLabel.setText("Uploaded: " + humanReadableByteCount(Manager.uploaded));
     } catch (Exception e){}
   }
   

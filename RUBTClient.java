@@ -82,25 +82,32 @@ public class RUBTClient {
 		JTabbedPane tabbedPane = new JTabbedPane();
 
 		// General Tab
-		JPanel panel = new JPanel();
-		JLabel name = new JLabel("File Name: " + manager.torrent_info.file_name);
-		panel.add(name);
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		JPanel nested1 = new JPanel(new BorderLayout());
+		JLabel name = new JLabel(manager.torrent_info.file_name);
+    name.setFont(new Font("Sans Serif", Font.BOLD, 30));
+		nested1.add(name, BorderLayout.NORTH);
 
 		JLabel size = new JLabel(
 				"File Size: "
 						+ Gooey.humanReadableByteCount(manager.torrent_info.file_length));
-		panel.add(size);
+		nested1.add(size, BorderLayout.CENTER);
 
 		manager.downloadedLabel = new JLabel("");
-		panel.add(manager.downloadedLabel);
+		nested1.add(manager.downloadedLabel, BorderLayout.EAST);
 
 		manager.uploadedLabel = new JLabel("");
-		panel.add(manager.uploadedLabel);
-
+		nested1.add(manager.uploadedLabel, BorderLayout.WEST);
+    
+    JPanel bottom = new JPanel();
 		manager.progress = new JProgressBar();
 		manager.progress.setStringPainted(true);
-		panel.add(manager.progress, BorderLayout.PAGE_END);
+		bottom.add(manager.progress);
 		tabbedPane.addTab("General", panel);
+		
+		panel.add(nested1, BorderLayout.NORTH);
+		panel.add(bottom, BorderLayout.SOUTH);
 
 		// Peers Tab
 		JPanel peers = new JPanel();
@@ -113,7 +120,7 @@ public class RUBTClient {
 		tabbedPane.addTab("Peers", peers);
 
 		pane.add(tabbedPane);
-		frame.setPreferredSize(new Dimension(800, 300));
+		frame.setPreferredSize(new Dimension(800, 400));
 		frame.setResizable(true);
 		frame.pack();
 		frame.setVisible(true);
