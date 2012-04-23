@@ -1,8 +1,10 @@
 package utils;
 
+import java.util.TimerTask;
+
 import peers.Peer;
 
-public class Choker implements Runnable {
+public class Choker extends TimerTask {
 	public void run() {
 		double rand = Math.random() * 3;
 		Math.round(rand);
@@ -10,46 +12,49 @@ public class Choker implements Runnable {
 		int totalMinIndex = -1;
 		int totalMax = Integer.MIN_VALUE;
 		int totalMaxIndex = -1;
-		while (Manager.unchokedPeers.size() < 3) {
-			double random = Math.random()
-					* (Manager.wantUnchokePeers.size() - 1);
-			Long blah = Math.round(random);
-			int index = blah.intValue();
-			Manager.unchokedPeers.add(Manager.wantUnchokePeers.get(index));
-			
-			try {
-				Message.encode(Manager.wantUnchokePeers.get(index).to_peer_,
-						Message.UNCHOKE);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			Manager.wantUnchokePeers.remove(index);
-		}
 		int total;
 		for (int i = 0; i < Manager.unchokedPeers.size(); i++) {
-			total = Manager.unchokedPeers.get(i).downloaded.get() + Manager.unchokedPeers.get(i).uploaded.get();
-			if(total < totalMin){
+			total = Manager.unchokedPeers.get(i).downloaded.get()
+					+ Manager.unchokedPeers.get(i).uploaded.get();
+			if (total < totalMin) {
 				totalMinIndex = i;
 			}
 		}
-		for(int i = 0; i<Manager.wantUnchokePeers.size();i++){
-			total = Manager.wantUnchokePeers.get(i).downloaded.get() + Manager.wantUnchokePeers.get(i).uploaded.get();
-			if(total>totalMax){
+		for (int i = 0; i < Manager.wantUnchokePeers.size(); i++) {
+			total = Manager.wantUnchokePeers.get(i).downloaded.get()
+					+ Manager.wantUnchokePeers.get(i).uploaded.get();
+			if (total > totalMax) {
 				totalMaxIndex = i;
 			}
 		}
-		Peer toAdd;
-		Peer toRemove;
-		if(totalMaxIndex !=-1){
+		Peer toAdd = null;
+		Peer toRemove = null;
+		if (totalMaxIndex != -1) {
 			toAdd = Manager.wantUnchokePeers.get(totalMaxIndex);
 		}
-		if(totalMinIndex != -1){
+		if (totalMinIndex != -1) {
 			toRemove = Manager.unchokedPeers.get(totalMinIndex);
 		}
-		
-		
-
-		
+		if (toAdd == null || toRemove == null) {
+			return;
+		} else {
+			try {
+				Message.encode(toAdd.to_peer_, Message.UNCHOKE);
+				toAdd.peerChoked = false;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			Manager.unchokedPeers.add(toAdd);
+			Manager.wantUnchokePeers.remove(toAdd);
+			try {
+				Message.encode(toRemove.to_peer_, Message.CHOKE);
+				toRemove.peerChoked = true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			Manager.wantUnchokePeers.add(toRemove);
+			Manager.unchokedPeers.remove(toRemove);
+		}
 	}
 
 }

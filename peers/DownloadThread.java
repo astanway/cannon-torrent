@@ -26,14 +26,17 @@ public class DownloadThread implements Runnable {
 	}
 
 	public void run() {
-	  //sleep to avoid calling over and over
-	  try { Thread.sleep(50); } catch(InterruptedException e){}
+		// sleep to avoid calling over and over
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+		}
 		peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
 		peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 		if (!peer.receiveHandshake(Manager.info_hash)) {
-			//System.out.println("Handshake Failed");
+			// System.out.println("Handshake Failed");
 			return;
 		} else {
 			peer.sendBitField();
@@ -95,7 +98,8 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-            // //System.out.println("Requested (" + b.getPiece() + ", " + b.getBlock() + ") from " + peer.peer_id_);
+						// //System.out.println("Requested (" + b.getPiece() +
+						// ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -152,7 +156,7 @@ public class DownloadThread implements Runnable {
 			try {
 				Thread.sleep(500L + (long) (Math.random() * 10));
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			}
 			run();
 			return;
@@ -173,17 +177,29 @@ public class DownloadThread implements Runnable {
 			peer.bfb[hvm.getPieceIndex()] = true;
 			return;
 		case Message.TYPE_INTERESTED:
-
-			Manager.wantUnchokePeers.add(peer);
-			peer.peerChoked = false;
-			peer.peerInterested = true;
-			return;
+			if (Manager.numUnchoked.get() < 3) {
+				Manager.unchokedPeers.add(this.peer);
+				Manager.numUnchoked.set(Manager.numUnchoked.get()+1);
+				peer.peerChoked = false;
+				peer.peerInterested = true;
+				try {
+					Message.encode(peer.to_peer_, Message.UNCHOKE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return;
+			} else {
+				Manager.wantUnchokePeers.add(peer);
+				peer.peerChoked = false;
+				peer.peerInterested = true;
+				return;
+			}
 		case Message.TYPE_KEEP_ALIVE:
 			// do nothing would reset timer, should loop again;
 			return;
 		case Message.TYPE_NOT_INTERESTED:
 			// do nothing, not keeping interested state atm
-			peerInterested = false;
+			peer.peerInterested = false;
 			return;
 		case Message.TYPE_PIECE:
 			PieceMessage pm = (PieceMessage) m;
@@ -207,7 +223,7 @@ public class DownloadThread implements Runnable {
 				file.write(piece_data);
 				file.close();
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			}
 
 			File rename = new File("temp/" + name);
@@ -217,10 +233,10 @@ public class DownloadThread implements Runnable {
 			} else {
 				rename.renameTo(new File("blocks/" + name));
 			}
-      
-      peer.downloaded.set(peer.downloaded.get() + piece_data.length);
-      // //System.out.print(peer.peer_id_ + " ");
-      // b.print(); 
+
+			peer.downloaded.set(peer.downloaded.get() + piece_data.length);
+			// //System.out.print(peer.peer_id_ + " ");
+			// b.print();
 			return;
 		case Message.TYPE_REQUEST:
 			if (!peerChoked) {
@@ -231,8 +247,8 @@ public class DownloadThread implements Runnable {
 				System.arraycopy(tempbytes, tempRequest.getBegin(), sendData,
 						0, tempRequest.getBlockLength());
 
-        // System.out.println(peer.peer_id_ + " sending block " +
-        // tempRequest.getBegin());
+				// System.out.println(peer.peer_id_ + " sending block " +
+				// tempRequest.getBegin());
 				// //System.out.println("of piece " +
 				// tempRequest.getPieceIndex());
 				PieceMessage toSend = new PieceMessage(
@@ -241,20 +257,19 @@ public class DownloadThread implements Runnable {
 				try {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(tempRequest.getBlockLength());
-		      peer.uploaded.set(peer.uploaded.get() + sendData.length);
+					peer.uploaded.set(peer.uploaded.get() + sendData.length);
 				} catch (Exception e) {
-					//e.printStackTrace();
+					// e.printStackTrace();
 				}
 				return;
 			}
 		case Message.TYPE_UNCHOKE:
 			peer.choked = false;
-      // //System.out.println("Peer " + peer.peer_id_ + " unchoked us");
+			// //System.out.println("Peer " + peer.peer_id_ + " unchoked us");
 			return;
 		}
 		return;
 	}
-	
 
 	/**
 	 * @return true if we have all the pieces false otherwise

@@ -9,6 +9,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,6 +41,7 @@ public class Manager {
 	public static ArrayList<Peer> wantUnchokePeers = null;
 	public static int downloaded = 0;
 	public static int uploaded = 0;
+	public static AtomicInteger numUnchoked = new AtomicInteger(0);
 
 	public static final int block_length = 16384;
 	public static final String STARTED = "started";
@@ -106,6 +108,10 @@ public class Manager {
 		Timer t2 = new Timer();
 		TrackerContact contact = new TrackerContact(0);
 		t2.schedule(contact, interval * 1000, interval * 1000);
+		
+		Timer t3 = new Timer();
+		Choker choke = new Choker();
+		t3.scheduleAtFixedRate(choke,30000,30000);
 		return;
 	}
 
