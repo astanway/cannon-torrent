@@ -19,6 +19,8 @@ import peers.Peer;
 public class PieceChecker extends TimerTask {
 
 	public void run() {
+	  Gooey.updateGui();
+
 		if (Manager.fileDone) {
 			this.cancel();
 		}
@@ -104,8 +106,6 @@ public class PieceChecker extends TimerTask {
 	}
 
 	public void finish() {
-	  Gooey.updateGui();
-	  
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
       System.out.println("File already exists.");

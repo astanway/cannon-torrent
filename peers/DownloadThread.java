@@ -248,6 +248,7 @@ public class DownloadThread implements Runnable {
 			// b.print();
 			return;
 		case Message.TYPE_REQUEST:
+		  System.out.println("got request");
 			if (!peer.peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
 				byte[] sendData = new byte[tempRequest.getBlockLength()];
