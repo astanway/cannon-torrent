@@ -24,6 +24,9 @@ public class Peer {
 	public AtomicInteger uploaded = new AtomicInteger(0);
 
 	public boolean choked = true;
+	public boolean interested = false;
+	public boolean peerChoked = true;
+	public boolean peerInterested = false;
 
 	public long lastRequest = 0;
 	public boolean ready = false;

@@ -6,8 +6,8 @@ import java.io.*;
 import java.util.*;
 import java.awt.*;
 import javax.swing.JProgressBar;
-import javax.swing.JLabel; 
-import javax.swing.JTable; 
+import javax.swing.JLabel;
+import javax.swing.JTable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,6 +36,8 @@ public class Manager {
 	public static boolean fileDone = false;
 	public static ReentrantLock fileLock = new ReentrantLock();
 	public static ArrayList<Peer> activePeerList = null;
+	public static ArrayList<Peer> unchokedPeers = null;
+	public static ArrayList<Peer> wantUnchokePeers = null;
 	public static int downloaded = 0;
 	public static int uploaded = 0;
 
@@ -46,13 +48,13 @@ public class Manager {
 	public static final String EMPTY = "";
 
 	/**
-	  GUI Globals
-	*/
+	 * GUI Globals
+	 */
 	public static JProgressBar progress = null;
 	public static JLabel downloadedLabel = null;
 	public static JLabel uploadedLabel = null;
-  public static JTable peerTable = null;
-	
+	public static JTable peerTable = null;
+
 	public static ArrayList<Peer> peerList_ = null;
 
 	public Manager() {
@@ -73,6 +75,8 @@ public class Manager {
 		have_piece = new AtomicIntegerArray(numPieces);
 
 		activePeerList = new ArrayList<Peer>();
+		unchokedPeers = new ArrayList<Peer>();
+		wantUnchokePeers = new ArrayList<Peer>();
 
 		// set up the reference queue
 		q = new ConcurrentLinkedQueue<Block>();
@@ -98,7 +102,7 @@ public class Manager {
 		Timer t1 = new Timer();
 		PieceChecker checker = new PieceChecker();
 		t1.scheduleAtFixedRate(checker, 0, 1000);
-		
+
 		Timer t2 = new Timer();
 		TrackerContact contact = new TrackerContact(0);
 		t2.schedule(contact, interval * 1000, interval * 1000);
@@ -118,7 +122,7 @@ public class Manager {
 	public static void restart() {
 		for (Peer peer : peerList_) {
 			if (peer.socket_ == null) {
-				//System.out.println("Restarting peer " + peer.peer_id_);
+				// System.out.println("Restarting peer " + peer.peer_id_);
 				DownloadThread p = new DownloadThread(peer);
 				Thread a = new Thread(p);
 				a.start();
@@ -132,8 +136,8 @@ public class Manager {
 			torrent_info.info_hash.get(info_hash, 0, info_hash.length);
 			file = new File(fileName);
 		} catch (Exception e) {
-      System.out.println(e);
-      System.out.println("Torrent file could not be loaded.");
+			System.out.println(e);
+			System.out.println("Torrent file could not be loaded.");
 			System.exit(1);
 		}
 	}
@@ -179,12 +183,13 @@ public class Manager {
 	}
 
 	public static Object[][] getPeerList() {
-	  Object[][] all = new Object[peerList_.size()][3];
-	  for(int i=0; i<peerList_.size(); i++){
-	    Peer peer = peerList_.get(i);
-      Object[] list = {peer.peer_id_, peer.ip_, peer.port_, peer.downloaded.get(), peer.uploaded.get()};
-      all[i] = list;
-	  }
+		Object[][] all = new Object[peerList_.size()][3];
+		for (int i = 0; i < peerList_.size(); i++) {
+			Peer peer = peerList_.get(i);
+			Object[] list = { peer.peer_id_, peer.ip_, peer.port_,
+					peer.downloaded.get(), peer.uploaded.get() };
+			all[i] = list;
+		}
 		return all;
 	}
 
@@ -241,12 +246,12 @@ public class Manager {
 					+ "&uploaded=" + uploaded + "&downloaded=" + downloaded
 					+ "&left=" + left;
 
-		    if(event.length() != 0){
-		    url_string += "&event=" + event;
-		  }
+			if (event.length() != 0) {
+				url_string += "&event=" + event;
+			}
 
 		} catch (Exception e) {
-			//System.out.println(e);
+			// System.out.println(e);
 		}
 
 		return url_string;
@@ -263,7 +268,7 @@ public class Manager {
 				setPort(i);
 				break;
 			} catch (Exception e) {
-				//System.out.println("Port " + i + " failed");
+				// System.out.println("Port " + i + " failed");
 				i++;
 				continue;
 			}
@@ -327,7 +332,7 @@ public class Manager {
 				}
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		peerList_ = peerList;

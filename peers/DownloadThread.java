@@ -173,13 +173,10 @@ public class DownloadThread implements Runnable {
 			peer.bfb[hvm.getPieceIndex()] = true;
 			return;
 		case Message.TYPE_INTERESTED:
-			try {
-				Message.encode(peer.to_peer_, Message.UNCHOKE);
-			} catch (Exception e) {
-				//e.printStackTrace();
-			}
-			peerChoked = false;
-			peerInterested = true;
+
+			Manager.wantUnchokePeers.add(peer);
+			peer.peerChoked = false;
+			peer.peerInterested = true;
 			return;
 		case Message.TYPE_KEEP_ALIVE:
 			// do nothing would reset timer, should loop again;
