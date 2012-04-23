@@ -178,19 +178,28 @@ public class DownloadThread implements Runnable {
 			return;
 		case Message.TYPE_INTERESTED:
 			if (Manager.numUnchoked.get() < 3) {
+				System.out.println("WE INTO THE UNCHOKE PROCESS");
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
 				Manager.unchokedPeers.add(this.peer);
-				Manager.numUnchoked.set(Manager.numUnchoked.get()+1);
+				Manager.numUnchoked.getAndIncrement();
 				peer.peerChoked = false;
 				peer.peerInterested = true;
 				try {
 					Message.encode(peer.to_peer_, Message.UNCHOKE);
+					System.out.println("SENT UNCHOKE MESSAGE");
+					System.out.println();
+					System.out.println();
+					System.out.println();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				return;
 			} else {
 				Manager.wantUnchokePeers.add(peer);
-				peer.peerChoked = false;
 				peer.peerInterested = true;
 				return;
 			}
@@ -239,7 +248,7 @@ public class DownloadThread implements Runnable {
 			// b.print();
 			return;
 		case Message.TYPE_REQUEST:
-			if (!peerChoked) {
+			if (!peer.peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
 				byte[] sendData = new byte[tempRequest.getBlockLength()];
 				byte[] tempbytes = Helpers
