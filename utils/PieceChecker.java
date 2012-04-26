@@ -21,8 +21,8 @@ public class PieceChecker extends TimerTask {
 	public void run() {
 	  Gooey.updateGui();
 
-		if (Manager.fileDone) {
-			this.cancel();
+		if (Manager.fileDone && Manager.have_piece != null) {
+      Manager.piecesReady = true;
 		}
 
 		for (int i = 0; i < Manager.numPieces; i++) {
@@ -35,7 +35,7 @@ public class PieceChecker extends TimerTask {
 			byte[] piece = Helpers.getPiece(i);
 			if (piece == null) {
 				continue;
-			}
+			} 
 
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
 			if (Helpers.verifyHash(piece, pieceHash)) {
@@ -63,6 +63,7 @@ public class PieceChecker extends TimerTask {
 			}
 		}
 
+    Manager.piecesReady = true;
 		finish();
 		return;
 	}
@@ -108,7 +109,6 @@ public class PieceChecker extends TimerTask {
 	public void finish() {
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
-      System.out.println("File already exists.");
 			Manager.fileDone = true;
 			return;
 		}

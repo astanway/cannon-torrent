@@ -16,10 +16,6 @@ import utils.Message.*;
 public class DownloadThread implements Runnable {
 
 	public Peer peer = null;
-	public boolean interested = false;
-	public boolean choked = true;
-	public boolean peerInterested = false;
-	public boolean peerChoked = true;
 
 	public DownloadThread(Peer _peer) {
 		peer = _peer;
@@ -33,10 +29,11 @@ public class DownloadThread implements Runnable {
 		}
 		peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
-		peer.establishStreams();
+    // System.out.println("got a socket");
+    peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 		if (!peer.receiveHandshake(Manager.info_hash)) {
-			// System.out.println("Handshake Failed");
+      System.out.println("Handshake Failed");
 			return;
 		} else {
 			peer.sendBitField();
@@ -52,6 +49,15 @@ public class DownloadThread implements Runnable {
 				}
 				interpret(m);
 			}
+			
+			//are they interested?
+			try {
+				m = peer.listen();
+			} catch (Exception e) {
+				run();
+				return;
+			}
+			interpret(m);
 
 			Block b = null;
 
@@ -77,7 +83,7 @@ public class DownloadThread implements Runnable {
 				if (f.exists()) {
 					continue;
 				}
-
+				
 				if (peer.bfb[b.getPiece()]) {
 					try {
 						peer.sendInterested();
@@ -98,8 +104,8 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-						// //System.out.println("Requested (" + b.getPiece() +
-						// ", " + b.getBlock() + ") from " + peer.peer_id_);
+            // System.out.println("Requested (" + b.getPiece() +
+            // ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -114,8 +120,7 @@ public class DownloadThread implements Runnable {
 					}
 					interpret(m);
 				} else {
-					// they don't have what we want, but we should listen to
-					// them
+					// they don't have what we want, but we should listen to them
 					// to see if they want anything we've got
 					try {
 						m = peer.listen();
@@ -133,7 +138,7 @@ public class DownloadThread implements Runnable {
 				}
 			}
 
-			while (peerInterested) {
+			while (peer.peerInterested) {
 				try {
 					m = peer.listen();
 				} catch (Exception e) {
@@ -170,30 +175,20 @@ public class DownloadThread implements Runnable {
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
-			// //System.out.println("We have been choked by " + peer.peer_id_);
+      // System.out.println("We have been choked by " + peer.peer_id_);
 			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;
 			peer.bfb[hvm.getPieceIndex()] = true;
 			return;
 		case Message.TYPE_INTERESTED:
-			if (Manager.numUnchoked.get() < 3) {
-				System.out.println("WE INTO THE UNCHOKE PROCESS");
-				System.out.println();
-				System.out.println();
-				System.out.println();
-				System.out.println();
-				System.out.println();
+			if (Manager.numUnchoked.get() < 5) {
 				Manager.unchokedPeers.add(this.peer);
 				Manager.numUnchoked.getAndIncrement();
 				peer.peerChoked = false;
 				peer.peerInterested = true;
 				try {
 					Message.encode(peer.to_peer_, Message.UNCHOKE);
-					System.out.println("SENT UNCHOKE MESSAGE");
-					System.out.println();
-					System.out.println();
-					System.out.println();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -244,11 +239,11 @@ public class DownloadThread implements Runnable {
 			}
 
 			peer.downloaded.set(peer.downloaded.get() + piece_data.length);
+			peer.lastDownloaded.set(peer.lastDownloaded.get() + piece_data.length);
 			// //System.out.print(peer.peer_id_ + " ");
 			// b.print();
 			return;
 		case Message.TYPE_REQUEST:
-		  System.out.println("got request");
 			if (!peer.peerChoked) {
 				RequestMessage tempRequest = (RequestMessage) m;
 				byte[] sendData = new byte[tempRequest.getBlockLength()];
@@ -268,6 +263,7 @@ public class DownloadThread implements Runnable {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(tempRequest.getBlockLength());
 					peer.uploaded.set(peer.uploaded.get() + sendData.length);
+					peer.lastUploaded.set(peer.lastUploaded.get() + sendData.length);
 				} catch (Exception e) {
 					// e.printStackTrace();
 				}

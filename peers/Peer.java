@@ -22,6 +22,9 @@ public class Peer {
 	public boolean[] bfb;
 	public AtomicInteger downloaded = new AtomicInteger(0);
 	public AtomicInteger uploaded = new AtomicInteger(0);
+	public AtomicInteger lastDownloaded = new AtomicInteger(0);
+	public AtomicInteger lastUploaded = new AtomicInteger(0);
+
 
 	public boolean choked = true;
 	public boolean interested = false;
@@ -58,7 +61,7 @@ public class Peer {
 		this.ip_ = _ip;
 		this.port_ = _port;
 		this.bfb = new boolean[Manager.numPieces];
-		System.out.println("Connected to " + _peer_id);
+    // System.out.println("Connected to " + _peer_id);
 	}
 
 	/**
@@ -286,6 +289,7 @@ public class Peer {
 			Message.encode(to_peer_, m);
 		} catch (SocketException se) {
 			this.establishStreams();
+      System.out.println("Error on sendRequest for peer " + peer_id_);
 			//e.printStackTrace();
 		} catch (Exception e) {
 			//e.printStackTrace();

@@ -14,15 +14,19 @@ public class Choker extends TimerTask {
 		int totalMaxIndex = -1;
 		int total;
 		for (int i = 0; i < Manager.unchokedPeers.size(); i++) {
-			total = Manager.unchokedPeers.get(i).downloaded.get()
-					+ Manager.unchokedPeers.get(i).uploaded.get();
+			total = Manager.unchokedPeers.get(i).lastDownloaded.get()
+					+ Manager.unchokedPeers.get(i).lastUploaded.get();
+			Manager.unchokedPeers.get(i).lastDownloaded.set(0);
+			Manager.unchokedPeers.get(i).lastUploaded.set(0);
 			if (total < totalMin) {
 				totalMinIndex = i;
 			}
 		}
 		for (int i = 0; i < Manager.wantUnchokePeers.size(); i++) {
-			total = Manager.wantUnchokePeers.get(i).downloaded.get()
-					+ Manager.wantUnchokePeers.get(i).uploaded.get();
+			total = Manager.wantUnchokePeers.get(i).lastDownloaded.get()
+					+ Manager.wantUnchokePeers.get(i).lastUploaded.get();
+			Manager.unchokedPeers.get(i).lastDownloaded.set(0);
+			Manager.unchokedPeers.get(i).lastUploaded.set(0);
 			if (total > totalMax) {
 				totalMaxIndex = i;
 			}

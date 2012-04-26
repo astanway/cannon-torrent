@@ -33,7 +33,7 @@ public class Manager {
 	public static int blocksInLastPiece = 0;
 	public static int leftoverBytes = 0;
 	public static boolean peersReady = false;
-	public static boolean piecesReady = true;
+	public static boolean piecesReady = false;
 	public static boolean fileDone = false;
 	public static ReentrantLock fileLock = new ReentrantLock();
 	public static ArrayList<Peer> activePeerList = null;
@@ -111,7 +111,7 @@ public class Manager {
 		
 		Timer t3 = new Timer();
 		Choker choke = new Choker();
-		t3.scheduleAtFixedRate(choke,30000,30000);
+		t3.scheduleAtFixedRate(choke, 30000, 30000);
 		return;
 	}
 
@@ -313,8 +313,18 @@ public class Manager {
 			// ToolKit.print(decodedResponse, 1);
 
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>) decodedResponse;
+
 			interval = (Integer) responseMap.get(intervalKey);
-			minInterval = (Integer) responseMap.get(minIntervalKey);
+			if(interval > 180 * 1000){
+			  interval = 180 * 1000;
+			}
+
+			minInterval = interval / 2;
+			try{
+			  minInterval = (Integer) responseMap.get(minIntervalKey);
+			} catch (Exception e){
+			  System.out.println("Min interval is not present");
+			}
 
 			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap
 					.get(peersKey);

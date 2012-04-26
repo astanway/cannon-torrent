@@ -8,7 +8,6 @@ import peers.Peer;
 
 public class Gooey{
   
-  
   public static void updateGui(){
     updateLabels();
     updateProgressBar();

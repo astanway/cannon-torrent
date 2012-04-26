@@ -51,18 +51,23 @@ public class RUBTClient {
 		manager = new Manager(torrentFile, savedFile);
 		manager.setPeerId();
 		manager.queryTracker();
-
-		while (!manager.peersReady) {
-			continue;
-		}
-
 		manager.setTimers();
 
-		while (!manager.piecesReady) {
-			continue;
+		while (!manager.peersReady) {
+		  try {
+  			Thread.sleep(50);
+  		} catch (InterruptedException e) {
+  		}
 		}
 
-		manager.download();
+		while (!manager.piecesReady) {
+		  try {
+  			Thread.sleep(50);
+  		} catch (InterruptedException e) {
+  		}
+		}
+
+    manager.download();
 
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
@@ -111,7 +116,7 @@ public class RUBTClient {
 
 		// Peers Tab
 		JPanel peers = new JPanel();
-		String[] columnNames = { "Id", "IP", "Port", "Downloaded", "Uploaded" };
+		String[] columnNames = { "Id", "IP", "Port", "Downloaded", "Uploaded"};
 
 		Object[][] data = Manager.getPeerList();
 		manager.peerTable = new JTable(data, columnNames);

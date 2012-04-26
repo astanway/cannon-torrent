@@ -13,12 +13,12 @@ public final class Helpers {
 	public static void printBoolArray(boolean[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i] == false) {
-				//System.out.print("0");
+        System.out.print("0");
 			} else {
-				//System.out.print("1");
+        System.out.print("1");
 			}
 		}
-		//System.out.println("");
+    System.out.println("");
 	}
 
 	/**
