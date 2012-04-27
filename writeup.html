@@ -114,7 +114,11 @@ and it will start to try and get blocks based on what the peers bitfield says.
 PieceChecker - This is a worker thread that will see if all the blocks of a piece are 
 downloaded and if so, it will try and verify the hash of the piece. If the piece fails the hash 
 the piece checker then takes the blocks, deletes them and enqueues the blocks to be 
-redownloaded. It also will take care of the file writing at the end.
+redownloaded. It also will take care of the file writing at the end. It also updates the bitfield, and will send out have messages if need be when we finish a piece.
+<br><br>
+Choker - This is a worker thread that takes care of having only 3 unchoked peers that we want to upload to at once. At first before we have 
+<br><br>
+GOOOOOOEY - 
 <br><br>
 This wasn't too hard. Threading wasn't really a problem because our queue is totally threadsafe. 
 In addition, our progress bar is now EXTRA badass.
