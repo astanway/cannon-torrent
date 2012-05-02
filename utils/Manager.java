@@ -324,7 +324,7 @@ public class Manager {
 			try{
 			  minInterval = (Integer) responseMap.get(minIntervalKey);
 			} catch (Exception e){
-			  System.out.println("Min interval is not present");
+			// System.out.println("Min interval is not present");
 			}
 
 			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap

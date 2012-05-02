@@ -289,7 +289,7 @@ public class Peer {
 			Message.encode(to_peer_, m);
 		} catch (SocketException se) {
 			this.establishStreams();
-      System.out.println("Error on sendRequest for peer " + peer_id_);
+    // System.out.println("Error on sendRequest for peer " + peer_id_);
 			//e.printStackTrace();
 		} catch (Exception e) {
 			//e.printStackTrace();

@@ -12,16 +12,16 @@ public class TrackerContact extends TimerTask {
 
 	public void run() {
 		if (choice == 0) {
-      System.out.println("\nUpdating tracker.");
-      System.out.println("Uploaded = " + Manager.uploaded);
-      System.out.println("Downloaded = " + Manager.downloaded);
+    // System.out.println("\nUpdating tracker.");
+    // System.out.println("Uploaded = " + Manager.uploaded);
+    // System.out.println("Downloaded = " + Manager.downloaded);
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, Manager.torrent_info.file_length
 							- Manager.downloaded, "");
 		} else if (choice == 1) {
-      System.out.println("Updating tracker.");
-      System.out.println("Uploaded = " + Manager.uploaded);
-      System.out.println("Downloaded = " + Manager.downloaded);
+    // System.out.println("Updating tracker.");
+    // System.out.println("Uploaded = " + Manager.uploaded);
+    // System.out.println("Downloaded = " + Manager.downloaded);
 			Manager.constructQuery(Manager.getPort(), Manager.uploaded,
 					Manager.downloaded, 0, Manager.COMPLETED);
 		} else {
