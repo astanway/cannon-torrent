@@ -18,11 +18,14 @@ import peers.Peer;
 
 public class PieceChecker extends TimerTask {
 
+	/**
+	 * Runs the piece checker that checks if a piece is done
+	 */
 	public void run() {
-	  Gooey.updateGui();
+		Gooey.updateGui();
 
 		if (Manager.fileDone && Manager.have_piece != null) {
-      Manager.piecesReady = true;
+			Manager.piecesReady = true;
 		}
 
 		for (int i = 0; i < Manager.numPieces; i++) {
@@ -35,7 +38,7 @@ public class PieceChecker extends TimerTask {
 			byte[] piece = Helpers.getPiece(i);
 			if (piece == null) {
 				continue;
-			} 
+			}
 
 			byte[] pieceHash = Manager.torrent_info.piece_hashes[i].array();
 			if (Helpers.verifyHash(piece, pieceHash)) {
@@ -44,30 +47,30 @@ public class PieceChecker extends TimerTask {
 				Manager.addDownloaded(Helpers.getPiece(i).length);
 
 				// don't send the have message if this is a resumed download
-        for (Peer peer : Manager.activePeerList) {
-         if (peer.ready) {
-           HaveMessage haveSend = new HaveMessage(i);
-           try {
-             Message.encode(peer.to_peer_, haveSend);
-           } catch (Exception e) {
-              // //e.printStackTrace();
-              // //System.out.println("Failed to send the have message to " + peer.peer_id_);
-           }
-         }
-        }
+				for (Peer peer : Manager.activePeerList) {
+					if (peer.ready) {
+						HaveMessage haveSend = new HaveMessage(i);
+						try {
+							Message.encode(peer.to_peer_, haveSend);
+						} catch (Exception e) {
+							// //e.printStackTrace();
+							// //System.out.println("Failed to send the have message to "
+							// + peer.peer_id_);
+						}
+					}
+				}
 			} else {
-				//System.out.println("Deleting piece " + i);
+				// System.out.println("Deleting piece " + i);
 				Manager.have_piece.set(i, 0);
 				Manager.addDownloaded(-1 * Helpers.getPiece(i).length);
 				Helpers.deletePiece(i);
 			}
 		}
 
-    Manager.piecesReady = true;
+		Manager.piecesReady = true;
 		finish();
 		return;
 	}
-		
 
 	// adds missing blocks to queue if needed
 	public static void addMissingBlocks() {
@@ -91,13 +94,13 @@ public class PieceChecker extends TimerTask {
 						data = new byte[Manager.leftoverBytes];
 						Block b = new Block(j, k, data);
 						Manager.q.add(b);
-            // System.out.println("Adding block " + j + " " + k);
+						// System.out.println("Adding block " + j + " " + k);
 						break;
 					} else {
 						data = new byte[Manager.block_length];
 					}
 					Block b = new Block(j, k, data);
-          // System.out.println("Adding block " + j + " " + k);
+					// System.out.println("Adding block " + j + " " + k);
 					Manager.q.add(b);
 				}
 			}
@@ -106,6 +109,9 @@ public class PieceChecker extends TimerTask {
 		// //System.out.println(Manager.q.size());
 	}
 
+	/**
+	 * Finishes the write to the file and updates the tracker
+	 */
 	public void finish() {
 		File f = new File(Manager.file.getName());
 		if (f.exists()) {
@@ -113,16 +119,15 @@ public class PieceChecker extends TimerTask {
 			return;
 		}
 
-
 		if (Manager.have_piece.toString().indexOf("0") != -1) {
 			if (Manager.q.size() == 0) {
 				addMissingBlocks();
 			}
 			return;
 		}
-		
+
 		System.out.println("\nCommencing file write...");
-    
+
 		byte[] piece = null;
 		byte[] block = null;
 
@@ -130,7 +135,7 @@ public class PieceChecker extends TimerTask {
 		try {
 			out = new FileOutputStream(Manager.file);
 		} catch (Exception e) {
-			//System.out.print(e);
+			// System.out.print(e);
 		}
 
 		// get rid of the spaces so we can make numbers out of the names
@@ -151,14 +156,14 @@ public class PieceChecker extends TimerTask {
 				byte[] fileBytes = Helpers.getBytesFromFile(file);
 				out.write(fileBytes);
 			} catch (Exception e) {
-				//System.out.print(e);
+				// System.out.print(e);
 			}
 		}
 
 		try {
 			out.close();
 		} catch (Exception e) {
-			//System.out.print(e);
+			// System.out.print(e);
 		}
 
 		// tell the tracker we're done
@@ -168,8 +173,8 @@ public class PieceChecker extends TimerTask {
 			t.start();
 			Manager.fileDone = true;
 		}
-		
-    System.out.println("I'll seed until you tell me to stop.");
+
+		System.out.println("I'll seed until you tell me to stop.");
 	}
 
 	public static void deleteBlocks(int i) {

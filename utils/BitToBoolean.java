@@ -10,6 +10,11 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
  */
 public class BitToBoolean {
 
+	/**
+	 * 
+	 * @param array atomic integer array that is our bitfield
+	 * @return boolean array of what we have
+	 */
 	public static boolean[] convert(AtomicIntegerArray array) {
 		boolean[] retVal = new boolean[array.length()];
 		for (int i = 0; i < array.length(); i++) {

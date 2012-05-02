@@ -15,6 +15,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import peers.*;
 
+/**
+ * @author Matt
+ * 
+ */
+/**
+ * @author Matt
+ * 
+ */
 public class Manager {
 
 	public static byte[] peer_id = new byte[20];
@@ -58,9 +66,20 @@ public class Manager {
 
 	public static ArrayList<Peer> peerList_ = null;
 
+	/**
+	 * empty constructor
+	 */
 	public Manager() {
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param torrentFile
+	 *            name of torrent file we are using
+	 * @param fileName
+	 *            the name of the file we are saving data to
+	 */
 	public Manager(String torrentFile, String fileName) {
 		setInfo(torrentFile, fileName);
 
@@ -99,6 +118,10 @@ public class Manager {
 		}
 	}
 
+	/**
+	 * starts the timers to start the piecechecker, trackercontact and choker
+	 * threads
+	 */
 	public static void setTimers() {
 		Timer t1 = new Timer();
 		PieceChecker checker = new PieceChecker();
@@ -107,13 +130,17 @@ public class Manager {
 		Timer t2 = new Timer();
 		TrackerContact contact = new TrackerContact(0);
 		t2.schedule(contact, interval * 1000, interval * 1000);
-		
+
 		Timer t3 = new Timer();
 		Choker choke = new Choker();
 		t3.scheduleAtFixedRate(choke, 30000, 30000);
 		return;
 	}
 
+	/**
+	 * 
+	 * @returns when done with starting the download threads
+	 */
 	public boolean download() {
 		for (Peer peer : peerList_) {
 			registerPeer(peer);
@@ -124,6 +151,9 @@ public class Manager {
 		return false;
 	}
 
+	/**
+	 * restarts the peers
+	 */
 	public static void restart() {
 		for (Peer peer : peerList_) {
 			if (peer.socket_ == null) {
@@ -135,6 +165,13 @@ public class Manager {
 		}
 	}
 
+	/**
+	 * 
+	 * @param torrentFile
+	 *            the torrent file name we are reading
+	 * @param fileName
+	 *            the file name that we are downloading to
+	 */
 	public static void setInfo(String torrentFile, String fileName) {
 		try {
 			torrent_info = new TorrentInfo(Helpers.readTorrent(torrentFile));
@@ -147,46 +184,96 @@ public class Manager {
 		}
 	}
 
+	/**
+	 * 
+	 * @return gets our peer id
+	 */
 	public static byte[] getPeerId() {
 		return peer_id;
 	}
+
+	/**
+	 * 
+	 * @param peer_id
+	 *            sets our peer id
+	 */
 
 	public static void setPeerId(byte[] peer_id) {
 		Manager.peer_id = peer_id;
 	}
 
+	/**
+	 * 
+	 * @return gets gets the info hash
+	 */
 	public static byte[] getInfoHash() {
 		return info_hash;
 	}
 
+	/**
+	 * 
+	 * @param info_hash
+	 *            sets the info hash
+	 */
 	public static void setInfoHash(byte[] info_hash) {
 		Manager.info_hash = info_hash;
 	}
 
+	/**
+	 * 
+	 * @return gets the torrent info
+	 */
 	public static TorrentInfo getTorrentInfo() {
 		return torrent_info;
 	}
 
+	/**
+	 * 
+	 * @param torrent_info
+	 *            sets the torrent info
+	 */
 	public static void setTorrentInfo(TorrentInfo torrent_info) {
 		Manager.torrent_info = torrent_info;
 	}
 
+	/**
+	 * 
+	 * @return gets the file we are writing to
+	 */
 	public static File getFile() {
 		return file;
 	}
 
+	/**
+	 * 
+	 * @param file
+	 *            sets the file we are using
+	 */
 	public static void setFile(File file) {
 		Manager.file = file;
 	}
 
+	/**
+	 * 
+	 * @return the port we are using
+	 */
 	public static int getPort() {
 		return port;
 	}
 
+	/**
+	 * 
+	 * @param port
+	 *            sets the port we are using
+	 */
 	public static void setPort(int port) {
 		Manager.port = port;
 	}
 
+	/**
+	 * 
+	 * @return returns an object[][] of the peer list.
+	 */
 	public static Object[][] getPeerList() {
 		Object[][] all = new Object[peerList_.size()][3];
 		for (int i = 0; i < peerList_.size(); i++) {
@@ -198,10 +285,19 @@ public class Manager {
 		return all;
 	}
 
+	/**
+	 * 
+	 * @return returns the number of pieces
+	 */
 	public static int getNumPieces() {
 		return numPieces;
 	}
 
+	/**
+	 * 
+	 * @param numPieces
+	 *            sets the number of pieces
+	 */
 	public static void setNumPieces(int numPieces) {
 		Manager.numPieces = numPieces;
 	}
@@ -262,7 +358,9 @@ public class Manager {
 		return url_string;
 	}
 
-	// query the tracker and get the initial list of peers
+	/**
+	 * queries the tracker and gets the initial list of peers
+	 */
 	public static void queryTracker() {
 		byte[] response = null;
 		int i = 0;
@@ -314,15 +412,15 @@ public class Manager {
 			Map<ByteBuffer, Object> responseMap = (Map<ByteBuffer, Object>) decodedResponse;
 
 			interval = (Integer) responseMap.get(intervalKey);
-			if(interval > 180 * 1000){
-			  interval = 180 * 1000;
+			if (interval > 180 * 1000) {
+				interval = 180 * 1000;
 			}
 
 			minInterval = interval / 2;
-			try{
-			  minInterval = (Integer) responseMap.get(minIntervalKey);
-			} catch (Exception e){
-			// System.out.println("Min interval is not present");
+			try {
+				minInterval = (Integer) responseMap.get(minIntervalKey);
+			} catch (Exception e) {
+				// System.out.println("Min interval is not present");
 			}
 
 			ArrayList<Object> peerArray = (ArrayList<Object>) responseMap
@@ -369,10 +467,20 @@ public class Manager {
 		activePeerList.add(p);
 	}
 
+	/**
+	 * 
+	 * @param added
+	 *            adds the amount downloaded to the downloaded in the peer
+	 */
 	public static void addDownloaded(int added) {
 		downloaded = downloaded + added;
 	}
 
+	/**
+	 * 
+	 * @param added
+	 *            adds the amount uploaded to the uploaded in the peer
+	 */
 	public static void addUploaded(int added) {
 		uploaded += added;
 	}

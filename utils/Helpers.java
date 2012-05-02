@@ -10,16 +10,22 @@ import peers.Peer;
 import peers.Block;
 
 public final class Helpers {
+	/**
+	 * Used for display in our GUI
+	 * @param arr
+	 *            the array we want to stringify
+	 * @return the string that we are constructing
+	 */
 	public static String stringifyBoolArray(boolean[] arr) {
-	  String ret = "";
+		String ret = "";
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i] == false) {
-			  ret += "0";
+				ret += "0";
 			} else {
-			  ret += "1";
+				ret += "1";
 			}
 		}
-    return ret;
+		return ret;
 	}
 
 	/**
@@ -57,7 +63,7 @@ public final class Helpers {
 			rFile.read(fileBytes);
 			return fileBytes;
 		} catch (IOException e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			return null;
 		}
 	}
@@ -84,7 +90,7 @@ public final class Helpers {
 
 			is.close();
 		} catch (IOException e) {
-			//System.out.println("URL failure with: " + string_url);
+			// System.out.println("URL failure with: " + string_url);
 		}
 
 		return baos.toByteArray();
@@ -130,7 +136,7 @@ public final class Helpers {
 	 */
 	public static void printBytes(byte[] bytes) {
 		String value = new String(bytes);
-		//System.out.print(value);
+		// System.out.print(value);
 	}
 
 	public static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6',
@@ -180,12 +186,12 @@ public final class Helpers {
 		for (File file : dir.listFiles()) {
 			StringTokenizer st = new StringTokenizer(file.getName());
 			int p = 0;
-			try{
-			  p = Integer.parseInt(st.nextToken());
-			} catch (Exception e){
-			  continue;
+			try {
+				p = Integer.parseInt(st.nextToken());
+			} catch (Exception e) {
+				continue;
 			}
-			
+
 			if (p == i) {
 				check++;
 				int b = Integer.parseInt(st.nextToken());
@@ -203,10 +209,10 @@ public final class Helpers {
 							block.length);
 					r.close();
 				} catch (Exception e) {
-          // System.out
-              // .println("Couldn't read file. This should never happen.");
-					//e.printStackTrace();
-          // System.exit(1);
+					// System.out
+					// .println("Couldn't read file. This should never happen.");
+					// e.printStackTrace();
+					// System.exit(1);
 				}
 			}
 		}
@@ -278,9 +284,9 @@ public final class Helpers {
 		return bytes;
 	}
 
-
 	/**
-	 * @param data byte[] to be turned into a hex string
+	 * @param data
+	 *            byte[] to be turned into a hex string
 	 * @return A hex string of the bytes as two hex characters
 	 */
 	public static String converToHex(byte[] data) {

@@ -17,10 +17,19 @@ public class DownloadThread implements Runnable {
 
 	public Peer peer = null;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param _peer
+	 *            the peer that we are connecting and reading from
+	 */
 	public DownloadThread(Peer _peer) {
 		peer = _peer;
 	}
 
+	/**
+	 * running the thread
+	 */
 	public void run() {
 		// sleep to avoid calling over and over
 		try {
@@ -29,11 +38,11 @@ public class DownloadThread implements Runnable {
 		}
 		peer.closeSocket();
 		peer.createSocket(peer.ip_, peer.port_);
-    // System.out.println("got a socket");
-    peer.establishStreams();
+		// System.out.println("got a socket");
+		peer.establishStreams();
 		peer.sendHandshake(Manager.peer_id, Manager.info_hash);
 		if (!peer.receiveHandshake(Manager.info_hash)) {
-      System.out.println("Handshake Failed");
+			System.out.println("Handshake Failed");
 			return;
 		} else {
 			peer.sendBitField();
@@ -49,8 +58,8 @@ public class DownloadThread implements Runnable {
 				}
 				interpret(m);
 			}
-			
-			//are they interested?
+
+			// are they interested?
 			try {
 				m = peer.listen();
 			} catch (Exception e) {
@@ -83,7 +92,7 @@ public class DownloadThread implements Runnable {
 				if (f.exists()) {
 					continue;
 				}
-				
+
 				if (peer.bfb[b.getPiece()]) {
 					try {
 						peer.sendInterested();
@@ -104,8 +113,8 @@ public class DownloadThread implements Runnable {
 					}
 					try {
 						peer.requestBlock(b);
-            // System.out.println("Requested (" + b.getPiece() +
-            // ", " + b.getBlock() + ") from " + peer.peer_id_);
+						// System.out.println("Requested (" + b.getPiece() +
+						// ", " + b.getBlock() + ") from " + peer.peer_id_);
 					} catch (Exception e) {
 						Manager.q.add(b);
 						run();
@@ -120,7 +129,8 @@ public class DownloadThread implements Runnable {
 					}
 					interpret(m);
 				} else {
-					// they don't have what we want, but we should listen to them
+					// they don't have what we want, but we should listen to
+					// them
 					// to see if they want anything we've got
 					try {
 						m = peer.listen();
@@ -175,7 +185,7 @@ public class DownloadThread implements Runnable {
 			return;
 		case Message.TYPE_CHOKE:
 			peer.choked = true;
-      // System.out.println("We have been choked by " + peer.peer_id_);
+			// System.out.println("We have been choked by " + peer.peer_id_);
 			return;
 		case Message.TYPE_HAVE:
 			HaveMessage hvm = (HaveMessage) m;
@@ -239,7 +249,8 @@ public class DownloadThread implements Runnable {
 			}
 
 			peer.downloaded.set(peer.downloaded.get() + piece_data.length);
-			peer.lastDownloaded.set(peer.lastDownloaded.get() + piece_data.length);
+			peer.lastDownloaded.set(peer.lastDownloaded.get()
+					+ piece_data.length);
 			// //System.out.print(peer.peer_id_ + " ");
 			// b.print();
 			return;
@@ -263,7 +274,8 @@ public class DownloadThread implements Runnable {
 					Message.encode(peer.to_peer_, toSend);
 					Manager.addUploaded(tempRequest.getBlockLength());
 					peer.uploaded.set(peer.uploaded.get() + sendData.length);
-					peer.lastUploaded.set(peer.lastUploaded.get() + sendData.length);
+					peer.lastUploaded.set(peer.lastUploaded.get()
+							+ sendData.length);
 				} catch (Exception e) {
 					// e.printStackTrace();
 				}

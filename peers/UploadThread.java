@@ -17,15 +17,27 @@ public class UploadThread implements Runnable {
 	private boolean interest = true;
 	boolean doHandshake = true;
 
+	/**
+	 * constructor
+	 * @param p peer we are connecting to 
+	 */
 	public UploadThread(Peer p) {
 		peer = p;
 	}
 
+	/**
+	 * Constructor
+	 * @param p peer we are connecting to
+	 * @param handshake do handshake or not
+	 */
 	public UploadThread(Peer p, boolean handshake) {
 		peer = p;
 		doHandshake = handshake;
 	}
 
+	/**
+	 * running the upload thread
+	 */
 	public void run() {
 		if (doHandshake) {
 			if (!peer.receiveHandshake(Manager.info_hash)) {

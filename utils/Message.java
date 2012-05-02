@@ -32,6 +32,16 @@ public class Message {
 	protected final byte id;
 	protected final int length;
 
+	/**
+	 * Decodes a message from an input stream and returns the correct message
+	 * object
+	 * 
+	 * @param in
+	 *            the input stream that we are reading from
+	 * @return the message that was in the stream
+	 * @throws IOException
+	 *             on failure
+	 */
 	public static Message decode(final InputStream in) throws IOException {
 		DataInputStream din = new DataInputStream(in);
 
@@ -85,6 +95,16 @@ public class Message {
 		}
 	}
 
+	/**
+	 * Encodes the message to the output stream that is given
+	 * 
+	 * @param out
+	 *            output stream to put things out to
+	 * @param message
+	 *            message to be sent out
+	 * @throws IOException
+	 *             on failure
+	 */
 	public static void encode(final OutputStream out, final Message message)
 			throws IOException {
 		DataOutputStream dout = new DataOutputStream(out);
@@ -173,10 +193,18 @@ public class Message {
 		return MESSAGE_NAMES[this.id];
 	}
 
+	/**
+	 * 
+	 * @return id of message
+	 */
 	public byte getId() {
 		return id;
 	}
 
+	/**
+	 * 
+	 * @return length of message
+	 */
 	public int getLength() {
 		return length;
 	}
@@ -185,10 +213,20 @@ public class Message {
 
 		private final int pieceIndex;
 
+		/**
+		 * 
+		 * @return piece index in message
+		 */
 		public int getPieceIndex() {
 			return pieceIndex;
 		}
 
+		/**
+		 * Constructor
+		 * 
+		 * @param pieceIndex
+		 *            piece index that is part of the message
+		 */
 		public HaveMessage(final int pieceIndex) {
 			super(TYPE_HAVE, 5);
 			this.pieceIndex = pieceIndex;
@@ -200,6 +238,16 @@ public class Message {
 		private final int begin;
 		private final byte[] data;
 
+		/**
+		 * Constructor of piece message
+		 * 
+		 * @param pieceIndex
+		 *            index of piece
+		 * @param begin
+		 *            the offset of the data
+		 * @param data
+		 *            the actual bytes in the message
+		 */
 		public PieceMessage(final int pieceIndex, final int begin,
 				final byte[] data) {
 			super(TYPE_PIECE, data.length + 9);
@@ -208,18 +256,34 @@ public class Message {
 			this.data = data;
 		}
 
+		/**
+		 * 
+		 * @return piece index
+		 */
 		public int getPieceIndex() {
 			return pieceIndex;
 		}
 
+		/**
+		 * 
+		 * @return offset of bytes
+		 */
 		public int getBegin() {
 			return begin;
 		}
 
+		/**
+		 * 
+		 * @return data in message
+		 */
 		public byte[] getData() {
 			return data;
 		}
 
+		/**
+		 * 
+		 * @return data length
+		 */
 		public int getBlockLength() {
 			return data.length;
 		}
@@ -230,6 +294,16 @@ public class Message {
 		private final int begin;
 		private final int blockLength;
 
+		/**
+		 * Constructor
+		 * 
+		 * @param pieceIndex
+		 *            index of piece
+		 * @param begin
+		 *            offset of the data
+		 * @param blockLength
+		 *            how much data we want
+		 */
 		public RequestMessage(final int pieceIndex, final int begin,
 				final int blockLength) {
 			super(TYPE_REQUEST, 13);
@@ -238,14 +312,26 @@ public class Message {
 			this.blockLength = blockLength;
 		}
 
+		/**
+		 * 
+		 * @return index of piece we want
+		 */
 		public int getPieceIndex() {
 			return pieceIndex;
 		}
 
+		/**
+		 * 
+		 * @return offset of the data we want
+		 */
 		public int getBegin() {
 			return begin;
 		}
 
+		/**
+		 * 
+		 * @return how much data we want
+		 */
 		public int getBlockLength() {
 			return blockLength;
 		}
@@ -254,11 +340,21 @@ public class Message {
 	public static final class BitfieldMessage extends Message {
 		private final byte[] data;
 
+		/**
+		 * Constructor of bitfield Message
+		 * 
+		 * @param data
+		 *            the data in the bitfield
+		 */
 		public BitfieldMessage(final byte[] data) {
 			super(TYPE_BITFIELD, 1 + data.length);
 			this.data = data;
 		}
 
+		/**
+		 * 
+		 * @return bitfield
+		 */
 		public byte[] getData() {
 			return data;
 		}

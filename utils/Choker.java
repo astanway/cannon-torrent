@@ -5,6 +5,10 @@ import java.util.TimerTask;
 import peers.Peer;
 
 public class Choker extends TimerTask {
+	/**
+	 * runs the choker thread
+	 * optimistically chokes and unchokes peers based on their performance
+	 */
 	public void run() {
 		double rand = Math.random() * 3;
 		Math.round(rand);
