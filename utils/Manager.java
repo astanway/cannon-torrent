@@ -53,8 +53,6 @@ public class Manager {
 	 * GUI Globals
 	 */
 	public static JProgressBar progress = null;
-	public static JLabel downloadedLabel = null;
-	public static JLabel uploadedLabel = null;
 	public static JLabel piecesLabel = null;
 	public static JTable peerTable = null;
 

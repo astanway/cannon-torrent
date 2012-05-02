@@ -26,8 +26,6 @@ public class Gooey{
   public static void updateLabels(){
     try{
       Manager.piecesLabel.setText("Pieces: " + Helpers.stringifyBoolArray(BitToBoolean.convert(Manager.have_piece)));
-      Manager.downloadedLabel.setText("Downloaded: " + humanReadableByteCount(Manager.downloaded));
-      Manager.uploadedLabel.setText("Uploaded: " + humanReadableByteCount(Manager.uploaded));
     } catch (Exception e){}
   }
   
