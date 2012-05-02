@@ -114,11 +114,16 @@ and it will start to try and get blocks based on what the peers bitfield says.
 PieceChecker - This is a worker thread that will see if all the blocks of a piece are 
 downloaded and if so, it will try and verify the hash of the piece. If the piece fails the hash 
 the piece checker then takes the blocks, deletes them and enqueues the blocks to be 
-redownloaded. It also will take care of the file writing at the end. It also updates the bitfield, and will send out have messages if need be when we finish a piece.
+redownloaded. It also will take care of the file writing at the end. It also updates the bitfield,
+and will send out have messages if need be when we finish a piece.
 <br><br>
-Choker - This is a worker thread that takes care of having only 5 unchoked peers that we want to upload/download to at once. At first before we have 
+Choker - This is a worker thread that takes care of having only 5 unchoked peers that we want to 
+upload/download to at once. At first before we have 5 peers done it will unchoke peers right away,
+however as we get more than five we optimistically unchoke the peer with the upload/download.
+If two are tied the one that was added to the list first will be unchoked. It runs every 30 seconds.
 <br><br>
-Gooey - This class is responsible for updating the GUI every second with new labels, according to the appropriate download/upload counts.
+Gooey - This class is responsible for updating the GUI every second with new labels, according to 
+the appropriate download/upload counts.
 </div>
 </body>
 </html>
