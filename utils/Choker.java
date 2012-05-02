@@ -46,7 +46,7 @@ public class Choker extends TimerTask {
 				Message.encode(toAdd.to_peer_, Message.UNCHOKE);
 				toAdd.peerChoked = false;
 			} catch (Exception e) {
-				e.printStackTrace();
+        // e.printStackTrace();
 			}
 			Manager.unchokedPeers.add(toAdd);
 			Manager.wantUnchokePeers.remove(toAdd);
@@ -54,7 +54,7 @@ public class Choker extends TimerTask {
 				Message.encode(toRemove.to_peer_, Message.CHOKE);
 				toRemove.peerChoked = true;
 			} catch (Exception e) {
-				e.printStackTrace();
+        // e.printStackTrace();
 			}
 			Manager.wantUnchokePeers.add(toRemove);
 			Manager.unchokedPeers.remove(toRemove);
