@@ -19,6 +19,7 @@ public class BitToBoolean {
 			}
 			retVal[i] = val;
 		}
+
 		return retVal;
 	}
 

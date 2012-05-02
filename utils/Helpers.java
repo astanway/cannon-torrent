@@ -10,15 +10,16 @@ import peers.Peer;
 import peers.Block;
 
 public final class Helpers {
-	public static void printBoolArray(boolean[] arr) {
+	public static String stringifyBoolArray(boolean[] arr) {
+	  String ret = "";
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i] == false) {
-        System.out.print("0");
+			  ret += "0";
 			} else {
-        System.out.print("1");
+			  ret += "1";
 			}
 		}
-    System.out.println("");
+    return ret;
 	}
 
 	/**

@@ -3,7 +3,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import utils.*;
 import peers.PeerListener;
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.*;
 
 public class RUBTClient {
 
@@ -11,6 +13,7 @@ public class RUBTClient {
 	public static ReentrantLock arrayLock = null;
 	public static ReentrantLock fileLock = null;
 	public boolean[][] blockDone = null;
+	public static JButton quit = new JButton ("Quit");
 
 	public static final int NUM_THREADS = 10;
 	public static final int MAX_THREADS = 20;
@@ -71,7 +74,6 @@ public class RUBTClient {
 
 		Thread t = new Thread(new PeerListener(Manager.getPort()));
 		t.start();
-		new Thread(new Input()).start();
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -84,47 +86,56 @@ public class RUBTClient {
 		JFrame frame = new JFrame("Cannon");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Container pane = frame.getContentPane();
-		JTabbedPane tabbedPane = new JTabbedPane();
+		JPanel inner = new JPanel();
 
-		// General Tab
+		// General
 		JPanel panel = new JPanel(new BorderLayout());
 		
 		JPanel nested1 = new JPanel(new BorderLayout());
 		JLabel name = new JLabel(manager.torrent_info.file_name);
     name.setFont(new Font("Sans Serif", Font.BOLD, 30));
 		nested1.add(name, BorderLayout.NORTH);
-
-		JLabel size = new JLabel(
-				"File Size: "
-						+ Gooey.humanReadableByteCount(manager.torrent_info.file_length));
-		nested1.add(size, BorderLayout.CENTER);
-
-		manager.downloadedLabel = new JLabel("");
-		nested1.add(manager.downloadedLabel, BorderLayout.EAST);
-
-		manager.uploadedLabel = new JLabel("");
-		nested1.add(manager.uploadedLabel, BorderLayout.WEST);
     
-    JPanel bottom = new JPanel();
+    JPanel bottom = new JPanel(new BorderLayout());
 		manager.progress = new JProgressBar();
+		Border paddingBorder = BorderFactory.createEmptyBorder(10,10,10,10);
+    manager.progress.setBorder(paddingBorder);
 		manager.progress.setStringPainted(true);
 		bottom.add(manager.progress);
-		tabbedPane.addTab("General", panel);
+		manager.piecesLabel = new JLabel();
+		bottom.add(manager.piecesLabel, BorderLayout.SOUTH);
+    inner.add("General", panel);
 		
 		panel.add(nested1, BorderLayout.NORTH);
 		panel.add(bottom, BorderLayout.SOUTH);
 
-		// Peers Tab
-		JPanel peers = new JPanel();
+    // Peers
+		JPanel peers = new JPanel(new BorderLayout());
+		peers.setPreferredSize(new Dimension(700, 250));
 		String[] columnNames = { "Id", "IP", "Port", "Downloaded", "Uploaded"};
 
 		Object[][] data = Manager.getPeerList();
 		manager.peerTable = new JTable(data, columnNames);
 		JScrollPane scrollPane = new JScrollPane(manager.peerTable);
-		peers.add(scrollPane);
-		tabbedPane.addTab("Peers", peers);
+		peers.add(scrollPane, BorderLayout.NORTH);
 
-		pane.add(tabbedPane);
+
+		JPanel quitPanel = new JPanel(new BorderLayout());
+    ActionListener al = new ActionListener() {
+    	public void actionPerformed(ActionEvent e){
+    	  if(e.getSource() == quit){
+      		new Thread(new Input()).start();
+    	  }
+    	}
+    };
+    
+    quit.addActionListener(al);
+    quitPanel.add(quit);
+  	inner.add(quitPanel);
+		inner.add(peers);
+
+    pane.add(inner);
+    
 		frame.setPreferredSize(new Dimension(800, 400));
 		frame.setResizable(true);
 		frame.pack();
