@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<body>
+<!-- 
+   _______ ____  _____  _____  ______ _   _ _______ _  __     ________ ______ 
+  |__   __/ __ \|  __ \|  __ \|  ____| \ | |__   __| | \ \   / /  ____|  ____|
+     | | | |  | | |__) | |__) | |__  |  \| |  | |  | |  \ \_/ /| |__  | |__   
+     | | | |  | |  _  /|  _  /|  __| | . ` |  | |  | |   \   / |  __| |  __|  
+     | | | |__| | | \ \| | \ \| |____| |\  |  | |  | |____| |  | |    | |____ 
+     |_|  \____/|_|  \_\_|  \_\______|_| \_|  |_|  |______|_|  |_|    |______|                                                           
+
+-->
+<style>
+#main{
+  font-size: 12px;
+  font-family: Helvetica, Arial, sans-serif;
+  width: 500px;
+}
+
+#quote{
+  text-align: right;
+}
+</style>
+<div id="main">
+<b>Matthew Halupka 121004243</b>
+<br>
+<b>Abe Stanway 121005181</b>
+<br>                                                                
+<br> 
+<br>
+<br>
+<div id="quote">
+"So a torrent, a tracker, and a bitfield walk into a bar..."
+<br>
+-Oscar Wilde
+</div>
+<br>
+<br>
+<br>
+Our downloads are based off a Concurrent Linked Queue that is calculated upon initialization using 
+the torrent data. The queue is made up of Block objects. After we have initialized the queue we then
+set up the peer list we get from the tracker and make a thread for each peer on the list (that is part 
+of the set of correct peers). This thread will take care of all messages to and from the peer 
+and maintain state for each peer. When we want to get a block we dequeue it, and send a request 
+for it. When we get that piece we write it to a random access file. This is done in a temporary 
+folder in order to prevent our piece checker from seeing it until it is fully written. Once the 
+block is fully written we move it to the blocks folder. Once a block is in the blocks folder, 
+we have a thread check to see if all the blocks in a piece are written and then it will verify 
+the piece. If the piece is not verified properly the blocks will be deleted and re-added the 
+queue. This takes care of a piece not passing the hash or if some data gets corrupted when we 
+are writing the files. Once we get all the pieces verified, we then write the file to the proper 
+place. We check for previous downloads by scanning the blocks folder upon initialization for 
+existing blocks, and creating our block request queue accordingly.
+<br><br>
+To quit, click on the quit button. The program will seed indefinitely after it is done downloading.
+<br><br>
+<h1>Small Classes</h1>
+<br><br>
+RUBTCLient - our main class that will run the program, initialize and resume from previous 
+starts and allows us to call methods from a bunch of other places in order to run properly.
+<br><br>
+Block - class that we use to denote a block of a piece in order to help us
+keep track of what we have downloaded and what needs to be downloaded
+<br><br>
+PeerListener - listens for incoming connections and sets up a new peer object in order to allow 
+for data transfer and message interpretation. It passes off the peer to an UploadThread which
+will take care of all the socket I/O after the accept()
+<br><br>
+Helpers - We use this to call convenience methods like byteToString or something like that. We 
+also use it to house a verifyHash method for verifying the piece hashes and the info hash
+<br><br>
+Input - this listens for the quit button to be clicked and closes all of our socket connections on a shutdown 
+(so we shutdown gracefully)
+<br><br>
+StringComparator - a comparator class for when we take filenames and convert them to string so 
+we can call a sort on them, rather than having to cast them to ints and back
+Input - worker thread that takes input from stdin and will exit when "exit" is typed (or any 
+capitalization of it is typed)
+<br><br>
+BitToBoolean - used to help with bitfield messages. Since we used an atomicintarray to help 
+with concurrency we had to write another method that converts from atomicintarrays to a boolean 
+array, this class also is used to take a byte[] and convert it to a boolean[] from a bitfield 
+message
+<br><br>
+Message - a filled in class that we recieved from the resources. Takes care of the encoding and 
+decoding of messages from a datastream and saves us from a lot of headaches in seeing what a 
+message is and what fields are in them
+<h1>Large Classes</h1>
+<br><br>
+DownloadThread - This worker class is a runnable class which will take a peer from our initial 
+peer list and trying to download/upload all data that we want from it. It's a bit of a misnomer,
+because it takes care of requesting data AND sending data to and from the peer in order for us
+to take care of both downloading our file and sending the pieces we have of our file to the other 
+peers.
+<br><br>
+UploadThread - This worker class is a runnable class which only handles leechers. When a peer 
+is in this class, we will only be answering requests from the peer, and not trying to download 
+data from them. This thread is created when we get a peer connecting from our peer listener. A 
+full peer object is never made, as we only create the streams necessary for the encoding and 
+decoding of messages
+<br><br>
+Peer - This class is an abstraction of a peer that we want to either get data from, or send 
+data to. It houses all the relevant information and some relevant methods such as 
+sendInterested message, so we don't have to call methods from Message, rather just call them 
+from the peer itself
+<br><br>
+Manager - This class is our base class which houses most of the relevant data we need in order 
+to operate. It has the initial peer list we use and an active peer list of peers we are 
+connected to (so when we shutdown we know which connections to close). It also takes care of 
+the initial set up of contacting the tracker and setting up the queue of what blocks we need to 
+download. It will then set up a download thread for each peer that is on the initial peers list 
+and it will start to try and get blocks based on what the peers bitfield says.
+<br><br>
+PieceChecker - This is a worker thread that will see if all the blocks of a piece are 
+downloaded and if so, it will try and verify the hash of the piece. If the piece fails the hash 
+the piece checker then takes the blocks, deletes them and enqueues the blocks to be 
+redownloaded. It also will take care of the file writing at the end. It also updates the bitfield,
+and will send out have messages if need be when we finish a piece.
+<br><br>
+Choker - This is a worker thread that takes care of having only 5 unchoked peers that we want to 
+upload/download to at once. At first before we have 5 peers done it will unchoke peers right away,
+however as we get more than five we optimistically unchoke the peer with the upload/download.
+If two are tied the one that was added to the list first will be unchoked. It runs every 30 seconds.
+<br><br>
+Gooey - This class is responsible for updating the GUI every second with new labels, according to 
+the appropriate download/upload counts.
+</div>
+</body>
+</html>
